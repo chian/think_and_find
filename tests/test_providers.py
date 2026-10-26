@@ -148,6 +148,31 @@ class ProviderHTTPTests(InMemoryTransportTests):
         self.assertEqual(result["values"][0]["value"], 11)
         self.assertNotIn("Authorization", transport.calls[0][2])
 
+    def test_argo_shim_request_uses_no_local_token_or_native_schema_parameter(self):
+        requests = []
+
+        def capture(request, *, timeout):
+            requests.append(request)
+            return json_response({"choices": [{"message": {"content": '{"ok":true}'},
+                                               "finish_reason": "stop"}]})
+
+        client = ArgoClient("http://127.0.0.1:12329/v1", "gpt55", user="chia",
+                            reasoning_effort="medium")
+        with patch("episodic_workflow.task_executors._http.urlopen", side_effect=capture):
+            self.assertEqual(client.call("Return the result", response_schema={
+                "type": "object", "properties": {"ok": {"type": "boolean"}},
+                "required": ["ok"]}), '{"ok":true}')
+        request = requests[0]
+        payload = json.loads(request.data)
+        self.assertEqual(request.full_url, "http://127.0.0.1:12329/v1/chat/completions")
+        self.assertEqual(payload["user"], "chia")
+        self.assertEqual(payload["max_completion_tokens"], 16000)
+        self.assertEqual(payload["reasoning_effort"], "medium")
+        self.assertIn('"required": ["ok"]', payload["messages"][-1]["content"])
+        self.assertNotIn("response_format", payload)
+        self.assertNotIn("Authorization", request.headers)
+        self.assertNotIn("X-api-key", request.headers)
+
     def test_argo_rejects_incomplete_or_malformed_content(self):
         bodies = ({}, {"choices": []}, {"choices": [{"message": {"content": None}}]}, {"choices": [{"message": {"content": "partial"}, "finish_reason": "length"}]})
         for body in bodies:

@@ -4,7 +4,7 @@ A standalone starting point for episodic research that uses evidence and reasoni
 together to answer a question. Reasoning should identify what to search for next;
 new evidence should be able to change the reasoning and the eventual conclusion.
 
-This directory is a source copy of `episodic_workflow`, without Git metadata,
+This repository began as a source copy of `episodic_workflow`, without
 credentials, environments, caches, run outputs, or historical experiment reports.
 The original domain application remains available. A subsequent task-specific
 pragmatic causal-pluralism pilot adds a research binding and extends the existing
@@ -43,10 +43,15 @@ appropriate; it should not assume the only existing reasoning is arithmetic.
 ## Providers and local configuration
 
 The copied provider composition retains Firecrawl Search/Scrape, TypeSafe Jev
-relevance assessment, and both configured model transports: Codex-login OAuth and
-the optional local Argo endpoint. Endpoint and model settings remain configurable.
-Only the template [.env.example](.env.example) is included. Shell configuration
-or a new local `.env` supplies credentials when a run is separately requested.
+relevance assessment, and both configured model transports: the local Argo shim
+and Codex-login OAuth. The template defaults to the Argo shim at
+`http://127.0.0.1:12329/v1`; start it with
+`/home/chia/.local/bin/argo-shim --no-auth` before running a workflow. Endpoint
+and model settings remain configurable. The client sends the Argo account name
+in the request body and no local authentication header. The shim handles its
+own upstream headers. Only the template [.env.example](.env.example) is
+included. Shell configuration or a new local `.env` supplies credentials when a
+run is separately requested.
 
 The current configuration names retain the `EPISODIC_` prefix. The internal Python
 package name remains `episodic_workflow` so the copied absolute imports and existing

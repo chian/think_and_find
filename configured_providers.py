@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import getpass
 import math
 import json
 import sys
@@ -47,8 +48,7 @@ class WorkflowProviderConfig:
     llm_base_url: str
     llm_model: str
     typesafe_api_key: str = field(repr=False)
-    llm_api_key: str = field(default="no-auth", repr=False)
-    llm_user: str = ""
+    llm_user: str = field(default_factory=lambda: getpass.getuser())
     firecrawl_base_url: str = FIRECRAWL_BASE_URL
     jev_endpoint: str = JEV_API_ENDPOINT
     jev_model: str = JEV_MODEL
@@ -63,8 +63,6 @@ class WorkflowProviderConfig:
     def __post_init__(self) -> None:
         if self.llm_provider not in {"argo", "codex_oauth"}:
             raise ProviderConfigurationError("EPISODIC_LLM_PROVIDER must be argo or codex_oauth")
-        if self.llm_provider == "argo" and self.llm_api_key != "no-auth":
-            raise ProviderConfigurationError("The workflow requires the local Argo shim with api_key='no-auth'")
         for name in (
             "firecrawl_api_key", "llm_model", "jev_model",
         ):
@@ -227,7 +225,7 @@ def firecrawl_argo_research_providers(config: WorkflowProviderConfig, *, progres
             "llm_reasoning_effort", "llm_fast_reasoning_effort", "llm_user",
             "firecrawl_base_url", "firecrawl_scrape_results", "jev_endpoint",
             "jev_model", "request_timeout_s", "require_jev")},
-            secrets=(config.firecrawl_api_key, config.typesafe_api_key, config.llm_api_key))
+            secrets=(config.firecrawl_api_key, config.typesafe_api_key))
         clients = {tier: JournaledClient(client, checkpoint, "model." + tier.value)
                    for tier, client in clients.items()}
         assessor = JournaledClient(assessor, checkpoint, "jev")
@@ -239,10 +237,7 @@ def firecrawl_argo_research_providers(config: WorkflowProviderConfig, *, progres
         return progress and (checkpoint is None or not checkpoint.replaying)
 
     def model_route(operation, tier):
-        route = policy.route(operation, tier)
-        if config.llm_provider == "argo":
-            route.pop("reasoning_effort")
-        return route
+        return policy.route(operation, tier)
 
     def agent_for_tier(request, tier):
         route = model_route(request["operation"], tier)
@@ -483,8 +478,8 @@ def firecrawl_argo_config_from_env(
         llm_reasoning_effort=values.get("EPISODIC_LLM_REASONING_EFFORT", "medium"),
         llm_fast_reasoning_effort=values.get("EPISODIC_LLM_FAST_REASONING_EFFORT", "none"),
         typesafe_api_key=_required_env(values, "TYPESAFE_API_KEY") if require_jev else values.get("TYPESAFE_API_KEY", ""),
-        llm_api_key="no-auth",
-        llm_user=values.get("EPISODIC_LLM_USER", ""),
+        llm_user=(values.get("EPISODIC_LLM_USER") or values.get("CELS_USERNAME")
+                  or getpass.getuser()),
         firecrawl_base_url=values.get("FIRECRAWL_BASE_URL", FIRECRAWL_BASE_URL),
         jev_endpoint=values.get("TYPESAFE_ENDPOINT", JEV_API_ENDPOINT),
         jev_model=values.get("TYPESAFE_MODEL", JEV_MODEL),
@@ -502,7 +497,7 @@ def _llm_client(config: WorkflowProviderConfig, *, model=None, reasoning_effort=
                                 reasoning_effort=reasoning_effort or config.llm_reasoning_effort,
                                 record_response=record_response)
     return ArgoClient(config.llm_base_url, model,
-        api_key=config.llm_api_key, user=config.llm_user,
+        user=config.llm_user, reasoning_effort=reasoning_effort or config.llm_reasoning_effort,
         timeout=config.request_timeout_s)
 
 
@@ -521,8 +516,6 @@ def reversal_research_providers(config, *, record):
 
     def agent(request, tier=ModelTier.REASONING):
         route = policy.route(request['operation'], tier)
-        if config.llm_provider == 'argo':
-            route.pop('reasoning_effort')
         rendered = render_reversal_request(request)
         record({'event': 'model_started', 'request': request,
                 'instruction_template': rendered.instructions,

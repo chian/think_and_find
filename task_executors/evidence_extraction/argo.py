@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import getpass
 import json
 import math
+import os
 from dataclasses import dataclass, field
 from typing import Any, Mapping
 
@@ -26,12 +28,12 @@ class ModelOutputError(ProviderError):
 
 @dataclass(frozen=True)
 class ArgoClient:
-    """Call an explicitly configured Argo/OpenAI-compatible HTTP endpoint."""
+    """Call the local Argo shim without a client authentication token."""
 
     base_url: str
     model: str
-    api_key: str = field(default="", repr=False)
-    user: str = ""
+    user: str = field(default_factory=lambda: os.environ.get("CELS_USERNAME") or getpass.getuser())
+    reasoning_effort: str | None = None
     timeout: float = 300.0
 
     def __post_init__(self) -> None:
@@ -40,6 +42,8 @@ class ArgoClient:
         )
         if not isinstance(self.model, str) or not self.model.strip():
             raise ValueError("LLM model must be a non-empty string")
+        if not isinstance(self.user, str) or not self.user.strip():
+            raise ValueError("Argo user must be a non-empty string")
         if (
             isinstance(self.timeout, bool)
             or not isinstance(self.timeout, (int, float))
@@ -50,22 +54,22 @@ class ArgoClient:
 
     def call(self, prompt: str, system_prompt: str | None = None, *,
              response_schema: dict | None = None) -> str:
+        if response_schema is not None:
+            prompt += ("\n\nReturn exactly one JSON object matching this response contract:\n"
+                       + json.dumps(response_schema, ensure_ascii=False, sort_keys=True,
+                                    allow_nan=False))
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
-        payload: dict[str, Any] = {"model": self.model, "messages": messages}
-        if response_schema is not None:
-            from .codex import native_response_schema
-            payload["response_format"] = {"type": "json_schema", "json_schema": {
-                "name": "workflow_response", "strict": True,
-                "schema": native_response_schema(response_schema)}}
-        if self.user:
-            payload["user"] = self.user
+        payload: dict[str, Any] = {"model": self.model, "messages": messages, "user": self.user}
+        if self.model.lower().startswith("gpt55"):
+            payload["max_completion_tokens"] = 16000
+            if self.reasoning_effort in {"low", "medium", "high"}:
+                payload["reasoning_effort"] = self.reasoning_effort
         body = post_json(
             f"{self.base_url}/chat/completions",
             payload,
-            api_key=self.api_key,
             timeout=self.timeout,
         )
         try:
