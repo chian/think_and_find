@@ -21,13 +21,17 @@ from .case_reports.research.model_tiers import ModelTier
 from .configured_providers import reversal_research_providers
 from .task_executors.outbreak_search.queries import source_locator, source_text
 from .credit_assignment.attainment import AttainmentArchive, hypervolume
+from .causal_argument import (argument_brief, argument_contract, argument_progress, argument_refs,
+                              normalize_argument, step_ids)
 
 
 RUBRIC = {
     'first_frame_warrant': 'Continuously measure source support for the first causal inference in the explicit inference pair, at the grain suited to its question: 0 merely descriptive, invented, or a hypothesis refuted by later evidence; 0.5 a partly warranted causal relation; 1 a warranted causal inference among stated actors and relations. A true claim about a different outcome does not warrant the inference proposed for transport.',
     'second_frame_warrant': 'Continuously measure independent source support for the second causal inference in the explicit inference pair: 0 imagined, merely descriptive, or only the negation of a rejected first hypothesis; 0.5 partly warranted; 1 a well-supported causal inference with its own actors and relations. Independent warrant may come from the same paper or other papers; paper count is not a scientific gate.',
+    'translation_specificity': 'Measure whether the proposed translation names the exact source inference, maps its actors, intervention, outcome, and relation, and states a plausible bridge premise: 0 no particular inference or map; 0.5 a partial map with a consequential gap; 1 a specific, biologically intelligible attempted transport. A merely imaginable but unlicensed prediction is weak.',
     'inference_reversal': 'Continuously measure whether the explicit proposed translation carries an inference actually licensed by frame one into a consequentially incompatible inference warranted by frame two: 0 the transported prediction was never licensed, only a prior hypothesis was falsified by new evidence, or the two claims concern unrelated outcomes; 0.5 a plausible linked reversal with an important warrant or mapping gap; 1 a clear linked reversal while both frame-specific causal claims remain valid.',
     'category_relation_break': 'Continuously measure whether the linked reversal arises from how actors, categories, relations, system boundaries, or intervention meanings change across grains: 0 routine fixed-variable modifier, contrary measurement, or invalidated hypothesis; 0.5 a plausible but unresolved category or relation mapping; 1 a warranted consequential break in the explicit causal translation.',
+    'fixed_category_challenge': 'Measure the explicit rival account that keeps actor, variable, intervention, and outcome meanings fixed while adding a cofactor, context variable, or dependency: 0 that account reconciles the findings or was not examined; 0.5 a specified rival with unresolved discrimination; 1 a specified rival is defeated by a warranted change in category, relation, boundary, or intervention meaning. Do not claim no possible larger graph can describe the biology.',
     'pragmatic_pluralism': 'Continuously measure why both causal inferences in the explicit pair remain useful for their own questions: 0 one is simply false or a descriptive claim was promoted into an unwarranted causal hypothesis; 0.5 both have some use but their distinct causal reach is unclear; 1 both are warranted and pragmatically appropriate despite their noninterchangeability. These anchors are continuous scores, never admission rules.',
 }
 QUALITY_RUBRIC = {
@@ -63,9 +67,9 @@ uncertainties, provisional cases, and well-supported negative assessments.
 An SCM component may expose a failed translation without defining the only
 real entities or supplying a complete account of collective phenomena.'''
 ROOT = 'collection'
-COLUMNS = (*QUALITY_RUBRIC,*RUBRIC)
+COLUMNS = (*QUALITY_RUBRIC,'argument_progress')
 THEORY_COLUMNS = (*QUALITY_RUBRIC,*THEORY_RUBRIC)
-CREDIT_VERSION = 'question-discovery-v10.1'
+CREDIT_VERSION = 'question-discovery-v11.5'
 WINDOW = 4
 STOP_EPSILON = 0.001
 ROOT_STOP_YIELD = 0.0
@@ -75,6 +79,7 @@ YIELD_UPDATE = 0.25
 WINDOW_CHARS = 12000
 SEARCH_LIMIT = 3
 SYNTHESIS_CONTEXT_CHARS = 24000
+THEORY_CONTEXT_CHARS = 12000
 SIDES = ('frame_one', 'frame_two', 'mapping')
 
 
@@ -89,8 +94,7 @@ def quality_utility(measurements):
 
 
 def material_vector(material):
-    values={**material['epistemic_quality'],**material['candidate_fit']}
-    return tuple(values[name]['score'] for name in COLUMNS)
+    return tuple(material['epistemic_quality'][name]['score'] for name in QUALITY_RUBRIC)+(material['argument_progress']['score'],)
 
 
 def theory_vector(material):
@@ -243,7 +247,7 @@ class GoalState:
             'quality':QUALITY_RUBRIC,
             'model_tiers':self.run.providers['model_tiers'],
             'implementation':{name:hashlib.sha256((Path(__file__).parent/name).read_bytes()).hexdigest()
-                for name in ('reversal_task.py','reversal_prompts.py','configured_providers.py',
+                for name in ('reversal_task.py','reversal_prompts.py','causal_argument.py','configured_providers.py',
                              'credit_assignment/attainment.py',
                              'method_loop/episode_binding/web_search_binding.py',
                              'task_executors/evidence_extraction/argo.py',
@@ -274,6 +278,7 @@ class GoalState:
             'material_id':current['material_id'] if current else None,
             'measurements':current['candidate_fit'] if current else {},
             'epistemic_quality':current['epistemic_quality'] if current else {},
+            'argument_progress':current['argument_progress'] if current else None,
             'credited_vector':material_vector(material) if material else (0.0,)*len(COLUMNS),
             'materials':row['materials'],'review_count':len(row['review_attempts']),
             'reading_notes':row['reading_notes']}
@@ -287,7 +292,7 @@ class GoalState:
                 'generalization_defect','frame_one_question','frame_one_claim',
                 'frame_two_question','frame_two_claim','inference_pair',
                 'identity_rationale','current_answer','measurements',
-                'epistemic_quality','review_count','reading_notes')})
+                'epistemic_quality','argument_progress','review_count','reading_notes')})
         return result
 
     def identity_catalog(self):
@@ -345,7 +350,7 @@ class GoalState:
                 'seconds':time.monotonic()-started}
 
     def as_record(self):
-        return {'schema_version':14,'credit_version':CREDIT_VERSION,
+        return {'schema_version':15,'credit_version':CREDIT_VERSION,
             'evaluator_policy':self.evaluator_policy,'question':self.run.question,
             'target':self.run.target,'cases':self.data,'facts':self.facts,'events':self.events,
             'attainment':self.archives,'collection_stats':self.collection_stats,
@@ -356,7 +361,7 @@ class GoalState:
                              'cycle_outcomes':self.run.cycle_outcomes}}
 
     def restore(self,record):
-        if (record.get('schema_version')!=14 or record.get('credit_version')!=CREDIT_VERSION
+        if (record.get('schema_version')!=15 or record.get('credit_version')!=CREDIT_VERSION
                 or record.get('evaluator_policy')!=self.evaluator_policy
                 or record.get('question')!=self.run.question or record.get('target')!=self.run.target):
             raise ValueError('State is incompatible with this discovery task and evaluator policy')
@@ -1284,6 +1289,7 @@ class Run:
         refs={'type':'array','uniqueItems':True,'items':{'type':'string','enum':options}}
         answer_schema=schema({'conclusion':TEXT,'comparison_notes':TEXT,'explanation':TEXT,
             'inference_pair':inference_pair_contract({'type':'string','enum':options}),
+            'argument':argument_contract({'type':'string','enum':options}),
             'evidence_refs':refs,'uncertainties':{'type':'array','items':schema({
                 'question':TEXT,'consequence':TEXT,'evidence_refs':refs})},
             'next_search_need':{'type':'string'}})
@@ -1302,17 +1308,34 @@ class Run:
             return {'kind':'theory_unavailable','reason':'No acquired source claims'}
         fresh=[ref for ref in facts if ref not in self.cycle_initial_facts]
         reviewed=[self.state.case(key) for key,row in self.state.data.items() if row['current']]
-        reviewed.sort(key=lambda case:quality_utility(case['epistemic_quality']),reverse=True)
-        selected_cases=reviewed[:8]
+        reviewed.sort(key=lambda case:(case['argument_progress']['score'],
+                                        quality_utility(case['epistemic_quality'])),reverse=True)
+        chosen=[];themes=set()
+        for case in reviewed:
+            if case['theme_id'] not in themes and len(chosen)<2:
+                chosen.append(case);themes.add(case['theme_id'])
+        for case in reviewed:
+            if len(chosen)>=2:break
+            if case not in chosen:chosen.append(case)
+        selected_cases=[{
+            name:case[name] for name in ('key','title','topic','theme_id')}
+            | {'current_answer':{
+                'conclusion':case['current_answer']['conclusion'],
+                'argument':argument_brief(case['current_answer']['argument'])},
+                'argument_progress':case['argument_progress']}
+            for case in chosen]
         current=self.state.theory['current']
         current_refs=current['answer']['evidence_refs'] if current else []
-        priority=list(dict.fromkeys([*current_refs,*fresh,*[ref for case in selected_cases for ref in
-                                       self.state.data[case['key']]['fact_ids']]]))
+        argument_evidence=[ref for case in chosen for ref in
+                           argument_refs(case['current_answer']['argument'])]
+        priority=list(dict.fromkeys([*argument_evidence,*current_refs,*fresh,
+            *[ref for case in selected_cases for ref in
+              self.state.data[case['key']]['fact_ids']]]))
         ordering=[*priority,*[ref for ref in facts if ref not in priority]]
         selected={};size=0
         for ref in ordering:
             length=len(json.dumps(facts[ref],ensure_ascii=False))
-            if size+length<=SYNTHESIS_CONTEXT_CHARS:
+            if size+length<=THEORY_CONTEXT_CHARS:
                 selected[ref]=facts[ref];size+=length
         evidence_options=list(selected)
         case_options=[case['key'] for case in selected_cases]
@@ -1350,7 +1373,9 @@ class Run:
         measured=self.ask('measure_theory_quality',ROOT,source_claims=list(selected.values()),
             reviewed_cases=selected_cases,answer=answer,
             previous_answer=current['answer'] if current else None,
-            known_materials={identity:row['answer'] for identity,row in known.items()},
+            known_materials={identity:{name:row['answer'][name] for name in
+                ('conclusion','cross_case_mapping','case_refs')}
+                for identity,row in known.items()},
             response_contract=schema({'equivalent_to':{'type':'string','enum':['new',*known]},
                 'identity_rationale':TEXT,'theory_fit':fit,'epistemic_quality':quality,
                 'previous_measurements':previous,'revision_summary':TEXT}))
@@ -1395,14 +1420,19 @@ class Run:
         if not isinstance(refs,list) or any(ref not in options for ref in refs):
             raise ValueError('Answer references must name existing source records')
         pair=normalize_inference_pair(answer.get('inference_pair'),{ref:ref for ref in options})
+        argument=normalize_argument(answer.get('argument'),options)
         answer['inference_pair']=pair
+        answer['argument']=argument
         answer['evidence_refs']=list(dict.fromkeys([
-            *refs,*pair['frame_one_warrant_refs'],*pair['frame_two_warrant_refs']]))
+            *refs,*pair['frame_one_warrant_refs'],*pair['frame_two_warrant_refs'],
+            *argument_refs(argument)]))
         known=case['materials']
         measurement_schema=schema({'score':{'type':'number','minimum':0,'maximum':1},
             'evidence_refs':{'type':'array','items':{'type':'string','enum':options}},'rationale':TEXT})
         fit_schema=schema({name:measurement_schema for name in RUBRIC})
         quality_schema=schema({name:measurement_schema for name in QUALITY_RUBRIC})
+        step_schema=schema({name:schema({identity:measurement_schema for identity in identities})
+                            for name,identities in step_ids(argument).items()})
         previous_schema=(schema({'candidate_fit':fit_schema,'epistemic_quality':quality_schema})
                          if case['current_answer'] else {'type':'null'})
         measured=self.ask('measure_answer_quality',key,source_claims=case['facts'],answer=answer,
@@ -1410,13 +1440,19 @@ class Run:
             known_materials={identity:row['answer'] for identity,row in known.items()},
             response_contract=schema({'equivalent_to':{'type':'string','enum':['new',*known]},
                 'identity_rationale':TEXT,'candidate_fit':fit_schema,
-                'epistemic_quality':quality_schema,'previous_measurements':previous_schema,
+                'epistemic_quality':quality_schema,'step_warrants':step_schema,
+                'previous_measurements':previous_schema,
                 'revision_summary':TEXT}))
         match=measured.get('equivalent_to')
         if match not in ('new',*known):
             raise ValueError('Measurement must use a declared material identity')
         self.validate_measurements(measured.get('candidate_fit'),RUBRIC,options)
         self.validate_measurements(measured.get('epistemic_quality'),QUALITY_RUBRIC,options)
+        steps=measured.get('step_warrants')
+        if not isinstance(steps,dict) or set(steps)!=set(step_ids(argument)):
+            raise ValueError('Step warrant measurements require both causal frames')
+        for frame_name,identities in step_ids(argument).items():
+            self.validate_measurements(steps[frame_name],identities,options)
         previous=measured.get('previous_measurements')
         if case['current_answer']:
             if not isinstance(previous,dict):
@@ -1429,6 +1465,8 @@ class Run:
                    'answer':answer,'rubric':CREDIT_VERSION})[:24])
         review={'material_id':identity,'answer':answer,'candidate_fit':measured['candidate_fit'],
                 'epistemic_quality':measured['epistemic_quality'],
+                'step_warrants':steps,
+                'argument_progress':argument_progress(argument,measured['candidate_fit'],steps),
                 'identity_rationale':string(measured.get('identity_rationale'),'identity_rationale')}
         return {'kind':'review_attempt','attempt_id':f'{self.output.name}:{self.sequence}',
                 'role':role,'version':version,'review':review,
@@ -1449,7 +1487,7 @@ class Run:
             string(row.get('rationale'),name+' rationale')
 
     def execute(self):
-        names=('reversal_task.py','reversal_prompts.py','cli.py','configured_providers.py',
+        names=('reversal_task.py','reversal_prompts.py','causal_argument.py','cli.py','configured_providers.py',
                'credit_assignment/attainment.py','method_loop/episode_binding/web_search_binding.py',
                'task_executors/evidence_extraction/argo.py',
                'task_executors/evidence_extraction/codex.py')
@@ -1461,8 +1499,8 @@ class Run:
             'evaluator_policy':self.state.evaluator_policy,
             'case_identity':'one biological process and question pair per inquiry; separately assign a conceptual translation theme across biological inquiries',
             'candidate_origin':'exact retrieved source spans plus explicitly provisional inference',
-            'paired_inference_record':'each candidate and review records two causal inferences with separate source refs, one proposed translation, and its causal tension; empty side refs remain unresolved',
-            'credit_formula':'sum of raw dominated union hypervolumes across materials within each conceptual theme, plus one cross-case account archive; separate biological cases in one theme do not receive additive duplicate credit; zero is the empty baseline; no collection capacity or scientific admission gate',
+            'paired_inference_record':'source-grounded candidates remain provisional; each review records two question-relative derivations, an explicit translation and failed bridge, and a fixed-category rival account; source reports and inferred steps are distinguished',
+            'credit_formula':'one raw dominated union hypervolume over three epistemic coordinates and derived argument_progress per coherent material, summed across conceptual themes plus one cross-case account archive; argument_progress = 0.1 max(D1,D2) + 0.1 min(D1,D2) + 0.8 min(D1,D2,W), with each derivation bounded by its weakest required step and W by translation, reversal, category break, fixed-category challenge and pragmatic use; no admission gate',
             'learning_feedback':'each positive method gain is allocated once across distinct first evidence-origin cycles for newly used citations and the current reasoning cycle; visit-order forecasts are recomputed after delayed shares; this allocation does not add method credit',
             'root_attention':{'rule':'smoothed expected attributed gain per action visit, recomputed after delayed feedback, plus exploration*sqrt(log(cycles+2)/(visits+1))',
                               'exploration':UCB_EXPLORATION,'initial_expected_yield':YIELD_PRIOR,
@@ -1472,10 +1510,11 @@ class Run:
             'root_stop_statistic':'maximum one-step expected attributed gain across general discovery and every known inquiry after delayed feedback is assigned; literal zero only',
             'child_stop_threshold':STOP_EPSILON,'root_observation':'one integrated acquisition, frame synthesis, case inquiry and cross-case reasoning cycle',
             'synthesis_context_characters':SYNTHESIS_CONTEXT_CHARS,
+            'theory_source_context_characters':THEORY_CONTEXT_CHARS,
             'scientific_gates':False,'source_provenance_validation':True,
             'report_preference':'same-evidence epistemic utility; first canonical credit measurement persists; every material alternative is offered',
             'search_limit':SEARCH_LIMIT,'reading_window_chars':WINDOW_CHARS,
-            'post_collection_selection':'only after stopping: all five task-fit scores >=0.70; retain every inquiry in complete report',
+            'post_collection_selection':'only after stopping: all seven task-fit scores >=0.70; retain every inquiry in complete report',
             'failure_rule':'four consecutive failed structured operations or unavailable provider ends as execution failure',
             'bounds':'ten is a reporting milestone, not a credit capacity or stop; no run-wide iteration, source, time or spend cap; numerical continuation governs',
             'model_tiers':self.providers['model_tiers'],
@@ -1497,7 +1536,8 @@ class Run:
             (self.output/'episodes.json').write_text(json.dumps(record.as_record(),ensure_ascii=False,indent=2))
             cases=[self.state.case(key) for key in self.state.data]
             def fit(case):
-                return math.prod(row['score'] for row in case['measurements'].values())**0.25 if case['measurements'] else 0.0
+                return (math.prod(row['score'] for row in case['measurements'].values())
+                        **(1/len(case['measurements'])) if case['measurements'] else 0.0)
             ranked=sorted(cases,key=fit,reverse=True)
             selected=[];selected_themes=set()
             for case in ranked:
@@ -1515,7 +1555,7 @@ class Run:
                 'queries':self.queries,'cycle_outcomes':self.cycle_outcomes,
                 'output_directory':str(self.output),'provider_failure':self.unavailable,
                 'operation_attempts':self.operation_attempts,'operation_successes':self.operation_successes,
-                'post_collection_filtering':'all five task-fit scores >=0.70 and at most one representative per conceptual theme, after Episode closure only; all accounts retained',
+                'post_collection_filtering':'all seven task-fit scores >=0.70 and at most one representative per conceptual theme, after Episode closure only; all accounts retained',
                 'completion':{'ended_by':record.ended_by,'units':record.units_consumed},
                 'interpretation':'Source-driven discovery of pragmatically useful causal frames with continuous provisional judgments. Numerical saturation is observed lack of improvement, not truth or literature exhaustion.'}
             (self.output/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
@@ -1550,6 +1590,44 @@ class Run:
             answer=case['current_answer']
             if answer:
                 lines.extend([answer['conclusion'],'',answer['comparison_notes'],'',answer['explanation'],''])
+                argument=answer['argument']
+                for frame_name,title in (('frame_one','First causal construction'),
+                                         ('frame_two','Second causal construction')):
+                    frame=argument[frame_name]
+                    lines.extend(['### '+title,'',
+                        'Question: '+frame['question'],'',
+                        'Actors and categories: '+frame['actors_and_categories'],'',
+                        'Boundary: '+frame['boundary'],'',
+                        'Intervention: '+frame['intervention'],'',
+                        'Outcome: '+frame['outcome'],'',
+                        'Scope: '+frame['scope'],'',
+                        'Pragmatic use: '+frame['pragmatic_use'],''])
+                    for step in frame['steps']:
+                        lines.append(f"- **{step['id']} ({step['role']})** {step['claim']} "
+                            f"Premises: {', '.join(step['premise_ids']) or 'none'}. "
+                            f"Reasoning: {step['reasoning']} "
+                            f"Source refs: {', '.join(step['warrant_refs']) or 'none'}.")
+                    lines.extend(['','Conclusion step: '+(frame['conclusion_step_id'] or 'open'),''])
+                bridge=argument['translation']
+                lines.extend(['### Attempted translation and failure','',
+                    'Source step: '+(bridge['source_step_id'] or 'open'),'',
+                    'Target step: '+(bridge['target_step_id'] or 'open'),'',
+                    'Actor map: '+bridge['actor_map'],'',
+                    'Intervention map: '+bridge['intervention_map'],'',
+                    'Outcome map: '+bridge['outcome_map'],'',
+                    'Relation map: '+bridge['relation_map'],'',
+                    'Bridge premise: '+bridge['bridge_premise'],'',
+                    'Transported inference: '+bridge['transported_inference'],'',
+                    'Target inference: '+bridge['target_inference'],'',
+                    'Failure mechanism: '+bridge['failure_mechanism'],'',
+                    'Consequence: '+bridge['consequence'],''])
+                alternative=argument['fixed_category_alternative']
+                lines.extend(['### Fixed-category alternative','',
+                    'Status: '+alternative['status'],'',
+                    'Shared vocabulary: '+alternative['fixed_vocabulary'],'',
+                    'Added context or dependencies: '+alternative['added_context_or_dependencies'],'',
+                    'Reconciliation: '+alternative['reconciliation'],'',
+                    f"Argument progress: {case['argument_progress']['score']:.3f}",''])
                 for title,measurements in (('Epistemic quality',case['epistemic_quality']),
                                            ('Task fit',case['measurements'])):
                     lines.extend(['### '+title,''])

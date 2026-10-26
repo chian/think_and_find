@@ -104,6 +104,22 @@ attainment occupies one theme-level dominated volume;
 the milestone is not a stopping rule. This remains a
 biological task-specific rubric, not a task-neutral interface. The existing
 launcher serves both paths.
+
+Case reviews now store two explicit, source-linked causal derivations, the
+attempted inference translation, and a fixed-category rival explanation.
+Each inference step names its premises, so a weak required step limits the
+strength of its conclusion. Case credit includes a derived argument-progress
+coordinate: small credit for warranted local constructions and most credit
+only when both constructions and the consequential translation failure hold.
+The research process chooses what to investigate next; there is no required
+number or order of steps. Full arguments remain in durable state, while
+cross-case reasoning receives compact dependency paths. See
+[the argument design](docs/ARGUMENT_PROGRESS_PLAN.md).
+
+Model requests now have explicit size bounds. Long-running identity catalogs
+and case histories still need addressable selection before they can grow
+without hitting those bounds. The current positive-prior root stop rule also
+needs repair for finite automatic completion.
 The calculation kernels and their references remain available as optional tools
 for the eventual generic workflow.
 
@@ -118,11 +134,11 @@ for the eventual generic workflow.
 | `task_executors/` | HTTP/model/search adapters and deterministic tools |
 | `configured_providers.py` | Provider composition and model routing |
 | `reversal_prompts.py` | Decision-specific field selection, temporary reference labels and rendered model instructions |
+| `causal_argument.py` | Causal argument validation, compact handoffs and derived progress |
 | `checkpoint.py`, `environment.py`, `cli.py`, `__main__.py` | Persistence, local configuration and existing entry point |
 | `tests/`, `scripts/` | Copied source checks and maintenance utilities |
 | `scenarios/` | Example input used by the retained domain workflow |
 
-The included tests describe the copied implementation; they are not evidence
-that generic reasoning has been implemented or validated. Copy verification and
-future behavioral verification are recorded separately. No live research was
-started as part of this migration.
+The included tests check source behavior and the new argument-credit ordering
+rules. Live discovery runs are recorded separately and do not establish a
+scientifically validated reversal or a generic reasoning interface.

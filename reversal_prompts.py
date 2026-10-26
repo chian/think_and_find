@@ -9,6 +9,12 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+import json
+
+
+MAX_ITERATION_CHARS = 48000
+MAX_PROMPT_CHARS = 64000
+MAX_CONTRACT_CHARS = 32000
 
 
 @dataclass(frozen=True)
@@ -28,7 +34,7 @@ def _fields(value, names):
 
 def _answer(value):
     return _fields(value, ('conclusion', 'comparison_notes', 'explanation',
-                           'inference_pair', 'evidence_refs', 'uncertainties',
+                           'inference_pair', 'argument', 'evidence_refs', 'uncertainties',
                            'next_search_need')) if value else None
 
 
@@ -208,6 +214,8 @@ Record two frames as a reasoning grammar, not a scientific admission checklist. 
 
 A partial SCM formalism can display the problem: a variable X_q and edge X_q → Y_q belong to a question-indexed causal description M_q, whose variables are constructed by a grain g_q. Translating an edge from M_1 to M_2 assumes that actors, interventions, and relations survive that change of grain. They need not. For collective phenomena, the macro actor can be constituted by interactions among its units, so intervention on a named unit need not mean intervention on the collective variable. Use an SCM to locate a failed inference, not to insist on one privileged ontology or to claim metaphysical irreducibility from an unexplained pattern.
 
+A reviewed case records an editable causal argument. Each frame defines its question, actors, boundary, intervention, outcome, scope, and pragmatic use. Its steps distinguish source reports from inferences, cite exact source claims, and name earlier premises. The conclusion points to a step, or remains open. The translation maps the particular inference, names the bridge premise, and identifies a mistaken prediction, intervention choice, or causal role. A fixed-category alternative adds a cofactor, context variable, or dependency while keeping the same variable and intervention meanings. If that alternative explains the apparent reversal, the case is a near miss. A strong case explains the exact semantic reconstruction that the ordinary alternative misses. Build, challenge, and revise these links in any order; the representation is an objective for reasoning, not a mandated research sequence.
+
 Schematic examples use placeholders and supply no named biological cases. Collective case: a property P gives an individual unit U access to resource R; as many U express P, their interactions construct a shared structure S that changes access to R. The individual-level and collective-level causal descriptions may both be true, while treating the individual advantage as a fixed population component fails. Relational-category case: an organism's role is defined by its interactions in a network; transporting its role category by organism name into a differently organized network can fail even when the organism remains identifiable. Mechanistic case: a useful coarse relation A → B summarizes a distributed pathway for one problem; another problem resolves feedback and interacting participants so that A and B no longer name a stable causal component. Near miss: paper one shows that X marks a lineage and paper two shows Y causes fate; if paper one never supported X causing fate, paper two has rejected an unwarranted guess, not reversed a valid causal inference. Another near miss: the same fixed actors X and Y show different effect sizes under moderator Z; that is ordinary effect modification unless the relevant entities or relations change. Significance versus nonsignificance alone says nothing about pragmatic causal pluralism. Judge every actual biological case from acquired evidence, not these placeholders.'''
 
 
@@ -224,9 +232,9 @@ TRANSFER_STAGE_GUIDANCE = {
     'extract_claims_and_discover': '''Treat an exact quote as support only for the relation it reports. Extraction from one source need not establish both frames. In a candidate, frame_one_question and frame_two_question name the problems; inference_pair states each causal inference and its own warrant labels, the proposed translation, and the tension. Use empty warrant labels for an unresolved side. Use causal_structure for category construction and generalization_defect for why the attempted transport matters. A new experiment disproving a causal claim never warranted by the earlier source is a near miss, not completed pragmatic causal pluralism.''',
     'synthesize_discovery': '''Connect claims from one or more papers into a linked inference pair. For each candidate, state both biological questions, the exact causal inference warranted in each, its separate source refs, and the proposed translation. A true first-frame claim about another outcome cannot warrant the prediction being tested in the second frame. If one causal inference lacks support, mark it unresolved with empty warrant refs; search hypotheses should seek literature that would independently establish that side, not another refutation of the same hypothesis. Current cross-case decision feedback guides the open question but is not evidence.''',
     'resolve_candidate_identities': '''For same_case_as, compare biological system, process, and question pair so source claims for one case cannot enter another case's answer. For same_theme_as, compare the category construction and specific translation failure across cases. A different species alone does not create a new theme; identical named actors do not make different translation defects the same.''',
-    'assess_case_construct': '''Revise inference_pair using the full case evidence: its side-specific refs must support the exact causal inferences, and proposed_translation must be a consequence of the first. Use comparison_notes for the two questions, actors, and relations; explanation for why the second warrants an incompatible inference and why both remain useful, or for the precise missing warrant. Set next_search_need to a source type that would establish the missing causal side or mapping.''',
-    'assess_case_challenge': '''Test each arrow in inference_pair against its own citations. If frame one's source supports only descent, association, or pattern while proposed_translation asserts fate, intervention, or mechanism, identify that unlicensed step and lower the substantive claim. Check ordinary modifiers and different outcomes as rival explanations. Preserve negative assessments, and name evidence from another study that could make both causal inferences independently warranted.''',
-    'measure_answer_quality': '''Score first_frame_warrant and second_frame_warrant against the respective causal inferences in inference_pair, not against arbitrary true descriptions at those grains. Score inference_reversal near zero when the first source never licensed the transported prediction, even if a later source convincingly overturns that prediction. Different outcomes can be legitimate only when their explicit translation is defended. Epistemic quality can remain high for a well-supported negative correction. Score continuously, without admission gates.''',
+    'assess_case_construct': '''Build or revise the argument at whatever part can now be warranted. In each frame, source_report steps cite exact claims; inference steps name earlier step IDs as premises and state the rule that reaches their conclusion. One step may suffice when it actually carries the inference; adding steps for appearance is useless. An open side has an empty conclusion_step_id. The translation names the particular source and target steps, maps actors, interventions, outcomes and relations, states the bridge premise, and describes the consequential inference that would fail. The fixed_category_alternative gives the strongest specific account using stable variables plus context or dependencies and says whether it reconciles the findings. Do not assert that no conceivable global graph exists. Keep unsupported parts explicitly provisional, then state the next evidence need.''',
+    'assess_case_challenge': '''Inspect every cited step and premise link. Correct any source_report that is only descriptive while its inference step claims a causal intervention. Test whether the source inference licenses the transported consequence. Specify an ordinary fixed-category graph with added context or dependencies and determine whether it already reconciles the observations; if so, mark the candidate a near miss. Preserve useful local inferences and unresolved links. Revise the structured argument and next evidence need rather than issuing an admission or stopping decision.''',
+    'measure_answer_quality': '''Assess every argument step under step_warrants, citing source claims that bear on it and scoring the actual inferential link, not its length or fluency. An unsupported premise makes every dependent conclusion weak. Rate first_frame_warrant and second_frame_warrant for the whole coherent derivations. Rate translation_specificity for the exact map and bridge; inference_reversal for a consequential failure between still-valid local inferences; fixed_category_challenge for whether a specified stable-variable graph is defeated; and pragmatic_pluralism for the distinct uses. A cofactor, omitted dependency, or refuted unsupported hypothesis earns low reversal credit. A careful negative answer can score highly for source fidelity and uncertainty. Assess previous and proposed answers against the same claims; repeated ratings and cosmetic step splits are the same material. Scores are continuous and never admit, reject, or stop research.''',
     'develop_theory': '''Identify patterns only from linked inference pairs whose separate warrants survive scrutiny. Explain each grain's pragmatic value and limits. Treat a refuted earlier hypothesis as an evidence correction, not pluralist causation. State the next independently supportable causal inference or category mapping whose evidence could change the account.''',
     'measure_theory_quality': '''Score the account's biological warrant and explanation of linked causal inferences that are both useful but do not transport. A list of falsified hypotheses, empirical oppositions, generic emergence language, or an assertion that one grain is fundamentally wrong is weak theory fit. Keep source fidelity and uncertainty on their separate coordinates.''',
 }
@@ -265,7 +273,7 @@ def _identities(value, register):
 
 def _replace(value, aliases):
     if isinstance(value, Mapping):
-        return {aliases.get(key, key): _replace(item, aliases) for key, item in value.items()}
+        return {_replace(key, aliases): _replace(item, aliases) for key, item in value.items()}
     if isinstance(value, list):
         return [_replace(item, aliases) for item in value]
     if isinstance(value, tuple):
@@ -381,9 +389,15 @@ def render_reversal_request(request):
     context_lines = (_search_context_lines(selected) if op == 'form_search'
                      else _render_value(selected))
     message = '\n'.join(context_lines)
+    if len(message) > MAX_ITERATION_CHARS:
+        raise ValueError(f'{op} Episode context exceeds its {MAX_ITERATION_CHARS}-character bound; select addressable argument records')
     if aliases:
         instructions += '\n\nUse only the temporary reference labels supplied for this call. Do not invent a reference.'
     prompt = instructions + '\n\nIteration message:\n' + message
+    if len(prompt) > MAX_PROMPT_CHARS:
+        raise ValueError(f'{op} model prompt exceeds its {MAX_PROMPT_CHARS}-character bound')
+    if len(json.dumps(contract, ensure_ascii=False)) > MAX_CONTRACT_CHARS:
+        raise ValueError(f'{op} response contract exceeds its {MAX_CONTRACT_CHARS}-character bound')
     reverse = {label: identity for identity, label in aliases.items()}
     return RenderedModelCall(instructions, message, prompt, contract,
                              lambda response: _replace(response, reverse))

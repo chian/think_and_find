@@ -94,24 +94,53 @@ materials. Design its continuous measures around:
 - resistance to the fixed-category cofactor/dependency explanation; and
 - distinct pragmatic use of both constructions.
 
-One concrete starting rule is to score each frame by its strongest coherent
-derivation path, taking the weakest warranted step on that path as its strength
+The implemented starting rule scores each frame by its declared conclusion
+path, taking the weakest warranted step on that path as its strength
 (`D_A`, `D_B`). Let `W` be the weakest of the plausible translation, the
 evidenced failure, the answer to the specified `H0` challenge, and the two
 pragmatic-use claims. Then a provisional task coordinate is
 
 ```text
-argument_progress = 0.2 max(D_A, D_B) + 0.2 min(D_A, D_B)
-                  + 0.6 min(D_A, D_B, W)
+argument_progress = 0.1 max(D_A, D_B) + 0.1 min(D_A, D_B)
+                  + 0.8 min(D_A, D_B, W)
 ```
 
 All inputs lie in `[0, 1]`. This gives bounded credit for building one or both
 local arguments, while the larger share requires the complete witness. A
 longer chain cannot improve its score simply by adding steps. The formula is
-a candidate task coordinate for the existing single coherent-material credit
-calculation, not a second controller or a rule that dictates the order of
-research. Its coefficients and path semantics must be stress-tested against
-constructed positive and near-miss arguments before implementation.
+a task coordinate in the existing single coherent-material credit
+calculation. It is not a second controller or a rule that dictates the order
+of research. Constructed positive, partial, irrelevant-step and near-miss
+arguments check its intended ordering; the numeric anchors still require
+scientific calibration.
+When the structured rival account says a fixed-category model reconciles the
+findings, the completed-witness term is zero regardless of a model's numeric
+rating. This leaves bounded credit for useful local derivations.
+
+## Implementation status
+
+`causal_argument.py` validates source references, step identities, premise
+order, conclusion pointers, translation pointers, and the explicit rival
+account. `reversal_task.py` stores full reviewed arguments and step-warrant
+ratings, computes the formula above, and uses its result as one case-credit
+coordinate. The model judges biological warrant; the validator checks
+structure and provenance. Cross-case theory receives at most two selected
+case arguments as compact conclusion dependency paths, with source claims
+selected under a separate 12,000-character budget. Prompt rendering rejects
+messages above 48,000 characters. The return schema and full case argument
+are not yet bounded as an addressable delta protocol, and growing identity
+catalogs may eventually exceed the request bound. Those are the next
+communication changes; the numbered build steps below remain the wider plan.
+
+The 2026-10-26 v11.5 Argo run completed two discovery cycles before an
+operator stop. It acquired 16 source claims and reviewed two cases; both
+specified fixed-category reconciliations and therefore received zero witness
+strength and only local-derivation progress (0.16 and 0.17). No model or
+operation failed in those two cycles. The largest theory measurement message
+was 43,766 characters under the 48,000-character Episode limit. These are
+workflow and credit-behavior checks, not positive biological validation. The
+root's positive-prior exact-zero stop remains incapable of finite automatic
+closure, so the run produced no final collection report.
 
 Credit only a material change to the argument, once per semantic identity.
 Repeated ratings, more source quotations for the same step, and cosmetic

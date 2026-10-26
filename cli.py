@@ -28,14 +28,14 @@ from .method_loop.archive import iter_json, write_json
 PRAGMATIC_CAUSAL_PLURALISM_NAME = 'pragmatic causal pluralism'
 DEFAULT_CAUSAL_REPORTING_MILESTONE = 10
 # The standing question, literal-zero stop, reporting milestone, and target
-# name remain those registered in v8 and v9. V10 changes evaluator rubrics to
-# score linked, independently warranted causal inferences after the operator
-# identified the v9 ancestry-to-fate false positive. A version label is never
-# a new target; compare every future fingerprint change with that intent.
+# name remain those registered in v8 and v9. V11 adds ratings for the explicit
+# translation and fixed-category rival account while keeping the same target.
+# A version label is never a new target; compare every fingerprint change with
+# that intent.
 # Prompt wording is intentionally outside this fingerprint so it can improve;
 # prompt edits still need a semantic comparison against this fixed task intent.
 _PRAGMATIC_CAUSAL_PLURALISM_INTENT_DIGEST = (
-    '42190a1f08a6280f27746ae64a101a0caa5f783866a2d4ceb282be9acc1a4a63'
+    '6010e85b9700e0d38b08816a9797efd25d5a5c671d842baeb7d1e4815b1c69df'
 )
 
 
