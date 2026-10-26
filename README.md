@@ -17,6 +17,7 @@ that transition.
 - [Task and scope](docs/CURRENT_GOAL.md)
 - [Episode ownership](docs/RESEARCH_EPISODES.md)
 - [Reasoning and judgment design](docs/REASONING.md)
+- [Argument progress and Episode communication plan](docs/ARGUMENT_PROGRESS_PLAN.md)
 - [Credit repair plan and live checks](docs/ITERATIVE_CREDIT_PLAN.md)
 - [Question-driven discovery and current verification](docs/DISCOVERY_PLAN.md)
 - [Search and whole-document reading](docs/SEARCH.md)
