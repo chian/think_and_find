@@ -1,0 +1,28 @@
+{
+  "scenarios": [
+    {
+      "subject": "high-school-basketball-gym",
+      "description": "An indoor high-school basketball game in a gym with spectator seating capacity of 1000. Actual attendance is 300 fans plus an assumed combined allowance of 30 players and coaches for the two teams: 330 occupants total. Model spectators seated or standing in bleachers with intermittent cheering, rather than treating spectators as continuously exercising athletes. Mechanical ventilation is operating; outdoor-air delivery, recirculation, filtration, floor area and room volume are unspecified and must be found or estimated for a comparable gym. Capacity alone does not determine gym dimensions or airflow. No masks. Use a two-hour reference game duration and a six-foot reference separation; these are evaluation coordinates, not assumed-safe answers. Model one continuously present infectious spectator, using an effective homogeneous breathing/activity approximation for the population. Calculate steady-background and initially clean-room transient outputs. The whole-room R_in criterion is 0.1 expected secondary transmissions, not a 10 percent individual infection probability.",
+      "fixed": {
+        "occupant_count": {"value": 330, "unit": "person"},
+        "susceptible_count": {"value": 329, "unit": "person"},
+        "index_case_count": {"value": 1, "unit": "person"},
+        "exposure_time_s": {"value": 7200, "unit": "s"},
+        "neighbor_distance_m": {"value": 1.8288, "unit": "m"},
+        "mask_penetration": {"value": 1, "unit": "fraction"},
+        "risk_tolerance": {"value": 0.1, "unit": "scalar"},
+        "initial_concentration_quanta_m3": {"value": 0, "unit": "quanta/m3"}
+      },
+      "conditions": {
+        "well_mixed": "Treat the room background concentration as spatially uniform outside the modeled local plume.",
+        "single_infectious_source": "One infectious spectator remains present and emits at a constant effective rate.",
+        "uniform_breathing_and_masks": "Use one effective breathing-flow parameter for emitter and recipients, with no masks; this is an explicit homogeneous approximation for spectators and team occupants.",
+        "continuous_unmasked_jet": "Include the existing model's local continuous respiratory-jet contribution.",
+        "quasi_steady_local_plume": "Treat the local plume as immediately established while the transient background concentration evolves.",
+        "stokes_particles": "Use the existing effective spherical-particle settling model."
+      },
+      "variables": [],
+      "basis": "User scenario: a high-school basketball gym with capacity 1000 and 300 fans attending plus teams. Explicit illustrative choices added for this run: 30 players/coaches combined, two-hour reference duration, mechanical ventilation, no masks, one infectious spectator, initially clean transient air, six-foot reference separation, and whole-room R_in criterion 0.1. These define the conditional case; they are not empirical findings. Unknown room geometry, HVAC rates, and biological/activity parameters remain research inputs."
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+# Think and Find
+
+A standalone starting point for episodic research that uses evidence and reasoning
+together to answer a question. Reasoning should identify what to search for next;
+new evidence should be able to change the reasoning and the eventual conclusion.
+
+This directory is a source copy of `episodic_workflow`, without Git metadata,
+credentials, environments, caches, run outputs, or historical experiment reports.
+The original domain application remains available. A subsequent task-specific
+pragmatic causal-pluralism pilot adds a research binding and extends the existing
+launcher and provider composition. The generic task interface and judgment
+records are still work to implement. Renaming the directory does not implement
+that transition.
+
+## Start here
+
+- [Task and scope](docs/CURRENT_GOAL.md)
+- [Episode ownership](docs/RESEARCH_EPISODES.md)
+- [Reasoning and judgment design](docs/REASONING.md)
+- [Credit repair plan and live checks](docs/ITERATIVE_CREDIT_PLAN.md)
+- [Question-driven discovery and current verification](docs/DISCOVERY_PLAN.md)
+- [Search and whole-document reading](docs/SEARCH.md)
+- [Implementation work](docs/IMPLEMENTATION_CHECKLIST.md)
+- [Copy and verification](docs/WORKFLOW_VERIFICATION.md)
+- [Checkpoint boundaries](docs/CHECKPOINTS.md)
+
+## Preserved foundation
+
+The copy includes the local `method_loop` runtime, acquisition and reading
+bindings, provider clients, evidence records, calculation tools, checkpointing,
+source tests and maintenance scripts. Python runtime imports use only the local
+source tree and standard library. No sibling repository is required.
+
+Search includes literal web queries, candidate relevance assessment and selection,
+full-body retrieval, document-order report windows, source-local lexical ranking,
+and table queries. Whole-document reading is a distinct iterative path, not a
+synonym for selecting a few ranked passages. See [the search inventory](docs/SEARCH.md).
+
+The existing workflow also has hypothesis, evidence-review and contextual
+assessment operations. The generic design must examine and reuse these where
+appropriate; it should not assume the only existing reasoning is arithmetic.
+
+## Providers and local configuration
+
+The copied provider composition retains Firecrawl Search/Scrape, TypeSafe Jev
+relevance assessment, and both configured model transports: Codex-login OAuth and
+the optional local Argo endpoint. Endpoint and model settings remain configurable.
+Only the template [.env.example](.env.example) is included. Shell configuration
+or a new local `.env` supplies credentials when a run is separately requested.
+
+The current configuration names retain the `EPISODIC_` prefix. The internal Python
+package name remains `episodic_workflow` so the copied absolute imports and existing
+entry point continue to work. These are implementation compatibility details,
+not a requirement for the future public API.
+
+| Configuration | Purpose |
+| --- | --- |
+| `FIRECRAWL_API_KEY`, `FIRECRAWL_BASE_URL` | Web search and document retrieval |
+| `TYPESAFE_API_KEY`, `TYPESAFE_ENDPOINT`, `TYPESAFE_MODEL` | Relevance assessment |
+| `EPISODIC_LLM_PROVIDER` | Existing `codex_oauth` or `argo` transport |
+| `EPISODIC_LLM_MODEL`, `EPISODIC_LLM_FAST_MODEL` | Configured reasoning and fast tiers |
+| `EPISODIC_LLM_REASONING_EFFORT`, `EPISODIC_LLM_FAST_REASONING_EFFORT` | Transport-supported reasoning effort |
+| `EPISODIC_LLM_BASE_URL`, `EPISODIC_LLM_USER` | Optional Argo endpoint configuration |
+| `EPISODIC_REQUEST_TIMEOUT_S` | Provider timeout |
+
+## Existing entry point
+
+The biological frame-comparison path starts from the question and an empty
+collection. It seeks pairs of useful causal descriptions built from different
+question-specific categories and relations, then tests where an inference fails
+to translate between them. Cases arise during source reading and synthesis;
+the developing cross-case account now informs later general searches. The root
+alternates general discovery and inquiry refinement
+through numerical scheduling and uses literal zero expected marginal yield as
+its stop condition. Its current positive-prior exponential estimate remains
+positive after any finite sequence of misses, so automatic numerical closure
+requires a different justified yield estimator. It has no
+scientific admission gates. See [the discovery design and live registration](docs/DISCOVERY_PLAN.md).
+This task-specific implementation does not establish that ten strong cases have
+been collected or complete the generic interface.
+
+Earlier fixed-case calibration exposed admission, reassessment and duplicate
+credit defects. Its [repair record](docs/ITERATIVE_CREDIT_PLAN.md) is retained as
+historical evidence; it must not be mistaken for discovery performance.
+
+From this directory, inspect the copied launcher without starting research:
+
+```sh
+python3 -I -S -B . --help
+```
+
+The retained domain path accepts a disease and scenarios. The biological frame
+path retains the compatibility flag `--task causal-reversals`; an optional `--request-file` supplies its
+question, and `--target-count` sets its reporting milestone (default 10).
+The root sums credit across distinct conceptual themes without a collection capacity;
+biological cases in one theme keep separate evidence and answers, and their
+attainment occupies one theme-level dominated volume;
+the milestone is not a stopping rule. This remains a
+biological task-specific rubric, not a task-neutral interface. The existing
+launcher serves both paths.
+The calculation kernels and their references remain available as optional tools
+for the eventual generic workflow.
+
+## Layout
+
+| Location | Responsibility |
+| --- | --- |
+| `method_loop/` | Episode execution, identity, contracts, archive and reconstruction |
+| `case_reports/research/` | Existing research state, hypotheses, acquisition, reading and tools |
+| `case_reports/` | Retained domain composition and source-admission helpers |
+| `credit_assignment/` | Existing progress and numerical yield policies |
+| `task_executors/` | HTTP/model/search adapters and deterministic tools |
+| `configured_providers.py` | Provider composition and model routing |
+| `reversal_prompts.py` | Decision-specific field selection, temporary reference labels and rendered model instructions |
+| `checkpoint.py`, `environment.py`, `cli.py`, `__main__.py` | Persistence, local configuration and existing entry point |
+| `tests/`, `scripts/` | Copied source checks and maintenance utilities |
+| `scenarios/` | Example input used by the retained domain workflow |
+
+The included tests describe the copied implementation; they are not evidence
+that generic reasoning has been implemented or validated. Copy verification and
+future behavioral verification are recorded separately. No live research was
+started as part of this migration.
