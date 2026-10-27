@@ -1,5 +1,11 @@
 # Same-system scope for a causal reversal
 
+> Historical v11.8 policy, superseded by
+> [GENERALIZABLE_INFERENCE_CREDIT.md](GENERALIZABLE_INFERENCE_CREDIT.md).
+> The active task allows cross-organism tests when the proposed causal rule's
+> warranted domain includes those organisms. Organism change alone is not a
+> failure of that rule.
+
 For one proposed reversal, both causal frames must concern the same focal
 organism or stable interacting biological system. The comparison may change
 grain, question, categories, and relations within that system. A change of

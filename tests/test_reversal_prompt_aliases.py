@@ -25,11 +25,13 @@ class ReversalPromptAliasTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Episode context exceeds"):
             render_reversal_request(request)
 
-    def test_search_prompt_requires_one_focal_biological_system(self):
+    def test_search_prompt_uses_explicit_generalizability_domain(self):
         request = {"operation": "form_search", "research_question": "Biological question",
                    "acquisition_scope": "general discovery", "response_contract": {"type": "object"}}
         rendered = render_reversal_request(request)
-        self.assertIn("same focal organism", rendered.instructions)
+        self.assertIn("nature of the proposed generalizability", rendered.instructions)
+        self.assertIn("Search may cross organisms", rendered.instructions)
+        self.assertIn("there is no required order", rendered.instructions)
 
 
 if __name__ == "__main__":

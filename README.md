@@ -20,7 +20,8 @@ that transition.
 - [Argument progress and Episode communication plan](docs/ARGUMENT_PROGRESS_PLAN.md)
 - [Exploration credit audit](docs/EXPLORATION_AUDIT.md)
 - [Cycle-by-cycle behavior trace](docs/BEHAVIOR_TRACE_2026-10-27.md)
-- [Same-system reversal scope](docs/SAME_SYSTEM_SCOPE.md)
+- [Generalizable inference credit](docs/GENERALIZABLE_INFERENCE_CREDIT.md)
+- [Historical same-system rule](docs/SAME_SYSTEM_SCOPE.md)
 - [Credit repair plan and live checks](docs/ITERATIVE_CREDIT_PLAN.md)
 - [Question-driven discovery and current verification](docs/DISCOVERY_PLAN.md)
 - [Search and whole-document reading](docs/SEARCH.md)
@@ -74,10 +75,10 @@ not a requirement for the future public API.
 
 ## Existing entry point
 
-The biological frame-comparison path starts from the question and an empty
-collection. It seeks pairs of useful causal descriptions built from different
-question-specific categories and relations, then tests where an inference fails
-to translate between them. Cases arise during source reading and synthesis;
+The biological discovery path starts from the question and an empty
+collection. It seeks source-grounded causal inferences with stated domains,
+the distinct theories they support, and warranted targets where transport and
+plausible repairs lose useful predictions. Cases arise during source reading and synthesis;
 the developing cross-case account now informs later general searches. The root
 alternates general discovery and inquiry refinement
 through numerical scheduling and uses literal zero expected marginal yield as
@@ -108,18 +109,18 @@ the milestone is not a stopping rule. This remains a
 biological task-specific rubric, not a task-neutral interface. The existing
 launcher serves both paths.
 
-Case reviews now store two explicit, source-linked causal derivations, the
-attempted inference translation, and a fixed-category rival explanation.
-The two frames must concern the same focal organism or stable interacting
-biological system; organism changes cannot earn reversal credit.
-Each inference step names its premises, so a weak required step limits the
-strength of its conclusion. Case credit includes a derived argument-progress
-coordinate: small credit for warranted local constructions and most credit
-only when both constructions and the consequential translation failure hold.
+Case reviews now store an explicit generalizable rule and its proposed domain,
+distinct supported theories with formal additions, an independent target
+theory, and concrete repair tests. The rule's warranted domain determines
+whether cross-organism tests are relevant; an organism change alone earns no
+failure credit. Each inference step names its premises, so a weak required step
+limits its conclusion. Case credit includes bounded credit for distinct
+supported theories and a larger, evidence-bottlenecked failure bonus when
+repairs lose reusable predictive or explanatory value.
 The research process chooses what to investigate next; there is no required
 number or order of steps. Full arguments remain in durable state, while
 cross-case reasoning receives compact dependency paths. See
-[the argument design](docs/ARGUMENT_PROGRESS_PLAN.md).
+[the inference credit design](docs/GENERALIZABLE_INFERENCE_CREDIT.md).
 
 Model requests now have explicit size bounds. Identity and synthesis calls
 select relevant whole inquiry records under separate budgets, and theory

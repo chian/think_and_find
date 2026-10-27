@@ -18,8 +18,8 @@ design documentation. Its domain CLI path, records, calculation catalog and
 credit policy remain available. A subsequent task-specific reasoning prototype
 adds the causal-reversal path and its separate credit policy. Generic reasoning
 operations and task-neutral records remain design work.
-Original checkouts remain unchanged. Git initialization and publication are future
-work, not part of this copy.
+The copied repository is now published separately. Generic reasoning records
+remain future work.
 
 ## Task contract
 
@@ -83,23 +83,24 @@ rules for duplication, revision and unresolved work. Do not award completion
 merely for calls, sources, filled fields or a repeated judgment. Stopping and
 success remain distinct outcomes.
 
-## Current discovery implementation: 2026-10-22
+## Current discovery implementation: 2026-10-27
 
 The operator clarified that a task-specific question must discover its own cases.
 The fixed three-case pilot was an investigation/calibration fixture, not the
 requested search space. Its historical record is in
 [CREDIT_EXPERIMENT.md](CREDIT_EXPERIMENT.md).
 
-The active binding starts with the biological causal-generalization question and
-an empty collection. Source-reading episodes create evidence-linked candidate
-inquiries, and their developing comparisons guide further searches. No preset
-case list or mechanism taxonomy is supplied. Numerical attention balances
-general discovery and existing inquiries. Continuous quality and fit contribute
-separate credit coordinates; scientific eligibility never closes an episode.
-Collection filtering happens only after numerical stopping.
+The active binding starts with a biological causal-generalization question and
+an empty collection. Each inquiry centers on a particular source-grounded
+causal inference and its proposed domain. Source reading supplies candidate
+rules; reviews build explicit derivations of distinct theories it supports,
+formal additions, an independently warranted target theory, and repair tests.
+The warranted domain decides which organisms and scales are relevant. Numerical
+attention balances general discovery and existing inquiries. Continuous quality
+and fit contribute separate credit coordinates; scientific eligibility never
+closes an episode. Collection filtering happens only after numerical stopping.
 
-[DISCOVERY_PLAN.md](DISCOVERY_PLAN.md) records implementation, the fixed-target
-portfolio projection and the current live verification. Ten strong examples are
-an empirical result to assess from actual sources, not an initial condition or
-a consequence of program exit. Original repositories remain unchanged; generic
-task-neutral interfaces, Git initialization and publication remain separate work.
+[GENERALIZABLE_INFERENCE_CREDIT.md](GENERALIZABLE_INFERENCE_CREDIT.md) defines
+the active proof obligations and credit objective. Ten strong examples are an
+empirical result to assess from actual sources, not an initial condition or a
+consequence of program exit. Generic task-neutral interfaces remain separate work.

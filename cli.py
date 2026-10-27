@@ -27,14 +27,14 @@ from .method_loop.archive import iter_json, write_json
 
 PRAGMATIC_CAUSAL_PLURALISM_NAME = 'pragmatic causal pluralism'
 DEFAULT_CAUSAL_REPORTING_MILESTONE = 10
-# V11.8 narrows the standing target: each reversal must stay within one focal
-# organism or stable interacting biological system. Different organisms may
-# still supply separate cases. The literal-zero stop and reporting milestone
-# remain unchanged. A version label alone never changes the target.
+# V12 centers the target on an explicit generalizable causal inference, its
+# supported theories, and tested limits of useful repair. Organism scope follows
+# that inference's warranted domain. The literal-zero stop and reporting
+# milestone remain unchanged. A version label alone never changes the target.
 # Prompt wording is intentionally outside this fingerprint so it can improve;
 # prompt edits still need a semantic comparison against this fixed task intent.
 _PRAGMATIC_CAUSAL_PLURALISM_INTENT_DIGEST = (
-    '8e4019a21431783e0d06808458898773268a42c958f77aff0e32d52cc87264de'
+    'de2f94baa78fb96a3c882f52339d7d61491f9d92ea5e80788e81cb1cf22701ed'
 )
 
 
@@ -54,8 +54,8 @@ def _verify_pragmatic_causal_pluralism_intent() -> str:
     if observed != _PRAGMATIC_CAUSAL_PLURALISM_INTENT_DIGEST:
         raise ProviderConfigurationError(
             'Pragmatic causal pluralism intent changed. Compare the proposed '
-            'task text, rubrics, milestone, and root stop rule with the v8 '
-            'registration before deliberately changing this fingerprint.'
+            'task text, rubrics, milestone, and root stop rule with the current '
+            'experiment registration before changing this fingerprint.'
         )
     return QUESTION
 

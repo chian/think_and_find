@@ -28,13 +28,17 @@ from .reversal_prompts import MAX_ITERATION_CHARS
 
 
 RUBRIC = {
-    'same_system_warrant': 'Measure whether the two causal frames concern the same focal organism or stable interacting biological system, supported by the cited sources: 0 different organisms or organism composition supplies the apparent reversal, or the shared system is unsubstantiated; 0.5 a plausible same-system comparison with uncertain identity or population overlap; 1 source-grounded same focal system. A cross-organism contrast is an ordinary context comparison, not a reversal.',
+    'generalization_warrant': 'Measure whether the same particular source-grounded causal inference is stated as a reusable rule with explicit variable and intervention meanings and a biologically justified proposed domain: 0 a fact merely restated as universal, no cited source, or an unrelated new rule substituted under an old inquiry; 0.5 a plausible but incompletely warranted scope; 1 a well-specified inference and domain supported by evidence. A changed rule needs an explicit source-grounded revision. The domain determines relevant targets.',
+    'target_domain_warrant': 'Measure whether the target theory falls within the proposed inference domain or a source-justified extension of it: 0 an unsupported leap beyond that domain; 0.5 plausible but uncertain inclusion; 1 well-supported inclusion. A different organism is allowed when the rule genuinely generalizes across organisms; organism change alone is not failure.',
+    'target_theory_warrant': 'Measure independent empirical or theoretical warrant for the target hypothesis or theory and its causal predictions: 0 imagined or merely the negation of the proposed rule; 0.5 partial support; 1 a useful independently warranted target theory.',
+    'repair_audit': 'Measure whether the argument explicitly tests the strongest plausible repairs to the proposed inference, including formally stated context variables, dependencies, mappings, or fitted assumptions where relevant: 0 no concrete repair, a viable repair ignored, or a bare assertion of impossibility; 0.5 a partial, source-grounded audit; 1 the pertinent simple repairs are specified and their prediction and preservation effects are compared.',
+    'predictive_loss': 'Measure whether proposed repairs lose reusable predictive or explanatory value: 0 a simple independently constrained repair predicts the target and retains earlier supported uses; 0.5 a consequential but unresolved loss; 1 tested plausible repairs need target-specific fitting, lose independent constraint or discrimination, or damage prior supported hypotheses. Do not claim universal impossibility.',
     'first_frame_warrant': 'Continuously measure source support for the first causal inference in the explicit inference pair, at the grain suited to its question: 0 merely descriptive, invented, or a hypothesis refuted by later evidence; 0.5 a partly warranted causal relation; 1 a warranted causal inference among stated actors and relations. A true claim about a different outcome does not warrant the inference proposed for transport.',
     'second_frame_warrant': 'Continuously measure independent source support for the second causal inference in the explicit inference pair: 0 imagined, merely descriptive, or only the negation of a rejected first hypothesis; 0.5 partly warranted; 1 a well-supported causal inference with its own actors and relations. Independent warrant may come from the same paper or other papers; paper count is not a scientific gate.',
     'translation_specificity': 'Measure whether the proposed translation names the exact source inference, maps its actors, intervention, outcome, and relation, and states a plausible bridge premise: 0 no particular inference or map; 0.5 a partial map with a consequential gap; 1 a specific, biologically intelligible attempted transport. A merely imaginable but unlicensed prediction is weak.',
-    'inference_reversal': 'Continuously measure whether the explicit proposed translation carries an inference actually licensed by frame one into a consequentially incompatible inference warranted by frame two in the same focal biological system: 0 the transported prediction was never licensed, an organism switch explains the contrast, only a prior hypothesis was falsified by new evidence, or the two claims concern unrelated outcomes; 0.5 a plausible linked reversal with an important warrant or mapping gap; 1 a clear linked reversal while both frame-specific causal claims remain valid.',
+    'inference_reversal': 'Measure whether transporting the source-grounded generalizable inference yields a consequentially incompatible prediction in an independently warranted target theory within its justified domain: 0 the transported prediction was never licensed, organism change alone explains the contrast, a prior unsupported hypothesis was falsified, or the outcomes are unrelated; 0.5 a plausible linked failure with a major gap; 1 a clear linked failure while both local causal constructions remain useful.',
     'category_relation_break': 'Continuously measure whether the linked reversal arises from how actors, categories, relations, system boundaries, or intervention meanings change across grains: 0 routine fixed-variable modifier, contrary measurement, or invalidated hypothesis; 0.5 a plausible but unresolved category or relation mapping; 1 a warranted consequential break in the explicit causal translation.',
-    'fixed_category_challenge': 'Measure the explicit rival account that keeps actor, variable, intervention, and outcome meanings fixed while adding a cofactor, context variable, or dependency, including organism identity: 0 that account reconciles the findings or was not examined; 0.5 a specified rival with unresolved discrimination; 1 a specified rival is defeated by a warranted change in category, relation, boundary, or intervention meaning within one focal biological system. Do not claim no possible larger graph can describe the biology.',
+    'fixed_category_challenge': 'Measure a specified rival account that keeps actor, variable, intervention, and outcome meanings fixed while adding a cofactor, context variable, or dependency: 0 a useful simple repair reconciles the target or was not examined; 0.5 a specified rival with unresolved discrimination; 1 a source-grounded reason the repair loses useful predictions or requires reconstructing categories or relations. Do not claim no possible larger graph can describe the biology.',
     'pragmatic_pluralism': 'Continuously measure why both causal inferences in the explicit pair remain useful for their own questions: 0 one is simply false or a descriptive claim was promoted into an unwarranted causal hypothesis; 0.5 both have some use but their distinct causal reach is unclear; 1 both are warranted and pragmatically appropriate despite their noninterchangeability. These anchors are continuous scores, never admission rules.',
 }
 QUALITY_RUBRIC = {
@@ -43,29 +47,30 @@ QUALITY_RUBRIC = {
     'explanatory_usefulness': 'Measure usefulness for the question of pragmatically valid causal descriptions at different grains: 0 irrelevant or misleading; 0.5 a partially informative comparison with important inference gaps; 1 a clear explanation of what each frame makes causal, why an inference does or does not translate, and what remains unresolved. More words or routine biology detail do not improve this score.',
 }
 THEORY_RUBRIC = {
-    'cross_case_grounding': 'Measure whether the account compares acquired cases and exact source claims that bear on perspective-dependent causation: 0 generic philosophy, organism differences used as the two sides of one reversal, or unrelated effect differences; 0.5 partly grounded comparison; 1 well-supported comparison of within-system cases retaining consequential differences among them.',
+    'cross_case_grounding': 'Measure whether the account compares acquired generalizable inferences, their supported theories, and exact source claims: 0 generic philosophy or organism differences alone; 0.5 partly grounded comparison; 1 well-supported comparison retaining differences in scope and repair outcomes.',
     'category_construction': 'Measure whether the account explains how each question and grain constructs its actors, categories, interventions, and relations: 0 categories taken as fixed names; 0.5 some construction explained; 1 clear, empirically anchored comparison of category choices.',
-    'causal_nontransportability': 'Measure whether the account identifies an explicitly linked causal inference that is warranted in one frame, yields an incompatible inference in another warranted frame of the same focal system, and fails to translate because actors or relations change: 0 an organism switch, new evidence rejecting an earlier hypothesis, an unwarranted transported prediction, or a routine modifier; 0.5 a plausible but incompletely warranted mapping failure; 1 a specific, well-supported within-system failure without claiming metaphysical irreducibility.',
+    'causal_nontransportability': 'Measure whether a reusable source inference supports distinct hypotheses yet loses predictive or explanatory use in a warranted target theory after concrete repairs are tested: 0 an organism switch alone, a rejected unsupported guess, or a useful routine modifier; 0.5 an incompletely warranted failure; 1 a specific supported failure of transport and repair without claiming metaphysical irreducibility.',
     'pragmatic_research_use': 'Measure whether the account explains why each grain suits its biological problem and identifies concrete evidence that could revise the proposed mapping: 0 no use or test; 0.5 partial rationale or broad test; 1 consequential problem-relative rationale and discriminating research directions.',
 }
-QUESTION = '''Discover conceptually different biological cases of pragmatic causal pluralism.
+QUESTION = '''Discover the scope and limits of generalizable biological causal inferences.
 A causal explanation relates entities or categories constructed at a grain suited
-to a biological question. Seek processes for which two grains or category choices
-each support a real, useful causal description, yet carrying a causal component
-or inference from one description into the other breaks because the actors,
-relations, system boundary, intervention meaning, or collective organization
-change. Explain what each question asks, what each grain makes causal, what it
-leaves out, and the consequential failure of translation. Evidence warrants the
-two descriptions; a contrary empirical finding alone is not the phenomenon.
+to a biological question. Identify a particular source-grounded causal inference
+that plausibly generalizes: state its rule, variables, intervention meanings,
+abstraction, proposed domain, and the evidence for that scope. Derive distinct
+useful hypotheses or theories it supports. When a support needs a small addition,
+state the changed variables, dependencies, or mapping and show that the core rule
+and prior predictions survive. Seek an independently warranted target theory
+where transporting that rule fails because its causal categories, relations,
+scale, or intervention meaning no longer serve the target question. Test concrete
+repairs and show whether they retain independent constraint and predictive use.
+A contrary empirical finding alone is not the phenomenon.
 A routine moderator such as temperature, an omitted blocker, a significant
 effect beside a nonsignificant one, or two unrelated outcomes is weak evidence
 of this problem while the causal categories and question remain fixed.
-For each proposed reversal, keep the focal organism or interacting biological
-system fixed across the two frames. Switching organisms, host species, strain
-composition, or study population is a context change that can be represented
-as an ordinary variable; it is not the structural reversal sought here.
-Different organisms may supply separate cases, but cannot supply opposite
-sides of one case's inference transfer.
+The inference's justified domain decides which organisms and scales to examine.
+An ecological rule about herbivores may apply across different animals. A change
+of organism alone is a routine context difference, not a structural failure;
+an unsupported leap outside the proposed rule's domain is not a reversal.
 Do not declare one grain fundamentally wrong or infer irreducibility from an
 unexplained effect. Assess why each grain is pragmatically appropriate and where
 its explanatory reach ends. Context can matter when it reorganizes the relevant
@@ -78,7 +83,7 @@ real entities or supplying a complete account of collective phenomena.'''
 ROOT = 'collection'
 COLUMNS = (*QUALITY_RUBRIC,'argument_progress')
 THEORY_COLUMNS = (*QUALITY_RUBRIC,*THEORY_RUBRIC)
-CREDIT_VERSION = 'question-discovery-v11.8'
+CREDIT_VERSION = 'question-discovery-v12.3'
 WINDOW = 4
 STOP_EPSILON = 0.001
 ROOT_STOP_YIELD = 0.0
@@ -127,13 +132,16 @@ def select_identity_catalog(catalog, candidates, budget):
     query=' '.join(str(candidate.get(field,'')) for candidate in candidates for field in
                    ('title','topic','causal_structure','generalization_defect',
                     'frame_one_question','frame_two_question'))
+    query+=' '+' '.join(str(candidate.get('inference_pair',{}).get(field,''))
+                       for candidate in candidates for field in
+                       ('generalizable_rule','proposed_domain'))
     query_words=words(query)
     direct={candidate.get('same_case_as') for candidate in candidates}
     def score(row):
         title_words=words(row['title']+' '+row['topic'])
         full_words=words(' '.join(str(row[field]) for field in
             ('causal_structure','generalization_defect','frame_one_question',
-             'frame_two_question')))
+             'frame_two_question'))+' '+str(row.get('inference_pair',{})))
         return 3*len(query_words & title_words)+len(query_words & full_words)
 
     ordered=sorted(enumerate(catalog),key=lambda item:(
@@ -159,7 +167,8 @@ def inference_pair_contract(reference_items=None):
     citations={'type':'array','uniqueItems':True,'items':reference_items or TEXT}
     return schema({'frame_one_causal_inference':TEXT,'frame_one_warrant_refs':citations,
         'frame_two_causal_inference':TEXT,'frame_two_warrant_refs':citations,
-        'proposed_translation':TEXT,'causal_tension':TEXT})
+        'proposed_translation':TEXT,'causal_tension':TEXT,
+        'generalizable_rule':TEXT,'proposed_domain':TEXT,'domain_rationale':TEXT})
 
 
 def candidate_contract(reference_field,reference_items=None):
@@ -177,7 +186,8 @@ def normalize_inference_pair(pair,references):
         raise ValueError('An inference pair must be a structured record')
     result={}
     for name in ('frame_one_causal_inference','frame_two_causal_inference',
-                 'proposed_translation','causal_tension'):
+                 'proposed_translation','causal_tension','generalizable_rule',
+                 'proposed_domain','domain_rationale'):
         result[name]=string(pair.get(name),name)
     for name in ('frame_one_warrant_refs','frame_two_warrant_refs'):
         refs=pair.get(name)
@@ -337,7 +347,8 @@ class GoalState:
     def identity_catalog(self):
         """Compact identity anchors; full occurrences remain addressable in state."""
         pair_fields=('frame_one_causal_inference','frame_two_causal_inference',
-                     'proposed_translation','causal_tension')
+                     'proposed_translation','causal_tension','generalizable_rule',
+                     'proposed_domain','domain_rationale')
         return [{'key':key,'theme_id':row['theme_id'],'title':row['title'],
                  'topic':row['topic'],
                  'causal_structure':row['causal_structure'],
@@ -383,7 +394,7 @@ class GoalState:
                 'seconds':time.monotonic()-started}
 
     def as_record(self):
-        return {'schema_version':15,'credit_version':CREDIT_VERSION,
+        return {'schema_version':18,'credit_version':CREDIT_VERSION,
             'evaluator_policy':self.evaluator_policy,'question':self.run.question,
             'target':self.run.target,'cases':self.data,'facts':self.facts,'events':self.events,
             'attainment':self.archives,'collection_stats':self.collection_stats,
@@ -394,7 +405,7 @@ class GoalState:
                              'cycle_outcomes':self.run.cycle_outcomes}}
 
     def restore(self,record):
-        if (record.get('schema_version')!=15 or record.get('credit_version')!=CREDIT_VERSION
+        if (record.get('schema_version')!=18 or record.get('credit_version')!=CREDIT_VERSION
                 or record.get('evaluator_policy')!=self.evaluator_policy
                 or record.get('question')!=self.run.question or record.get('target')!=self.run.target):
             raise ValueError('State is incompatible with this discovery task and evaluator policy')
@@ -677,25 +688,30 @@ class Source:
             pair=((case.get('current_answer') or {}).get('inference_pair')
                   or case.get('inference_pair'))
             scores=case.get('measurements') or {}
-            if scores:
-                priority=min(('first_frame_warrant','second_frame_warrant',
-                              'inference_reversal','category_relation_break'),
-                             key=lambda name:scores[name]['score'])
-            elif pair:
-                priority=('first_frame_warrant' if
-                          len(pair['frame_one_warrant_refs'])<=len(pair['frame_two_warrant_refs'])
-                          else 'second_frame_warrant')
-            else:priority=None
             cited=([self.run.state.facts[ref] for ref in dict.fromkeys([
                     *pair['frame_one_warrant_refs'],*pair['frame_two_warrant_refs']])
                     if ref in self.run.state.facts] if pair else [])
+            argument=(case.get('current_answer') or {}).get('argument') or {}
+            generalization=argument.get('generalization') or {}
             focus=({'topic':case['topic'],
                     'frame_one_question':case['frame_one_question'],
                     'frame_one_claim':case['frame_one_claim'],
                     'frame_two_question':case['frame_two_question'],
                     'frame_two_claim':case['frame_two_claim'],
                     'inference_pair':pair,
-                    'priority_dimension':priority,
+                    'current_fit':{name:row['score'] for name,row in scores.items()},
+                    'credit_components':case.get('argument_progress'),
+                    'active_generalization':({
+                        'rule':generalization.get('rule'),
+                        'proposed_domain':generalization.get('proposed_domain'),
+                        'supported_theories':[{
+                            name:item[name] for name in ('id','theory','consequence')}
+                            for item in generalization.get('supports',[])[:6]],
+                        'tested_repairs':[{
+                            'id':item['id'],'status':item['status'],
+                            'formal_change':item['addition']['formal_change']}
+                            for item in generalization.get('repair_tests',[])[:6]]}
+                        if generalization else None),
                     'paired_warrant_claims':[{'side':('frame_one' if fact['id'] in
                         pair['frame_one_warrant_refs'] else 'frame_two'),
                         'id':fact['id'],'source':fact['source'],'claim':fact['claim']}
@@ -1130,8 +1146,8 @@ class Run:
                     raise ValueError('Every candidate must resolve to exact acquired source records')
                 pair=normalize_inference_pair(candidate.get('inference_pair'),references)
                 string(candidate.get('same_case_as'),'proposed same_case_as')
-                identity='case_'+digest({name:candidate[name] for name in
-                    ('title','topic','frame_one_question','frame_two_question')})[:20]
+                identity='case_'+digest({name:pair[name] for name in
+                    ('generalizable_rule','proposed_domain')})[:20]
                 for name in ('title','topic','causal_structure','generalization_defect',
                              'identity_rationale','frame_one_question','frame_one_claim',
                              'frame_two_question','frame_two_claim'):
@@ -1174,8 +1190,8 @@ class Run:
             item=response['identities'][candidate['label']]
             match=item['same_case_as']
             if match=='new':
-                identity='case_'+digest({name:candidate[name] for name in
-                    ('title','topic','frame_one_question','frame_two_question')})[:20]
+                identity='case_'+digest({name:candidate['inference_pair'][name] for name in
+                    ('generalizable_rule','proposed_domain')})[:20]
             elif match in self.state.data:identity=match
             elif match in aliases:identity=aliases[match]
             else:raise ValueError('Resolved identity must name a known inquiry or earlier occurrence')
@@ -1358,11 +1374,10 @@ class Run:
             return {'kind':'theory_unavailable','reason':'No acquired source claims'}
         fresh=[ref for ref in facts if ref not in self.cycle_initial_facts]
         reviewed=[self.state.case(key) for key,row in self.state.data.items()
-                  if (row['current'] and row['current']['argument_progress']['system_match']
-                      and row['current']['argument_progress']['system_strength']>0)]
+                  if (row['current'] and row['current']['argument_progress']['support_breadth']>0)]
         if not reviewed:
             return {'kind':'theory_unavailable',
-                    'reason':'No reviewed argument has source-grounded same-system frames'}
+                    'reason':'No reviewed argument has a source-grounded supported generalization'}
         reviewed.sort(key=lambda case:(case['argument_progress']['score'],
                                         quality_utility(case['epistemic_quality'])),reverse=True)
         chosen=[];themes=set()
@@ -1488,14 +1503,21 @@ class Run:
         quality_schema=schema({name:measurement_schema for name in QUALITY_RUBRIC})
         step_schema=schema({name:schema({identity:measurement_schema for identity in identities})
                             for name,identities in step_ids(argument).items()})
+        support_ids=[item['id'] for item in argument['generalization']['supports']]
+        repair_ids=[item['id'] for item in argument['generalization']['repair_tests']]
+        support_schema=schema({identity:measurement_schema for identity in support_ids})
+        repair_schema=schema({identity:measurement_schema for identity in repair_ids})
         previous_schema=(schema({'candidate_fit':fit_schema,'epistemic_quality':quality_schema})
                          if case['current_answer'] else {'type':'null'})
         measured=self.ask('measure_answer_quality',key,source_claims=case['facts'],answer=answer,
+            inquiry_generalization={name:case['inference_pair'][name] for name in
+                ('generalizable_rule','proposed_domain','domain_rationale')},
             previous_answer=case['current_answer'],
             known_materials={identity:row['answer'] for identity,row in known.items()},
             response_contract=schema({'equivalent_to':{'type':'string','enum':['new',*known]},
                 'identity_rationale':TEXT,'candidate_fit':fit_schema,
                 'epistemic_quality':quality_schema,'step_warrants':step_schema,
+                'support_warrants':support_schema,'repair_warrants':repair_schema,
                 'previous_measurements':previous_schema,
                 'revision_summary':TEXT}))
         match=measured.get('equivalent_to')
@@ -1508,6 +1530,8 @@ class Run:
             raise ValueError('Step warrant measurements require both causal frames')
         for frame_name,identities in step_ids(argument).items():
             self.validate_measurements(steps[frame_name],identities,options)
+        self.validate_measurements(measured.get('support_warrants'),support_ids,options)
+        self.validate_measurements(measured.get('repair_warrants'),repair_ids,options)
         previous=measured.get('previous_measurements')
         if case['current_answer']:
             if not isinstance(previous,dict):
@@ -1520,8 +1544,10 @@ class Run:
                    'answer':answer,'rubric':CREDIT_VERSION})[:24])
         review={'material_id':identity,'answer':answer,'candidate_fit':measured['candidate_fit'],
                 'epistemic_quality':measured['epistemic_quality'],
-                'step_warrants':steps,
-                'argument_progress':argument_progress(argument,measured['candidate_fit'],steps),
+                'step_warrants':steps,'support_warrants':measured['support_warrants'],
+                'repair_warrants':measured['repair_warrants'],
+                'argument_progress':argument_progress(argument,measured['candidate_fit'],steps,
+                    measured['support_warrants'],measured['repair_warrants']),
                 'identity_rationale':string(measured.get('identity_rationale'),'identity_rationale')}
         return {'kind':'review_attempt','attempt_id':f'{self.output.name}:{self.sequence}',
                 'role':role,'version':version,'review':review,
@@ -1552,10 +1578,10 @@ class Run:
             'quality_rubric':QUALITY_RUBRIC,'case_credit_columns':COLUMNS,
             'theory_credit_columns':THEORY_COLUMNS,
             'evaluator_policy':self.state.evaluator_policy,
-            'case_identity':'one biological process and question pair per inquiry; separately assign a conceptual translation theme across biological inquiries',
+            'case_identity':'one proposed generalizable causal inference and its changing support and challenge graph per inquiry; separately assign a conceptual translation theme',
             'candidate_origin':'exact retrieved source spans plus explicitly provisional inference',
-            'paired_inference_record':'source-grounded candidates remain provisional; each review records two question-relative derivations in one focal organism or interacting system, an explicit translation and failed bridge, and a fixed-category rival account; source reports and inferred steps are distinguished',
-            'credit_formula':'one raw dominated union hypervolume over three epistemic coordinates and derived argument_progress per coherent material, summed across conceptual themes plus one cross-case account archive; argument_progress = 0.1 max(D1,D2) + 0.1 min(D1,D2) + 0.8 min(D1,D2,W), scaled by same-system warrant and zero for different or unresolved organisms; each derivation is bounded by its weakest required step and W by translation, reversal, category break, fixed-category challenge and pragmatic use',
+            'paired_inference_record':'each review records a warranted rule and domain, distinct theories it supports through explicit additions and derivations, an independently warranted target theory, a transported prediction, and concrete repair tests',
+            'credit_formula':'one raw dominated union hypervolume over three epistemic coordinates and derived argument_progress per coherent material, summed across conceptual themes plus one cross-case account archive; argument_progress = 0.05 warranted rule + 0.20 diminishing distinct support breadth + 0.75 bottlenecked challenge; the challenge requires a warranted in-domain target and tested repairs that lose reusable predictive or explanatory use',
             'learning_feedback':'each positive method gain is allocated once across distinct first evidence-origin cycles for newly used citations and the current reasoning cycle; visit-order forecasts are recomputed after delayed shares; this allocation does not add method credit',
             'root_attention':{'rule':'smoothed expected attributed gain per action visit, recomputed after delayed feedback, plus exploration*sqrt(log(cycles+2)/(visits+1))',
                               'exploration':UCB_EXPLORATION,'initial_expected_yield':YIELD_PRIOR,
@@ -1569,7 +1595,7 @@ class Run:
             'scientific_gates':False,'source_provenance_validation':True,
             'report_preference':'same-evidence epistemic utility; first canonical credit measurement persists; every material alternative is offered',
             'search_limit':SEARCH_LIMIT,'reading_window_chars':WINDOW_CHARS,
-            'post_collection_selection':'only after stopping: all eight task-fit scores >=0.70 and shared-system match; retain every inquiry in complete report',
+            'post_collection_selection':'only after stopping: all task-fit scores >=0.70 and a source-grounded challenge; retain every inquiry in complete report',
             'failure_rule':'four consecutive failed structured operations or unavailable provider ends as execution failure',
             'bounds':'ten is a reporting milestone, not a credit capacity or stop; no run-wide iteration, source, time or spend cap; numerical continuation governs',
             'model_tiers':self.providers['model_tiers'],
@@ -1583,7 +1609,7 @@ class Run:
             path.write_bytes((Path(__file__).parent/name).read_bytes())
         self.record({'event':'experiment_registered',**registration})
         goal=EpisodeGoal.root(objective=self.question,result_contract={
-            'target':self.target,'result':'source-discovered diverse comparisons of pragmatically useful causal frames, their evidence and limits',
+            'target':self.target,'result':'source-discovered causal generalizations, warranted uses, and tested limits',
             'scientific_gates':False})
         try:
             root=self.episode('discovery',ROOT,goal)
@@ -1597,7 +1623,7 @@ class Run:
             selected=[];selected_themes=set()
             for case in ranked:
                 if (case['theme_id'] not in selected_themes and case['measurements']
-                        and case['argument_progress']['system_match']
+                        and case['argument_progress']['challenge_strength']>0
                         and all(row['score']>=0.70 for row in case['measurements'].values())):
                     selected.append(case['key']);selected_themes.add(case['theme_id'])
             report={'run_complete':self.unavailable is None,'question':self.question,'target':self.target,
@@ -1611,7 +1637,7 @@ class Run:
                 'queries':self.queries,'cycle_outcomes':self.cycle_outcomes,
                 'output_directory':str(self.output),'provider_failure':self.unavailable,
                 'operation_attempts':self.operation_attempts,'operation_successes':self.operation_successes,
-                'post_collection_filtering':'all eight task-fit scores >=0.70 and shared-system match, at most one representative per conceptual theme, after Episode closure only; all accounts retained',
+                'post_collection_filtering':'all task-fit scores >=0.70 and positive challenged-generalization strength, at most one representative per conceptual theme, after Episode closure only; all accounts retained',
                 'completion':{'ended_by':record.ended_by,'units':record.units_consumed},
                 'interpretation':'Source-driven discovery of pragmatically useful causal frames with continuous provisional judgments. Numerical saturation is observed lack of improvement, not truth or literature exhaustion.'}
             (self.output/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
@@ -1678,13 +1704,31 @@ class Run:
                     'Failure mechanism: '+bridge['failure_mechanism'],'',
                     'Consequence: '+bridge['consequence'],''])
                 alternative=argument['fixed_category_alternative']
-                system=argument['shared_system']
-                lines.extend(['### Shared biological system','',
-                    'Status: '+system['status'],'',
-                    'Focal system: '+system['focal_system'],'',
-                    'Frame-one organisms: '+', '.join(system['organisms_frame_one']),'',
-                    'Frame-two organisms: '+', '.join(system['organisms_frame_two']),'',
-                    'Overlap reasoning: '+system['overlap_reasoning'],''])
+                generalization=argument['generalization']
+                lines.extend(['### Proposed generalizable inference','',
+                    'Rule: '+generalization['rule'],'',
+                    'Proposed domain: '+generalization['proposed_domain'],'',
+                    'Domain warrant: '+generalization['domain_warrant'],'',
+                    'Target domain status: '+generalization['target_domain_status'],'',
+                    'Target theory: '+generalization['target_theory'],''])
+                for item in generalization['supports']:
+                    lines.extend(['#### Supported theory: '+item['id'],'',
+                        item['theory'],'','Question: '+item['question'],'',
+                        'Consequence: '+item['consequence'],'',
+                        'Relation to rule: '+item['relation_to_rule'],'',
+                        'Status: '+item['status'],'',
+                        'Derivation: '+item['derivation'],'',
+                        'Formal addition: '+item['addition']['formal_change'],'',
+                        'Graph edits: '+json.dumps(item['addition']['edits'],ensure_ascii=False),''])
+                for item in generalization['repair_tests']:
+                    lines.extend(['#### Tested repair: '+item['id'],'',
+                        'Status: '+item['status'],'',
+                        'Formal change: '+item['addition']['formal_change'],'',
+                        'Graph edits: '+json.dumps(item['addition']['edits'],ensure_ascii=False),'',
+                        'Target prediction: '+item['target_prediction'],'',
+                        'Tested earlier theories: '+', '.join(item['tested_support_ids']),'',
+                        'Effect on prior uses: '+item['prior_uses_after_repair'],'',
+                        'Independent constraint: '+item['independent_constraint'],''])
                 lines.extend(['### Fixed-category alternative','',
                     'Status: '+alternative['status'],'',
                     'Shared vocabulary: '+alternative['fixed_vocabulary'],'',

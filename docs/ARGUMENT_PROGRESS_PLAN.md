@@ -1,5 +1,10 @@
 # First improvement: formalize a causal reversal
 
+> Historical v11.8 design. The active v12 inference-centered objective and
+> credit rule are described in [GENERALIZABLE_INFERENCE_CREDIT.md](GENERALIZABLE_INFERENCE_CREDIT.md).
+> Its proposed inference domain, rather than a same-organism requirement,
+> determines which biological systems can test generalization.
+
 ## The object the research must produce
 
 The objective is a **reversal witness**, not two related causal-sounding

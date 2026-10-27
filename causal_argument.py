@@ -62,28 +62,62 @@ def argument_contract(reference_items):
         "status": {"type": "string", "enum": ["reconciles", "challenged", "unresolved"]},
         "evidence_refs": refs,
     })
-    shared_system = _object({
-        "focal_system": TEXT,
-        "organisms_frame_one": {"type": "array", "minItems": 1,
-                                "uniqueItems": True, "items": TEXT},
-        "organisms_frame_two": {"type": "array", "minItems": 1,
-                                "uniqueItems": True, "items": TEXT},
-        "overlap_reasoning": TEXT,
-        "status": {"type": "string", "enum": ["same", "different", "unresolved"]},
+    graph_edit = _object({
+        "operation": {"type": "string", "enum": [
+            "add_variable", "add_edge", "change_mapping", "constrain_parameter"]},
+        "subject": TEXT, "object": TEXT, "expression": TEXT,
+    })
+    addition = _object({
+        "kind": {"type": "string", "enum": ["none", "context_variable",
+                    "dependency", "scale_mapping", "parameter_assumption"]},
+        "edits": {"type": "array", "items": graph_edit},
+        "formal_change": TEXT,
+        "preservation_argument": TEXT,
+    })
+    support = _object({
+        "id": TEXT, "question": TEXT, "theory": TEXT, "consequence": TEXT,
+        "derivation": TEXT, "addition": addition,
+        "distinct_consequence": TEXT,
+        "relation_to_rule": {"type": "string", "enum": [
+            "application", "component", "restatement", "speculative"]},
+        "relation_reasoning": TEXT,
+        "status": {"type": "string", "enum": ["warranted", "provisional", "unsupported"]},
+        "status_reasoning": TEXT, "evidence_refs": refs,
+    })
+    repair = _object({
+        "id": TEXT, "addition": addition,
+        "target_prediction": TEXT, "prior_uses_after_repair": TEXT,
+        "tested_support_ids": {"type": "array", "uniqueItems": True, "items": TEXT},
+        "independent_constraint": TEXT,
+        "status": {"type": "string", "enum": ["works", "fails", "unresolved"]},
         "evidence_refs": refs,
+    })
+    generalization = _object({
+        "source_step_id": MAYBE_TEXT,
+        "rule": TEXT, "premises": TEXT, "causal_conclusion": TEXT,
+        "variable_meanings": TEXT, "proposed_domain": TEXT,
+        "domain_warrant": TEXT, "abstraction_map": TEXT,
+        "domain_evidence_refs": refs,
+        "supports": {"type": "array", "items": support},
+        "target_domain_status": {"type": "string", "enum": [
+            "supported", "unsupported", "unresolved"]},
+        "target_domain_reasoning": TEXT,
+        "target_domain_refs": refs,
+        "target_theory": TEXT, "target_theory_refs": refs,
+        "repair_tests": {"type": "array", "items": repair},
     })
     return _object({"frame_one": frame, "frame_two": frame,
                     "translation": translation,
                     "fixed_category_alternative": alternative,
-                    "shared_system": shared_system})
+                    "generalization": generalization})
 
 
 def normalize_argument(value, available_refs):
     """Check source identities and an acyclic local premise graph."""
     if not isinstance(value, dict) or set(value) != {
             "frame_one", "frame_two", "translation", "fixed_category_alternative",
-            "shared_system"}:
-        raise ValueError("A causal argument needs two frames, translation, a fixed-category alternative, and a shared system")
+            "generalization"}:
+        raise ValueError("A causal argument needs two frames, translation, a fixed-category alternative, and a generalization")
     refs = set(available_refs)
     result = {}
     for frame_name in ("frame_one", "frame_two"):
@@ -158,26 +192,114 @@ def normalize_argument(value, available_refs):
     if alternative["status"] not in ("reconciles", "challenged", "unresolved"):
         raise ValueError("The fixed-category alternative has an unknown status")
     _check_refs(alternative["evidence_refs"], refs, "fixed-category alternative")
-    system = value["shared_system"]
-    if not isinstance(system, dict) or set(system) != {
-            "focal_system", "organisms_frame_one", "organisms_frame_two",
-            "overlap_reasoning", "status", "evidence_refs"}:
-        raise ValueError("The shared-system comparison has incomplete fields")
-    for field in ("focal_system", "overlap_reasoning"):
-        if not isinstance(system[field], str) or not system[field].strip():
-            raise ValueError(f"The shared system's {field} needs text")
-    for field in ("organisms_frame_one", "organisms_frame_two"):
-        names = system[field]
-        if (not isinstance(names, list) or not names
-                or any(not isinstance(name, str) or not name.strip() for name in names)
-                or len(names) != len(set(names))):
-            raise ValueError(f"The shared system's {field} needs organism names")
-    if system["status"] not in ("same", "different", "unresolved"):
-        raise ValueError("The shared system has an unknown status")
-    _check_refs(system["evidence_refs"], refs, "shared system")
+    generalization = _normalize_generalization(value["generalization"], result, refs)
     return result | {"translation": translation,
                      "fixed_category_alternative": alternative,
-                     "shared_system": system}
+                     "generalization": generalization}
+
+
+def _normalize_addition(value, label):
+    if not isinstance(value, dict) or set(value) != {
+            "kind", "edits", "formal_change", "preservation_argument"}:
+        raise ValueError(f"{label} needs a typed formal change and preservation argument")
+    if value["kind"] not in ("none", "context_variable", "dependency",
+                              "scale_mapping", "parameter_assumption"):
+        raise ValueError(f"{label} has an unknown addition kind")
+    for field in ("formal_change", "preservation_argument"):
+        if not isinstance(value[field], str) or not value[field].strip():
+            raise ValueError(f"{label}.{field} needs text")
+    edits=value["edits"]
+    expected={"context_variable":"add_variable", "dependency":"add_edge",
+              "scale_mapping":"change_mapping",
+              "parameter_assumption":"constrain_parameter"}
+    if not isinstance(edits,list) or (value["kind"]=="none") != (len(edits)==0):
+        raise ValueError(f"{label} needs graph edits matching its addition kind")
+    seen=set()
+    for edit in edits:
+        if not isinstance(edit,dict) or set(edit)!={
+                "operation","subject","object","expression"}:
+            raise ValueError(f"{label} has an incomplete graph edit")
+        if edit["operation"] not in expected.values():
+            raise ValueError(f"{label} has an unknown graph edit")
+        if any(not isinstance(edit[field],str) or not edit[field].strip()
+               for field in ("subject","object","expression")):
+            raise ValueError(f"{label} graph edits need named terms and an expression")
+        identity=tuple(edit[field] for field in ("operation","subject","object","expression"))
+        if identity in seen:
+            raise ValueError(f"{label} repeats a graph edit")
+        seen.add(identity)
+    if value["kind"]!="none" and expected[value["kind"]] not in {
+            edit["operation"] for edit in edits}:
+        raise ValueError(f"{label} has no edit matching its addition kind")
+    return value
+
+
+def _normalize_generalization(value, frames, refs):
+    fields = {"source_step_id", "rule", "premises", "causal_conclusion",
+              "variable_meanings", "proposed_domain", "domain_warrant",
+              "abstraction_map", "domain_evidence_refs", "supports",
+              "target_domain_status", "target_domain_reasoning",
+              "target_domain_refs", "target_theory", "target_theory_refs",
+              "repair_tests"}
+    if not isinstance(value, dict) or set(value) != fields:
+        raise ValueError("The generalization has incomplete fields")
+    source_id = value["source_step_id"]
+    if not isinstance(source_id, str) or (source_id and source_id not in {
+            step["id"] for step in frames["frame_one"]["steps"]}):
+        raise ValueError("The generalization source step must name a first-frame step or remain open")
+    for field in ("rule", "premises", "causal_conclusion", "variable_meanings",
+                  "proposed_domain", "domain_warrant", "abstraction_map",
+                  "target_domain_reasoning", "target_theory"):
+        if not isinstance(value[field], str) or not value[field].strip():
+            raise ValueError(f"The generalization's {field} needs text")
+    for field in ("domain_evidence_refs", "target_domain_refs", "target_theory_refs"):
+        _check_refs(value[field], refs, f"generalization {field}")
+    if value["target_domain_status"] not in ("supported", "unsupported", "unresolved"):
+        raise ValueError("The target domain status is unknown")
+    for group, expected in (("supports", {"id", "question", "theory", "consequence",
+            "derivation", "addition", "distinct_consequence",
+            "relation_to_rule", "relation_reasoning", "status",
+            "status_reasoning", "evidence_refs"}),
+            ("repair_tests", {"id", "addition", "target_prediction",
+            "prior_uses_after_repair", "tested_support_ids",
+            "independent_constraint", "status",
+            "evidence_refs"})):
+        items = value[group]
+        if not isinstance(items, list):
+            raise ValueError(f"The generalization's {group} must be an array")
+        seen = set()
+        for item in items:
+            if not isinstance(item, dict) or set(item) != expected:
+                raise ValueError(f"The generalization's {group} has incomplete fields")
+            identity = item["id"]
+            if not isinstance(identity, str) or not identity.strip() or identity in seen:
+                raise ValueError(f"The generalization's {group} IDs must be unique")
+            seen.add(identity)
+            for field in expected - {"id", "addition", "evidence_refs", "status",
+                                     "relation_to_rule",
+                                     "tested_support_ids"}:
+                if not isinstance(item[field], str) or not item[field].strip():
+                    raise ValueError(f"The generalization's {group}.{field} needs text")
+            _normalize_addition(item["addition"], f"{group}.{identity}.addition")
+            _check_refs(item["evidence_refs"], refs, f"{group}.{identity}")
+            if group == "repair_tests" and item["status"] not in (
+                    "works", "fails", "unresolved"):
+                raise ValueError("A repair status is unknown")
+            if group == "supports" and item["status"] not in (
+                    "warranted", "provisional", "unsupported"):
+                raise ValueError("A supported-theory status is unknown")
+            if group == "supports" and item["relation_to_rule"] not in (
+                    "application", "component", "restatement", "speculative"):
+                raise ValueError("A supported-theory relation is unknown")
+            if group == "repair_tests":
+                prior = item["tested_support_ids"]
+                support_ids = {support["id"] for support in value["supports"]}
+                if (not isinstance(prior,list)
+                        or any(not isinstance(identity,str) for identity in prior)
+                        or len(prior)!=len(set(prior))
+                        or any(identity not in support_ids for identity in prior)):
+                    raise ValueError("A repair must name available supported theories it tests")
+    return value
 
 
 def _check_refs(values, available, name):
@@ -194,7 +316,12 @@ def argument_refs(argument):
             refs.extend(step["warrant_refs"])
     refs.extend(argument["translation"]["evidence_refs"])
     refs.extend(argument["fixed_category_alternative"]["evidence_refs"])
-    refs.extend(argument["shared_system"]["evidence_refs"])
+    generalization = argument["generalization"]
+    for field in ("domain_evidence_refs", "target_domain_refs", "target_theory_refs"):
+        refs.extend(generalization[field])
+    for group in ("supports", "repair_tests"):
+        for item in generalization[group]:
+            refs.extend(item["evidence_refs"])
     return list(dict.fromkeys(refs))
 
 
@@ -241,20 +368,22 @@ def argument_brief(argument):
     result["fixed_category_alternative"] = {
         key: argument["fixed_category_alternative"][key] for key in (
             "status", "reconciliation")}
-    result["shared_system"] = {
-        key: argument["shared_system"][key] for key in (
-            "focal_system", "organisms_frame_one", "organisms_frame_two",
-            "status", "evidence_refs")}
+    generalization = argument["generalization"]
+    result["generalization"] = {
+        key: generalization[key] for key in (
+            "rule", "proposed_domain", "domain_warrant", "abstraction_map",
+            "target_domain_status", "target_domain_reasoning", "target_theory")}
+    result["generalization"]["supports"] = [{
+        key: item[key] for key in ("id", "question", "theory", "consequence",
+                              "derivation", "addition", "relation_to_rule",
+                              "relation_reasoning", "status", "evidence_refs")}
+        for item in generalization["supports"]]
+    result["generalization"]["repair_tests"] = [{
+        key: item[key] for key in ("id", "addition", "status", "target_prediction",
+                              "prior_uses_after_repair", "tested_support_ids",
+                              "evidence_refs")}
+        for item in generalization["repair_tests"]]
     return result
-
-
-def same_system(argument):
-    """Only an explicitly evidenced, stable organism set can support a reversal."""
-    system = argument["shared_system"]
-    def names(field):
-        return {" ".join(name.casefold().split()) for name in system[field]}
-    return (system["status"] == "same" and bool(system["evidence_refs"])
-            and names("organisms_frame_one") == names("organisms_frame_two"))
 
 
 def frame_strength(frame, ratings):
@@ -276,8 +405,8 @@ def frame_strength(frame, ratings):
     return min(float(ratings[identity]["score"]) for identity in required)
 
 
-def argument_progress(argument, fit, step_warrants):
-    """Bounded partial progress plus the larger complete-witness component."""
+def argument_progress(argument, fit, step_warrants, support_warrants, repair_warrants):
+    """Reward warranted reuse of one inference and a harder failed repair."""
     strengths = {}
     for frame_name, warrant_name in (("frame_one", "first_frame_warrant"),
                                      ("frame_two", "second_frame_warrant")):
@@ -290,15 +419,62 @@ def argument_progress(argument, fit, step_warrants):
         strengths[frame_name] = min(frame_strength(argument[frame_name], ratings),
                                     fit[warrant_name]["score"])
     first, second = strengths["frame_one"], strengths["frame_two"]
+    generalization = argument["generalization"]
+    def scores_for(group, ratings):
+        identities = {item["id"] for item in generalization[group]}
+        if set(ratings) != identities:
+            raise ValueError(f"Every {group} item needs a warrant measurement")
+        if any(not math.isfinite(row["score"]) or not 0 <= row["score"] <= 1
+               for row in ratings.values()):
+            raise ValueError(f"{group} warrant scores must lie in [0,1]")
+    scores_for("supports", support_warrants)
+    scores_for("repair_tests", repair_warrants)
+    source_id = generalization["source_step_id"]
+    local = (min(first, fit["generalization_warrant"]["score"])
+             if source_id and generalization["domain_evidence_refs"] else 0.0)
+    candidates = []
+    for index, item in enumerate(generalization["supports"]):
+        key = " ".join(item["consequence"].casefold().split())
+        theory_key = " ".join(item["theory"].casefold().split())
+        strength = (min(local, support_warrants[item["id"]]["score"])
+                    if item["status"] == "warranted"
+                    and item["relation_to_rule"] == "application"
+                    and item["evidence_refs"] else 0.0)
+        candidates.append((strength, index, item["id"], key, theory_key))
+    seen_consequences = set()
+    seen_theories = set()
+    support_strengths = {item["id"]: 0.0 for item in generalization["supports"]}
+    for strength, _, identity, consequence, theory in sorted(
+            candidates, key=lambda row: (-row[0], row[1])):
+        if not strength or consequence in seen_consequences or theory in seen_theories:
+            continue
+        support_strengths[identity] = strength
+        seen_consequences.add(consequence)
+        seen_theories.add(theory)
+    breadth = 1.0 - math.exp(-math.fsum(support_strengths.values()))
+    target = (min(second, fit["target_theory_warrant"]["score"])
+              if generalization["target_theory_refs"] else 0.0)
+    domain = (fit["target_domain_warrant"]["score"]
+              if generalization["target_domain_status"] == "supported"
+              and generalization["target_domain_refs"] else 0.0)
+    repairs = generalization["repair_tests"]
+    repair_strength = (min(fit["repair_audit"]["score"],
+                           *(repair_warrants[item["id"]]["score"] for item in repairs))
+                       if repairs and all(item["status"] == "fails" and item["evidence_refs"]
+                                          and item["tested_support_ids"]
+                                          and any(support_strengths[identity] > 0 for identity in
+                                                  item["tested_support_ids"])
+                                          for item in repairs) else 0.0)
     witness = min(fit[name]["score"] for name in (
         "translation_specificity", "inference_reversal", "category_relation_break",
-        "fixed_category_challenge", "pragmatic_pluralism"))
-    if argument["fixed_category_alternative"]["status"] == "reconciles":
+        "fixed_category_challenge", "pragmatic_pluralism", "predictive_loss"))
+    if argument["fixed_category_alternative"]["status"] != "challenged":
         witness = 0.0
-    system_match = same_system(argument)
-    system_strength = fit["same_system_warrant"]["score"] if system_match else 0.0
-    score = system_strength * (0.1 * max(first, second) + 0.1 * min(first, second)
-                               + 0.8 * min(first, second, witness))
+    challenge = min(local, breadth, target, domain, repair_strength, witness)
+    score = 0.05 * local + 0.20 * breadth + 0.75 * challenge
     return {"score": score, "frame_one_strength": first,
-            "frame_two_strength": second, "witness_strength": witness,
-            "system_match": system_match, "system_strength": system_strength}
+            "frame_two_strength": second, "generalization_strength": local,
+            "support_breadth": breadth, "support_strengths": support_strengths,
+            "target_strength": target, "domain_strength": domain,
+            "repair_strength": repair_strength, "witness_strength": witness,
+            "challenge_strength": challenge}
