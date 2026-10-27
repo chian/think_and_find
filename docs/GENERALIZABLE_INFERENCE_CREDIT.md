@@ -107,6 +107,19 @@ C = min(g, B, target_theory_strength, target_domain_warrant,
 argument_progress = 0.05*g + 0.20*B + 0.75*C
 ```
 
+The collection account uses the same progress components rather than paying
+directly for a reviewer's prose ratings. For every reviewed case it cites, the
+account's interpretation ratings can lower its cited cases' warranted rule and
+support strengths, and its nontransportability rating can lower their
+challenge strength. Cited case strengths combine with diminishing returns
+(`1 - exp(-sum strengths)`) before the same 0.05/0.20/0.75 weights are applied.
+Thus a useful provisional account can earn bounded partial credit, and further
+warranted cases can add credit without a required count or order. Its reversal
+component is zero when the cited cases have established no reversal. The
+account's epistemic quality remains a separate credit coordinate. Raw
+theory-fit ratings stay visible for audit and cannot manufacture progress
+absent in their case lineage.
+
 `C` is zero when the target is outside the justified domain, no repair is
 tested, a repair works or remains unresolved, the target lacks an independent
 citation, or the fixed-category alternative reconciles the findings or remains

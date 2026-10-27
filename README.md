@@ -117,6 +117,10 @@ failure credit. Each inference step names its premises, so a weak required step
 limits its conclusion. Case credit includes bounded credit for distinct
 supported theories and a larger, evidence-bottlenecked failure bonus when
 repairs lose reusable predictive or explanatory value.
+Collection-account credit derives from the progress of its cited reviewed
+cases: an account can summarize partial progress, but it cannot earn reversal
+credit when those cases have no reversal witness. Reviewer prose ratings remain
+visible without becoming independent evidence of progress.
 The research process chooses what to investigate next; there is no required
 number or order of steps. Full arguments remain in durable state, while
 cross-case reasoning receives compact dependency paths. See

@@ -89,8 +89,8 @@ An SCM component may expose a failed translation without defining the only
 real entities or supplying a complete account of collective phenomena.'''
 ROOT = 'collection'
 COLUMNS = (*QUALITY_RUBRIC,'argument_progress')
-THEORY_COLUMNS = (*QUALITY_RUBRIC,*THEORY_RUBRIC)
-CREDIT_VERSION = 'question-discovery-v12.8'
+THEORY_COLUMNS = (*QUALITY_RUBRIC,'theory_progress')
+CREDIT_VERSION = 'question-discovery-v12.9'
 WINDOW = 4
 STOP_EPSILON = 0.001
 ROOT_STOP_YIELD = 0.0
@@ -121,8 +121,29 @@ def material_vector(material):
 
 
 def theory_vector(material):
-    values={**material['epistemic_quality'],**material['theory_fit']}
-    return tuple(values[name]['score'] for name in THEORY_COLUMNS)
+    return tuple(material['epistemic_quality'][name]['score'] for name in QUALITY_RUBRIC)+(material['theory_progress']['score'],)
+
+
+def derive_theory_progress(theory_fit, cited_case_progress):
+    """Limit synthesis credit to progress demonstrated by its cited cases."""
+    interpretation=min(theory_fit[name]['score'] for name in (
+        'cross_case_grounding','category_construction','pragmatic_research_use'))
+    nontransport=theory_fit['causal_nontransportability']['score']
+    def pooled(name):
+        return 1.0-math.exp(-math.fsum(
+            progress[name] for progress in cited_case_progress.values()))
+    generalization=min(interpretation,pooled('generalization_strength'))
+    support=min(interpretation,pooled('support_breadth'))
+    challenge=min(interpretation,nontransport,pooled('challenge_strength'))
+    score=0.05*generalization+0.20*support+0.75*challenge
+    cited_ceiling=math.fsum(progress['score'] for progress in cited_case_progress.values())
+    if score>cited_ceiling+1e-9:
+        raise ValueError('Theory progress cannot exceed its cited case progress')
+    return {'score':score,'generalization_strength':generalization,
+            'support_breadth':support,'challenge_strength':challenge,
+            'source_case_ids':list(cited_case_progress),
+            'cited_case_progress_ceiling':cited_ceiling,
+            'cited_case_count':len(cited_case_progress)}
 
 
 def string(value, name):
@@ -401,7 +422,7 @@ class GoalState:
                 'seconds':time.monotonic()-started}
 
     def as_record(self):
-        return {'schema_version':18,'credit_version':CREDIT_VERSION,
+        return {'schema_version':19,'credit_version':CREDIT_VERSION,
             'evaluator_policy':self.evaluator_policy,'question':self.run.question,
             'target':self.run.target,'cases':self.data,'facts':self.facts,'events':self.events,
             'attainment':self.archives,'collection_stats':self.collection_stats,
@@ -412,7 +433,7 @@ class GoalState:
                              'cycle_outcomes':self.run.cycle_outcomes}}
 
     def restore(self,record):
-        if (record.get('schema_version')!=18 or record.get('credit_version')!=CREDIT_VERSION
+        if (record.get('schema_version')!=19 or record.get('credit_version')!=CREDIT_VERSION
                 or record.get('evaluator_policy')!=self.evaluator_policy
                 or record.get('question')!=self.run.question or record.get('target')!=self.run.target):
             raise ValueError('State is incompatible with this discovery task and evaluator policy')
@@ -514,6 +535,10 @@ class GoalState:
                 for case_id,material_id in case_refs.items():
                     if case_id not in data or not data[case_id]['current'] or data[case_id]['current']['material_id']!=material_id:
                         raise ValueError('Theory case-material lineage must name the current cited account')
+                expected_progress=derive_theory_progress(review['theory_fit'],{
+                    case_id:data[case_id]['current']['argument_progress'] for case_id in case_refs})
+                if review.get('theory_progress')!=expected_progress:
+                    raise ValueError('Theory credit must match cited case progress')
                 theory['review_attempts'].append(event)
                 prior=theory['current']
                 if event['previous_material_id']!=(prior['material_id'] if prior else None):
@@ -1469,14 +1494,18 @@ class Run:
             raise ValueError('Unknown cross-case material identity')
         identity=match if match!='new' else 'answer:'+digest({
             'theory':answer,'rubric':CREDIT_VERSION})[:24]
+        case_material_refs={case_id:self.state.data[case_id]['current']['material_id']
+                            for case_id in answer['case_refs']}
         review={'material_id':identity,'answer':answer,
             'theory_fit':measured['theory_fit'],
             'epistemic_quality':measured['epistemic_quality'],
+            'theory_progress':derive_theory_progress(measured['theory_fit'],{
+                case_id:self.state.data[case_id]['current']['argument_progress']
+                for case_id in case_material_refs}),
             'identity_rationale':string(measured['identity_rationale'],'identity rationale')}
         return {'kind':'theory_review_attempt','source':'cross-case reasoning',
             'version':digest(selected),'theory_review':review,
-            'case_material_refs':{case_id:self.state.data[case_id]['current']['material_id']
-                                  for case_id in answer['case_refs']},
+            'case_material_refs':case_material_refs,
             'previous_material_id':current['material_id'] if current else None,
             'previous_measurements':prior,
             'revision_summary':string(measured['revision_summary'],'revision summary')}
@@ -1600,7 +1629,7 @@ class Run:
             'case_identity':'one proposed generalizable causal inference and its changing support and challenge graph per inquiry; separately assign a conceptual translation theme',
             'candidate_origin':'exact retrieved source spans plus explicitly provisional inference',
             'paired_inference_record':'each review records a warranted rule and domain, distinct theories it supports through explicit additions and derivations, an independently warranted target theory, a transported prediction, and concrete repair tests',
-            'credit_formula':'one raw dominated union hypervolume over three epistemic coordinates and derived argument_progress per coherent material, summed across conceptual themes plus one cross-case account archive; argument_progress = 0.05 warranted rule + 0.20 diminishing distinct support breadth + 0.75 bottlenecked challenge; the challenge requires a warranted in-domain target and tested repairs that lose reusable predictive or explanatory use',
+            'credit_formula':'case archives use three epistemic coordinates and derived argument_progress; the collection account archive uses three epistemic coordinates and derived theory_progress, bounded by a diminishing combination of cited case progress. Both progress scores use 0.05 warranted rule + 0.20 distinct support breadth + 0.75 bottlenecked challenge; theory interpretation and nontransport ratings may lower these components but cannot create reversal credit absent a cited case challenge',
             'learning_feedback':'each positive method gain is allocated once across distinct first evidence-origin cycles for newly used citations and the current reasoning cycle; visit-order forecasts are recomputed after delayed shares; this allocation does not add method credit',
             'root_attention':{'rule':'smoothed expected attributed gain per action visit, recomputed after delayed feedback, plus exploration*sqrt(log(cycles+2)/(visits+1))',
                               'exploration':UCB_EXPLORATION,'initial_expected_yield':YIELD_PRIOR,
@@ -1782,7 +1811,9 @@ class Run:
                 account['explanation'],'',
                 'Next frame gap: '+account['next_frame_gap'],'',
                 'Next evidence need: '+account['next_evidence_need'],'',
-                'Avoid repeating: '+account['avoid_pattern'],''])
+                'Avoid repeating: '+account['avoid_pattern'],'',
+                f"Derived theory progress: {theory['theory_progress']['score']:.3f}",
+                'Progress grounded in cases: '+', '.join(theory['theory_progress']['source_case_ids']),''])
             for title,measurements in (('Epistemic quality',theory['epistemic_quality']),
                                        ('Theory fit',theory['theory_fit'])):
                 lines.extend(['### '+title,''])

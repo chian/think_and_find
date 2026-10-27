@@ -13,7 +13,8 @@ from episodic_workflow.causal_argument import (
     argument_brief, argument_contract, argument_progress, argument_refs, normalize_argument,
 )
 from episodic_workflow.reversal_task import (
-    COLUMNS, QUALITY_RUBRIC, RUBRIC, Run, material_vector,
+    COLUMNS, QUALITY_RUBRIC, RUBRIC, THEORY_COLUMNS, ROOT, GoalState, Run,
+    derive_theory_progress, material_vector, theory_vector,
 )
 
 
@@ -329,6 +330,61 @@ class CausalArgumentTests(unittest.TestCase):
                     "candidate_fit": fit(), "argument_progress": {"score": 0.3}}
         self.assertEqual(COLUMNS[-1], "argument_progress")
         self.assertEqual(material_vector(material), (1.0, 1.0, 1.0, 0.3))
+
+    def test_theory_credit_tracks_cited_case_progress(self):
+        theory_fit = {name: {"score": 0.9} for name in (
+            "cross_case_grounding", "category_construction",
+            "causal_nontransportability", "pragmatic_research_use")}
+        case = progress(example_argument())
+        open_case = progress(example_argument(),
+            fit_values=fit(target_domain_warrant=0))
+        provisional = derive_theory_progress(theory_fit, {"case_open": open_case})
+        established = derive_theory_progress(theory_fit, {"case_witness": case})
+        self.assertEqual(provisional["challenge_strength"], 0)
+        self.assertGreater(provisional["score"], 0)
+        self.assertLessEqual(provisional["score"], open_case["score"])
+        self.assertGreater(established["challenge_strength"], 0)
+        self.assertGreater(established["score"], provisional["score"])
+        self.assertLessEqual(established["score"], case["score"])
+        combined = derive_theory_progress(theory_fit, {
+            "case_open": open_case, "case_second": open_case})
+        self.assertGreater(combined["score"], provisional["score"])
+        self.assertEqual(combined["challenge_strength"], 0)
+        self.assertLessEqual(combined["score"], 2 * open_case["score"])
+        self.assertEqual(derive_theory_progress(theory_fit, {})["score"], 0)
+        material = {"epistemic_quality": {name: {"score": 1.0}
+                                            for name in QUALITY_RUBRIC},
+                    "theory_fit": theory_fit, "theory_progress": provisional}
+        self.assertEqual(THEORY_COLUMNS[-1], "theory_progress")
+        self.assertEqual(theory_vector(material)[-1], provisional["score"])
+
+    def test_theory_review_rejects_credit_exceeding_cited_case(self):
+        case_progress = progress(example_argument(),
+            fit_values=fit(target_domain_warrant=0))
+        case_id = "case_12345678901234567890"
+        material_id = "answer:case"
+        state = GoalState(SimpleNamespace())
+        state.data[case_id] = {"theme_id": "theme_test",
+            "materials": {material_id: {}},
+            "current": {"material_id": material_id,
+                        "argument_progress": case_progress}}
+        theory_fit = {name: {"score": 0.9} for name in (
+            "cross_case_grounding", "category_construction",
+            "causal_nontransportability", "pragmatic_research_use")}
+        credited = derive_theory_progress(theory_fit, {case_id: case_progress})
+        review = {"material_id": "answer:theory",
+            "answer": {"case_refs": [case_id]}, "theory_fit": theory_fit,
+            "epistemic_quality": {name: {"score": 0.9}
+                                   for name in QUALITY_RUBRIC},
+            "theory_progress": credited}
+        event = {"kind": "theory_review_attempt", "theory_review": review,
+                 "case_material_refs": {case_id: material_id},
+                 "previous_material_id": None}
+        proposal = SimpleNamespace(payload={"key": ROOT, "event": event})
+        self.assertGreater(state.preview(proposal, None).controller_input.value["score"], 0)
+        review["theory_progress"] = {**credited, "challenge_strength": 0.5}
+        with self.assertRaisesRegex(ValueError, "must match cited case progress"):
+            state.preview(proposal, None)
 
     def test_review_wires_support_and_repair_warrants_into_credit(self):
         def measured(score=0.9):
