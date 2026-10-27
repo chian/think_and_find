@@ -38,11 +38,13 @@ def _answer(value):
                            'next_search_need')) if value else None
 
 
-def _theory_answer(value):
-    return _fields(value, ('conclusion', 'cross_case_mapping', 'explanation',
-                           'case_refs', 'evidence_refs', 'uncertainties',
-                           'next_frame_gap', 'next_evidence_need',
-                           'avoid_pattern')) if value else None
+def _theory_answer(value, *, compact=False):
+    fields = (('conclusion', 'cross_case_mapping', 'case_refs', 'evidence_refs',
+               'next_frame_gap', 'next_evidence_need', 'avoid_pattern') if compact else
+              ('conclusion', 'cross_case_mapping', 'explanation', 'case_refs',
+               'evidence_refs', 'uncertainties', 'next_frame_gap',
+               'next_evidence_need', 'avoid_pattern'))
+    return _fields(value, fields) if value else None
 
 
 def _claim(value):
@@ -110,7 +112,8 @@ def _select(request):
                 **context, 'cross_case_feedback':cross_case,
                 'recent_queries': [query for query in
                     request.get('previous_queries', [])[-4:] if query not in measured_queries],
-                'measured_search_feedback': feedback}
+                'measured_search_feedback': feedback[-12:],
+                'unshown_search_feedback_count':max(0,len(feedback)-12)}
     if op == 'choose_source':
         return {'information_need': request['information_need'],
                 'candidate_pages': [{**_fields(item, ('option_id', 'provider_rank',
@@ -141,6 +144,7 @@ def _select(request):
                 'current_cross_case_decision_feedback':(_fields(request['cross_case_account'],
                     ('next_frame_gap','next_evidence_need','avoid_pattern'))
                     if request.get('cross_case_account') else None),
+                'unshown_inquiry_count':request.get('unshown_inquiry_count',0),
                 'known_inquiries': [_fields(item, ('key', 'title',
                     'frame_one_question','frame_two_question',
                     'causal_structure', 'generalization_defect','inference_pair'))
@@ -148,6 +152,7 @@ def _select(request):
     if op == 'resolve_candidate_identities':
         return {'known_biological_inquiries': [_case(item) for item in
                                                request['known_conceptual_inquiries']],
+                'unshown_inquiry_count': request.get('unshown_inquiry_count',0),
                 'candidate_occurrences': [_fields(item, ('label', 'title', 'topic',
                     'causal_structure', 'generalization_defect',
                     'frame_one_question', 'frame_one_claim',
@@ -169,13 +174,13 @@ def _select(request):
     if op == 'develop_theory':
         return {'source_claims': [_claim(item) for item in request['source_claims']],
                 'reviewed_cases': [_case(item) for item in request['reviewed_cases']],
-                'current_account': _theory_answer(request.get('current_answer')),
+                'current_account': _theory_answer(request.get('current_answer'),compact=True),
                 'unshown_fact_count': request['unshown_fact_count']}
     if op == 'measure_theory_quality':
         return {'source_claims': [_claim(item) for item in request['source_claims']],
                 'reviewed_cases': [_case(item) for item in request['reviewed_cases']],
                 'proposed_account': _theory_answer(request['answer']),
-                'previous_account': _theory_answer(request.get('previous_answer')),
+                'previous_account': _theory_answer(request.get('previous_answer'),compact=True),
                 'known_materials': {key: _theory_answer(value) for key, value in
                                     request['known_materials'].items()}}
     raise ValueError(f'No instruction template for model operation {op}')

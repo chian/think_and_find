@@ -18,6 +18,7 @@ that transition.
 - [Episode ownership](docs/RESEARCH_EPISODES.md)
 - [Reasoning and judgment design](docs/REASONING.md)
 - [Argument progress and Episode communication plan](docs/ARGUMENT_PROGRESS_PLAN.md)
+- [Exploration credit audit](docs/EXPLORATION_AUDIT.md)
 - [Credit repair plan and live checks](docs/ITERATIVE_CREDIT_PLAN.md)
 - [Question-driven discovery and current verification](docs/DISCOVERY_PLAN.md)
 - [Search and whole-document reading](docs/SEARCH.md)
@@ -116,10 +117,12 @@ number or order of steps. Full arguments remain in durable state, while
 cross-case reasoning receives compact dependency paths. See
 [the argument design](docs/ARGUMENT_PROGRESS_PLAN.md).
 
-Model requests now have explicit size bounds. Long-running identity catalogs
-and case histories still need addressable selection before they can grow
-without hitting those bounds. The current positive-prior root stop rule also
-needs repair for finite automatic completion.
+Model requests now have explicit size bounds. Identity and synthesis calls
+select relevant whole inquiry records under separate budgets, and theory
+measurement receives a compact prior account. Full case histories and theory
+arguments still need more general addressable retrieval as they grow. The
+current positive-prior root stop rule also needs repair for finite automatic
+completion.
 The calculation kernels and their references remain available as optional tools
 for the eventual generic workflow.
 

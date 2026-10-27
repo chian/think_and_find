@@ -9,6 +9,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import re
 import sys
 import time
 
@@ -23,6 +24,7 @@ from .task_executors.outbreak_search.queries import source_locator, source_text
 from .credit_assignment.attainment import AttainmentArchive, hypervolume
 from .causal_argument import (argument_brief, argument_contract, argument_progress, argument_refs,
                               normalize_argument, step_ids)
+from .reversal_prompts import MAX_ITERATION_CHARS
 
 
 RUBRIC = {
@@ -69,7 +71,7 @@ real entities or supplying a complete account of collective phenomena.'''
 ROOT = 'collection'
 COLUMNS = (*QUALITY_RUBRIC,'argument_progress')
 THEORY_COLUMNS = (*QUALITY_RUBRIC,*THEORY_RUBRIC)
-CREDIT_VERSION = 'question-discovery-v11.5'
+CREDIT_VERSION = 'question-discovery-v11.6'
 WINDOW = 4
 STOP_EPSILON = 0.001
 ROOT_STOP_YIELD = 0.0
@@ -79,7 +81,9 @@ YIELD_UPDATE = 0.25
 WINDOW_CHARS = 12000
 SEARCH_LIMIT = 3
 SYNTHESIS_CONTEXT_CHARS = 24000
-THEORY_CONTEXT_CHARS = 12000
+THEORY_CONTEXT_CHARS = 8000
+IDENTITY_CATALOG_CHARS = 12000
+SYNTHESIS_CATALOG_CHARS = 10000
 SIDES = ('frame_one', 'frame_two', 'mapping')
 
 
@@ -106,6 +110,34 @@ def string(value, name):
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f'{name} requires nonempty text')
     return value
+
+
+def select_identity_catalog(catalog, candidates, budget):
+    """Select whole, relevant identity anchors within an Episode view budget."""
+    def words(value):
+        return set(re.findall(r'[a-z0-9]{3,}', value.lower()))
+
+    query=' '.join(str(candidate.get(field,'')) for candidate in candidates for field in
+                   ('title','topic','causal_structure','generalization_defect',
+                    'frame_one_question','frame_two_question'))
+    query_words=words(query)
+    direct={candidate.get('same_case_as') for candidate in candidates}
+    def score(row):
+        title_words=words(row['title']+' '+row['topic'])
+        full_words=words(' '.join(str(row[field]) for field in
+            ('causal_structure','generalization_defect','frame_one_question',
+             'frame_two_question')))
+        return 3*len(query_words & title_words)+len(query_words & full_words)
+
+    ordered=sorted(enumerate(catalog),key=lambda item:(
+        item[1]['key'] not in direct,-score(item[1]),item[0]))
+    selected=[]
+    for _,row in ordered:
+        if len(json.dumps([*selected,row],ensure_ascii=False))<=budget:
+            selected.append(row)
+        elif row['key'] in direct:
+            raise ValueError('A proposed known identity does not fit the bounded identity view')
+    return selected,[row['key'] for row in catalog if row not in selected]
 
 
 def schema(properties, required=None):
@@ -296,24 +328,18 @@ class GoalState:
         return result
 
     def identity_catalog(self):
-        """Keep prior alias occurrences visible without copying grades or answers."""
-        fields=('title','causal_structure','generalization_defect',
-                'frame_one_question','frame_one_claim','frame_two_question','frame_two_claim',
-                'identity_rationale')
+        """Compact identity anchors; full occurrences remain addressable in state."""
         pair_fields=('frame_one_causal_inference','frame_two_causal_inference',
                      'proposed_translation','causal_tension')
-        def occurrence_record(item):
-            return {**{name:item[name] for name in fields},
-                    'inference_pair':{name:item['inference_pair'][name]
-                                      for name in pair_fields}}
-        return [{'key':key,'theme_id':row['theme_id'],'topic':row['topic'],
+        return [{'key':key,'theme_id':row['theme_id'],'title':row['title'],
+                 'topic':row['topic'],
                  'causal_structure':row['causal_structure'],
                  'generalization_defect':row['generalization_defect'],
                  'frame_one_question':row['frame_one_question'],
                  'frame_two_question':row['frame_two_question'],
-                 'inference_pair':row['inference_pair'],
-                 'occurrences':list({digest(occurrence_record(o)):
-                     occurrence_record(o) for o in row['occurrences']}.values())}
+                 'inference_pair':{name:row['inference_pair'][name]
+                                   for name in pair_fields},
+                 'occurrence_count':len(row['occurrences'])}
                 for key,row in self.data.items()]
 
     def snapshot(self,keys=None,data=None,archives=None,theory_archive=None):
@@ -1119,14 +1145,21 @@ class Run:
         Semantic equivalence requires a model; no score or eligibility decision
         enters this operation. Every source-linked occurrence remains in state.
         """
+        catalog=self.state.identity_catalog()
+        candidate_chars=len(json.dumps(candidates,ensure_ascii=False))
+        budget=min(IDENTITY_CATALOG_CHARS,
+                   max(0,MAX_ITERATION_CHARS-candidate_chars-6000))
+        selected,omitted=select_identity_catalog(catalog,candidates,budget)
+        visible_ids=[row['key'] for row in selected]
         contracts={}
         for candidate in candidates:
             contracts[candidate['label']]=schema({
-                'same_case_as':{'type':'string','enum':['new',*self.state.data,*contracts]},
-                'same_theme_as':{'type':'string','enum':['new',*self.state.data,*contracts]},
+                'same_case_as':{'type':'string','enum':['new',*visible_ids,*contracts]},
+                'same_theme_as':{'type':'string','enum':['new',*visible_ids,*contracts]},
                 'identity_rationale':TEXT})
         response=self.ask('resolve_candidate_identities',ROOT,
-            known_conceptual_inquiries=self.state.identity_catalog(),
+            known_conceptual_inquiries=selected,
+            unshown_inquiry_count=len(omitted),
             candidate_occurrences=candidates,
             response_contract=schema({'identities':schema(contracts)}))
         resolved=[];aliases={};themes={}
@@ -1161,6 +1194,7 @@ class Run:
                 'identity_rationale':string(item['identity_rationale'],'identity rationale')})
         self.record({'event':'candidate_identities_resolved',
             'known_inquiry_count':len(self.state.data),
+            'shown_inquiry_ids':visible_ids,'omitted_inquiry_ids':omitted,
             'resolutions':[{'label':c['label'],'case_id':c['case_id'],
                 'theme_id':c['theme_id'],'same_case_as':c['same_case_as'],
                 'same_theme_as':c['same_theme_as'],'identity_rationale':c['identity_rationale'],
@@ -1191,10 +1225,17 @@ class Run:
             length=len(json.dumps(facts[key],ensure_ascii=False))
             if size+length<=SYNTHESIS_CONTEXT_CHARS:
                 selected[key]=facts[key];size+=length
+        catalog=self.state.identity_catalog()
+        inquiry_view,omitted_inquiries=select_identity_catalog(catalog,[{
+            'title':query,'topic':query,'causal_structure':query,
+            'generalization_defect':query,
+            'frame_one_question':query,'frame_two_question':query,
+            'same_case_as':focus if focus!=ROOT else 'new'}],SYNTHESIS_CATALOG_CHARS)
         refs={'type':'string','enum':list(selected)}
         response=self.ask('synthesize_discovery',ROOT,source_claims=list(selected.values()),
             new_fact_ids=[key for key in fresh if key in selected],
-            unshown_fact_count=len(facts)-len(selected),known_inquiries=self.state.catalog(),
+            unshown_fact_count=len(facts)-len(selected),known_inquiries=inquiry_view,
+            unshown_inquiry_count=len(omitted_inquiries),
             cross_case_account=(self.state.theory['current']['answer']
                                 if self.state.theory['current'] else None),
             response_contract=schema({'candidates':{'type':'array','items':candidate_contract('evidence_refs',refs)},
@@ -1203,6 +1244,8 @@ class Run:
                     'discriminating_evidence':TEXT,'query_vocabulary':{'type':'array','items':TEXT}})}}))
         candidates,errors=self.normalize_candidates(response['candidates'],{key:key for key in selected},'evidence_refs')
         self.record({'event':'discovery_reasoning_completed','shown_fact_ids':list(selected),
+            'shown_inquiry_ids':[row['key'] for row in inquiry_view],
+            'omitted_inquiry_ids':omitted_inquiries,
             'source_versions':sorted({f['source_version'] for f in selected.values()}),
             'context_characters':size,'unshown_fact_count':len(facts)-len(selected),
             'candidate_ids':[c['case_id'] for c in candidates],'contract_errors':errors,

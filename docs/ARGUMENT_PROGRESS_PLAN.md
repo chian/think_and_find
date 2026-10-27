@@ -126,11 +126,14 @@ ratings, computes the formula above, and uses its result as one case-credit
 coordinate. The model judges biological warrant; the validator checks
 structure and provenance. Cross-case theory receives at most two selected
 case arguments as compact conclusion dependency paths, with source claims
-selected under a separate 12,000-character budget. Prompt rendering rejects
-messages above 48,000 characters. The return schema and full case argument
-are not yet bounded as an addressable delta protocol, and growing identity
-catalogs may eventually exceed the request bound. Those are the next
-communication changes; the numbered build steps below remain the wider plan.
+selected under a separate 8,000-character budget. Identity and synthesis
+calls select whole relevant inquiry records under 12,000 and 10,000 character
+catalog budgets; omitted IDs are logged. Prompt rendering rejects messages
+above 48,000 characters. The return schema and full case argument are not yet
+bounded as an addressable delta protocol. Omitted identity anchors may hide
+semantic duplicates, so the selected views need a later recall audit. Those
+are the next communication changes; the numbered build steps below remain
+the wider plan.
 
 The 2026-10-26 v11.5 Argo run completed two discovery cycles before an
 operator stop. It acquired 16 source claims and reviewed two cases; both
@@ -141,6 +144,14 @@ was 43,766 characters under the 48,000-character Episode limit. These are
 workflow and credit-behavior checks, not positive biological validation. The
 root's positive-prior exact-zero stop remains incapable of finite automatic
 closure, so the run produced no final collection report.
+
+An attempted day-long v11.5 run ended after four cycles and about 25 minutes
+because growing identity and theory messages repeatedly exceeded the explicit
+bound. It acquired 102 source claims and reviewed three cases before ending;
+the root's numerical stop was not reached. v11.6 adds the bounded catalog
+views and compact prior theory account. A fresh day-long run is in progress;
+the early failure is retained as an operational diagnostic, not evidence that
+exploration credit is well calibrated.
 
 Credit only a material change to the argument, once per semantic identity.
 Repeated ratings, more source quotations for the same step, and cosmetic
