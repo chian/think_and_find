@@ -19,6 +19,7 @@ that transition.
 - [Reasoning and judgment design](docs/REASONING.md)
 - [Argument progress and Episode communication plan](docs/ARGUMENT_PROGRESS_PLAN.md)
 - [Exploration credit audit](docs/EXPLORATION_AUDIT.md)
+- [Cycle-by-cycle behavior trace](docs/BEHAVIOR_TRACE_2026-10-27.md)
 - [Credit repair plan and live checks](docs/ITERATIVE_CREDIT_PLAN.md)
 - [Question-driven discovery and current verification](docs/DISCOVERY_PLAN.md)
 - [Search and whole-document reading](docs/SEARCH.md)

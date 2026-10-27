@@ -153,6 +153,14 @@ views and compact prior theory account. A fresh day-long run is in progress;
 the early failure is retained as an operational diagnostic, not evidence that
 exploration credit is well calibrated.
 
+The replacement v11.6 run also ended after four cycles. It crossed three
+biological systems and assigned some delayed learning feedback, but did not
+establish a completed reversal. Its fourth search result contained a
+120,623-character description that overflowed source selection. v11.7 now
+shows a bounded description preview and preserves the full search result in
+the event log. The [behavior trace](BEHAVIOR_TRACE_2026-10-27.md) examines
+how the formalism affected those searches and credits.
+
 Credit only a material change to the argument, once per semantic identity.
 Repeated ratings, more source quotations for the same step, and cosmetic
 rewrites add no attainment. Partial, warranted constructions can receive

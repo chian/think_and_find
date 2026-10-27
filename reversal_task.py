@@ -71,7 +71,7 @@ real entities or supplying a complete account of collective phenomena.'''
 ROOT = 'collection'
 COLUMNS = (*QUALITY_RUBRIC,'argument_progress')
 THEORY_COLUMNS = (*QUALITY_RUBRIC,*THEORY_RUBRIC)
-CREDIT_VERSION = 'question-discovery-v11.6'
+CREDIT_VERSION = 'question-discovery-v11.7'
 WINDOW = 4
 STOP_EPSILON = 0.001
 ROOT_STOP_YIELD = 0.0

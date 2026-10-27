@@ -15,6 +15,7 @@ import json
 MAX_ITERATION_CHARS = 48000
 MAX_PROMPT_CHARS = 64000
 MAX_CONTRACT_CHARS = 32000
+SEARCH_DESCRIPTION_CHARS = 1200
 
 
 @dataclass(frozen=True)
@@ -117,7 +118,9 @@ def _select(request):
     if op == 'choose_source':
         return {'information_need': request['information_need'],
                 'candidate_pages': [{**_fields(item, ('option_id', 'provider_rank',
-                    'title', 'url', 'description')),
+                    'title', 'url')),
+                    'description':str(item.get('description',''))[:SEARCH_DESCRIPTION_CHARS],
+                    'description_characters':len(str(item.get('description',''))),
                     'relevance_probability': (item.get('jev_assessment') or {}).get('relevance_probability')}
                     for item in request['candidates']],
                 'previous_page_update': _acquisition_update(request.get('previous_page_update'))}

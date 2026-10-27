@@ -6,7 +6,7 @@ import json
 import unittest
 
 from episodic_workflow.reversal_task import select_identity_catalog
-from episodic_workflow.reversal_prompts import _select
+from episodic_workflow.reversal_prompts import _select, render_reversal_request
 
 
 def anchor(key, topic):
@@ -51,6 +51,19 @@ class BoundedViewTests(unittest.TestCase):
         self.assertEqual(selected["proposed_account"]["explanation"], "x" * 10000)
         self.assertNotIn("explanation", selected["previous_account"])
         self.assertEqual(selected["previous_account"]["cross_case_mapping"], "Exact map")
+
+    def test_oversized_search_description_is_a_bounded_preview(self):
+        request = {"operation": "choose_source", "research_question": "Causal question",
+                   "information_need": "Find the discriminating intervention",
+                   "candidates": [{"option_id": "page:1", "provider_rank": 1,
+                                   "title": "Source", "url": "https://example.org/source",
+                                   "description": "x" * 120623}],
+                   "response_contract": {"type": "object", "properties": {}}}
+        selected = _select(request)
+        page = selected["candidate_pages"][0]
+        self.assertEqual(len(page["description"]), 1200)
+        self.assertEqual(page["description_characters"], 120623)
+        self.assertLess(len(render_reversal_request(request).iteration_message), 48000)
 
 
 if __name__ == "__main__":
