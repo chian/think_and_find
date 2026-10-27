@@ -48,6 +48,12 @@ derivation earns credit only when the inference, addition, prediction, and
 source support are explicit. A new `H_i` adds credit only for a genuinely new
 consequence, not a second citation or paraphrase.
 
+The reviewer also records the basis of the supporting evidence. A result
+reported in the supplied primary source can receive the full warranted score;
+a secondary review summary is capped at 0.5; a study title or reference cited
+inside a review is only a search lead and earns no reuse credit. The source
+kind describes the document actually read, not the paper named by its title.
+
 Give a substantially larger bounded bonus for a challenge only when all of
 these are strong: the local warrant and domain of `G`; prior support breadth;
 independent warrant for `H_star`; a specific transported prediction and
@@ -79,10 +85,11 @@ The implemented task coordinate is
 
 ```text
 g = min(source_derivation_strength, generalization_warrant)
-s_i = min(g, support_warrant_i), with zero unless both the argument and the
-      independent reviewer classify the support as an application; also zero
-      for speculative, provisional, unsupported, uncited, or repeated theories
-      or consequences
+s_i = min(g, support_warrant_i, evidence_basis_cap_i), with zero unless both
+      the argument and reviewer classify the support as an application; also
+      zero for speculative, provisional, unsupported, uncited, or repeated
+      theories or consequences. evidence_basis_cap_i is 1 for a direct result,
+      0.5 for a secondary summary, and 0 for a cited title or missing support
 B = 1 - exp(-sum_i s_i)
 C = min(g, B, target_theory_strength, target_domain_warrant,
         repair_audit_strength, transport_failure_strength)

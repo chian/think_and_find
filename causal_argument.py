@@ -440,7 +440,11 @@ def argument_progress(argument, fit, step_warrants, support_warrants, repair_war
                     if item["status"] == "warranted"
                     and item["relation_to_rule"] == "application"
                     and support_warrants[item["id"]].get("reviewed_relation") == "application"
+                    and support_warrants[item["id"]].get("evidence_basis") in (
+                        "direct_result", "secondary_summary")
                     and item["evidence_refs"] else 0.0)
+        if support_warrants[item["id"]].get("evidence_basis") == "secondary_summary":
+            strength = min(strength, 0.5)
         candidates.append((strength, index, item["id"], key, theory_key))
     seen_consequences = set()
     seen_theories = set()

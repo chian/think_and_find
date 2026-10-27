@@ -83,7 +83,7 @@ real entities or supplying a complete account of collective phenomena.'''
 ROOT = 'collection'
 COLUMNS = (*QUALITY_RUBRIC,'argument_progress')
 THEORY_COLUMNS = (*QUALITY_RUBRIC,*THEORY_RUBRIC)
-CREDIT_VERSION = 'question-discovery-v12.6'
+CREDIT_VERSION = 'question-discovery-v12.7'
 WINDOW = 4
 STOP_EPSILON = 0.001
 ROOT_STOP_YIELD = 0.0
@@ -1507,7 +1507,9 @@ class Run:
         repair_ids=[item['id'] for item in argument['generalization']['repair_tests']]
         support_measurement_schema=schema({**measurement_schema['properties'],
             'reviewed_relation':{'type':'string','enum':[
-                'application','component','restatement','speculative']}})
+                'application','component','restatement','speculative']},
+            'evidence_basis':{'type':'string','enum':[
+                'direct_result','secondary_summary','citation_title','unsupported']}})
         support_schema=schema({identity:support_measurement_schema for identity in support_ids})
         repair_schema=schema({identity:measurement_schema for identity in repair_ids})
         previous_schema=(schema({'candidate_fit':fit_schema,'epistemic_quality':quality_schema})
@@ -1538,6 +1540,9 @@ class Run:
             if row.get('reviewed_relation') not in (
                     'application','component','restatement','speculative'):
                 raise ValueError(f'Support {identity} needs an independent relation verdict')
+            if row.get('evidence_basis') not in (
+                    'direct_result','secondary_summary','citation_title','unsupported'):
+                raise ValueError(f'Support {identity} needs an evidence-basis verdict')
         self.validate_measurements(measured.get('repair_warrants'),repair_ids,options)
         previous=measured.get('previous_measurements')
         if case['current_answer']:
