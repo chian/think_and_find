@@ -27,15 +27,14 @@ from .method_loop.archive import iter_json, write_json
 
 PRAGMATIC_CAUSAL_PLURALISM_NAME = 'pragmatic causal pluralism'
 DEFAULT_CAUSAL_REPORTING_MILESTONE = 10
-# The standing question, literal-zero stop, reporting milestone, and target
-# name remain those registered in v8 and v9. V11 adds ratings for the explicit
-# translation and fixed-category rival account while keeping the same target.
-# A version label is never a new target; compare every fingerprint change with
-# that intent.
+# V11.8 narrows the standing target: each reversal must stay within one focal
+# organism or stable interacting biological system. Different organisms may
+# still supply separate cases. The literal-zero stop and reporting milestone
+# remain unchanged. A version label alone never changes the target.
 # Prompt wording is intentionally outside this fingerprint so it can improve;
 # prompt edits still need a semantic comparison against this fixed task intent.
 _PRAGMATIC_CAUSAL_PLURALISM_INTENT_DIGEST = (
-    '6010e85b9700e0d38b08816a9797efd25d5a5c671d842baeb7d1e4815b1c69df'
+    '8e4019a21431783e0d06808458898773268a42c958f77aff0e32d52cc87264de'
 )
 
 

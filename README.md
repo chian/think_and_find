@@ -20,6 +20,7 @@ that transition.
 - [Argument progress and Episode communication plan](docs/ARGUMENT_PROGRESS_PLAN.md)
 - [Exploration credit audit](docs/EXPLORATION_AUDIT.md)
 - [Cycle-by-cycle behavior trace](docs/BEHAVIOR_TRACE_2026-10-27.md)
+- [Same-system reversal scope](docs/SAME_SYSTEM_SCOPE.md)
 - [Credit repair plan and live checks](docs/ITERATIVE_CREDIT_PLAN.md)
 - [Question-driven discovery and current verification](docs/DISCOVERY_PLAN.md)
 - [Search and whole-document reading](docs/SEARCH.md)
@@ -109,6 +110,8 @@ launcher serves both paths.
 
 Case reviews now store two explicit, source-linked causal derivations, the
 attempted inference translation, and a fixed-category rival explanation.
+The two frames must concern the same focal organism or stable interacting
+biological system; organism changes cannot earn reversal credit.
 Each inference step names its premises, so a weak required step limits the
 strength of its conclusion. Case credit includes a derived argument-progress
 coordinate: small credit for warranted local constructions and most credit

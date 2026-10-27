@@ -62,16 +62,28 @@ def argument_contract(reference_items):
         "status": {"type": "string", "enum": ["reconciles", "challenged", "unresolved"]},
         "evidence_refs": refs,
     })
+    shared_system = _object({
+        "focal_system": TEXT,
+        "organisms_frame_one": {"type": "array", "minItems": 1,
+                                "uniqueItems": True, "items": TEXT},
+        "organisms_frame_two": {"type": "array", "minItems": 1,
+                                "uniqueItems": True, "items": TEXT},
+        "overlap_reasoning": TEXT,
+        "status": {"type": "string", "enum": ["same", "different", "unresolved"]},
+        "evidence_refs": refs,
+    })
     return _object({"frame_one": frame, "frame_two": frame,
                     "translation": translation,
-                    "fixed_category_alternative": alternative})
+                    "fixed_category_alternative": alternative,
+                    "shared_system": shared_system})
 
 
 def normalize_argument(value, available_refs):
     """Check source identities and an acyclic local premise graph."""
     if not isinstance(value, dict) or set(value) != {
-            "frame_one", "frame_two", "translation", "fixed_category_alternative"}:
-        raise ValueError("A causal argument needs two frames, translation, and a fixed-category alternative")
+            "frame_one", "frame_two", "translation", "fixed_category_alternative",
+            "shared_system"}:
+        raise ValueError("A causal argument needs two frames, translation, a fixed-category alternative, and a shared system")
     refs = set(available_refs)
     result = {}
     for frame_name in ("frame_one", "frame_two"):
@@ -146,7 +158,26 @@ def normalize_argument(value, available_refs):
     if alternative["status"] not in ("reconciles", "challenged", "unresolved"):
         raise ValueError("The fixed-category alternative has an unknown status")
     _check_refs(alternative["evidence_refs"], refs, "fixed-category alternative")
-    return result | {"translation": translation, "fixed_category_alternative": alternative}
+    system = value["shared_system"]
+    if not isinstance(system, dict) or set(system) != {
+            "focal_system", "organisms_frame_one", "organisms_frame_two",
+            "overlap_reasoning", "status", "evidence_refs"}:
+        raise ValueError("The shared-system comparison has incomplete fields")
+    for field in ("focal_system", "overlap_reasoning"):
+        if not isinstance(system[field], str) or not system[field].strip():
+            raise ValueError(f"The shared system's {field} needs text")
+    for field in ("organisms_frame_one", "organisms_frame_two"):
+        names = system[field]
+        if (not isinstance(names, list) or not names
+                or any(not isinstance(name, str) or not name.strip() for name in names)
+                or len(names) != len(set(names))):
+            raise ValueError(f"The shared system's {field} needs organism names")
+    if system["status"] not in ("same", "different", "unresolved"):
+        raise ValueError("The shared system has an unknown status")
+    _check_refs(system["evidence_refs"], refs, "shared system")
+    return result | {"translation": translation,
+                     "fixed_category_alternative": alternative,
+                     "shared_system": system}
 
 
 def _check_refs(values, available, name):
@@ -163,6 +194,7 @@ def argument_refs(argument):
             refs.extend(step["warrant_refs"])
     refs.extend(argument["translation"]["evidence_refs"])
     refs.extend(argument["fixed_category_alternative"]["evidence_refs"])
+    refs.extend(argument["shared_system"]["evidence_refs"])
     return list(dict.fromkeys(refs))
 
 
@@ -209,7 +241,20 @@ def argument_brief(argument):
     result["fixed_category_alternative"] = {
         key: argument["fixed_category_alternative"][key] for key in (
             "status", "reconciliation")}
+    result["shared_system"] = {
+        key: argument["shared_system"][key] for key in (
+            "focal_system", "organisms_frame_one", "organisms_frame_two",
+            "status", "evidence_refs")}
     return result
+
+
+def same_system(argument):
+    """Only an explicitly evidenced, stable organism set can support a reversal."""
+    system = argument["shared_system"]
+    def names(field):
+        return {" ".join(name.casefold().split()) for name in system[field]}
+    return (system["status"] == "same" and bool(system["evidence_refs"])
+            and names("organisms_frame_one") == names("organisms_frame_two"))
 
 
 def frame_strength(frame, ratings):
@@ -250,6 +295,10 @@ def argument_progress(argument, fit, step_warrants):
         "fixed_category_challenge", "pragmatic_pluralism"))
     if argument["fixed_category_alternative"]["status"] == "reconciles":
         witness = 0.0
-    score = 0.1 * max(first, second) + 0.1 * min(first, second) + 0.8 * min(first, second, witness)
+    system_match = same_system(argument)
+    system_strength = fit["same_system_warrant"]["score"] if system_match else 0.0
+    score = system_strength * (0.1 * max(first, second) + 0.1 * min(first, second)
+                               + 0.8 * min(first, second, witness))
     return {"score": score, "frame_one_strength": first,
-            "frame_two_strength": second, "witness_strength": witness}
+            "frame_two_strength": second, "witness_strength": witness,
+            "system_match": system_match, "system_strength": system_strength}

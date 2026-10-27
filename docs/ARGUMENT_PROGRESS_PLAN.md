@@ -28,6 +28,10 @@ without itself making the entire inference.
 
 For a proposed case, construct `F_A` and `F_B` for the same biological process
 but with distinct useful questions.
+Both frames must stay within the same focal organism or stable interacting
+biological system. A species or study-population switch is a context-variable
+comparison, not the desired reversal. Different organisms may contribute
+separate cases to the collection.
 Then state a partial, typed translation `T` between their actors, interventions,
 outcomes, and relations. Name the exact inference `p_A` that is warranted in
 `F_A`, and the bridge premise that would license carrying `p_A` through `T`.
@@ -104,6 +108,10 @@ pragmatic-use claims. Then a provisional task coordinate is
 argument_progress = 0.1 max(D_A, D_B) + 0.1 min(D_A, D_B)
                   + 0.8 min(D_A, D_B, W)
 ```
+
+The v11.8 implementation multiplies the local partial-credit terms by a
+source-grounded same-system warrant and caps the witness term by that warrant.
+Different, unmatched, or unresolved organism sets receive zero case progress.
 
 All inputs lie in `[0, 1]`. This gives bounded credit for building one or both
 local arguments, while the larger share requires the complete witness. A

@@ -28,12 +28,13 @@ from .reversal_prompts import MAX_ITERATION_CHARS
 
 
 RUBRIC = {
+    'same_system_warrant': 'Measure whether the two causal frames concern the same focal organism or stable interacting biological system, supported by the cited sources: 0 different organisms or organism composition supplies the apparent reversal, or the shared system is unsubstantiated; 0.5 a plausible same-system comparison with uncertain identity or population overlap; 1 source-grounded same focal system. A cross-organism contrast is an ordinary context comparison, not a reversal.',
     'first_frame_warrant': 'Continuously measure source support for the first causal inference in the explicit inference pair, at the grain suited to its question: 0 merely descriptive, invented, or a hypothesis refuted by later evidence; 0.5 a partly warranted causal relation; 1 a warranted causal inference among stated actors and relations. A true claim about a different outcome does not warrant the inference proposed for transport.',
     'second_frame_warrant': 'Continuously measure independent source support for the second causal inference in the explicit inference pair: 0 imagined, merely descriptive, or only the negation of a rejected first hypothesis; 0.5 partly warranted; 1 a well-supported causal inference with its own actors and relations. Independent warrant may come from the same paper or other papers; paper count is not a scientific gate.',
     'translation_specificity': 'Measure whether the proposed translation names the exact source inference, maps its actors, intervention, outcome, and relation, and states a plausible bridge premise: 0 no particular inference or map; 0.5 a partial map with a consequential gap; 1 a specific, biologically intelligible attempted transport. A merely imaginable but unlicensed prediction is weak.',
-    'inference_reversal': 'Continuously measure whether the explicit proposed translation carries an inference actually licensed by frame one into a consequentially incompatible inference warranted by frame two: 0 the transported prediction was never licensed, only a prior hypothesis was falsified by new evidence, or the two claims concern unrelated outcomes; 0.5 a plausible linked reversal with an important warrant or mapping gap; 1 a clear linked reversal while both frame-specific causal claims remain valid.',
+    'inference_reversal': 'Continuously measure whether the explicit proposed translation carries an inference actually licensed by frame one into a consequentially incompatible inference warranted by frame two in the same focal biological system: 0 the transported prediction was never licensed, an organism switch explains the contrast, only a prior hypothesis was falsified by new evidence, or the two claims concern unrelated outcomes; 0.5 a plausible linked reversal with an important warrant or mapping gap; 1 a clear linked reversal while both frame-specific causal claims remain valid.',
     'category_relation_break': 'Continuously measure whether the linked reversal arises from how actors, categories, relations, system boundaries, or intervention meanings change across grains: 0 routine fixed-variable modifier, contrary measurement, or invalidated hypothesis; 0.5 a plausible but unresolved category or relation mapping; 1 a warranted consequential break in the explicit causal translation.',
-    'fixed_category_challenge': 'Measure the explicit rival account that keeps actor, variable, intervention, and outcome meanings fixed while adding a cofactor, context variable, or dependency: 0 that account reconciles the findings or was not examined; 0.5 a specified rival with unresolved discrimination; 1 a specified rival is defeated by a warranted change in category, relation, boundary, or intervention meaning. Do not claim no possible larger graph can describe the biology.',
+    'fixed_category_challenge': 'Measure the explicit rival account that keeps actor, variable, intervention, and outcome meanings fixed while adding a cofactor, context variable, or dependency, including organism identity: 0 that account reconciles the findings or was not examined; 0.5 a specified rival with unresolved discrimination; 1 a specified rival is defeated by a warranted change in category, relation, boundary, or intervention meaning within one focal biological system. Do not claim no possible larger graph can describe the biology.',
     'pragmatic_pluralism': 'Continuously measure why both causal inferences in the explicit pair remain useful for their own questions: 0 one is simply false or a descriptive claim was promoted into an unwarranted causal hypothesis; 0.5 both have some use but their distinct causal reach is unclear; 1 both are warranted and pragmatically appropriate despite their noninterchangeability. These anchors are continuous scores, never admission rules.',
 }
 QUALITY_RUBRIC = {
@@ -42,9 +43,9 @@ QUALITY_RUBRIC = {
     'explanatory_usefulness': 'Measure usefulness for the question of pragmatically valid causal descriptions at different grains: 0 irrelevant or misleading; 0.5 a partially informative comparison with important inference gaps; 1 a clear explanation of what each frame makes causal, why an inference does or does not translate, and what remains unresolved. More words or routine biology detail do not improve this score.',
 }
 THEORY_RUBRIC = {
-    'cross_case_grounding': 'Measure whether the account compares acquired biological systems and exact source claims that bear on perspective-dependent causation: 0 generic philosophy or unrelated effect differences; 0.5 partly grounded comparison; 1 well-supported comparison retaining consequential differences among cases.',
+    'cross_case_grounding': 'Measure whether the account compares acquired cases and exact source claims that bear on perspective-dependent causation: 0 generic philosophy, organism differences used as the two sides of one reversal, or unrelated effect differences; 0.5 partly grounded comparison; 1 well-supported comparison of within-system cases retaining consequential differences among them.',
     'category_construction': 'Measure whether the account explains how each question and grain constructs its actors, categories, interventions, and relations: 0 categories taken as fixed names; 0.5 some construction explained; 1 clear, empirically anchored comparison of category choices.',
-    'causal_nontransportability': 'Measure whether the account identifies an explicitly linked causal inference that is warranted in one frame, yields an incompatible inference in another warranted frame, and fails to translate because actors or relations change: 0 only new evidence rejecting an earlier hypothesis, an unwarranted transported prediction, or a routine modifier; 0.5 a plausible but incompletely warranted mapping failure; 1 a specific, well-supported failure without claiming metaphysical irreducibility.',
+    'causal_nontransportability': 'Measure whether the account identifies an explicitly linked causal inference that is warranted in one frame, yields an incompatible inference in another warranted frame of the same focal system, and fails to translate because actors or relations change: 0 an organism switch, new evidence rejecting an earlier hypothesis, an unwarranted transported prediction, or a routine modifier; 0.5 a plausible but incompletely warranted mapping failure; 1 a specific, well-supported within-system failure without claiming metaphysical irreducibility.',
     'pragmatic_research_use': 'Measure whether the account explains why each grain suits its biological problem and identifies concrete evidence that could revise the proposed mapping: 0 no use or test; 0.5 partial rationale or broad test; 1 consequential problem-relative rationale and discriminating research directions.',
 }
 QUESTION = '''Discover conceptually different biological cases of pragmatic causal pluralism.
@@ -59,6 +60,12 @@ two descriptions; a contrary empirical finding alone is not the phenomenon.
 A routine moderator such as temperature, an omitted blocker, a significant
 effect beside a nonsignificant one, or two unrelated outcomes is weak evidence
 of this problem while the causal categories and question remain fixed.
+For each proposed reversal, keep the focal organism or interacting biological
+system fixed across the two frames. Switching organisms, host species, strain
+composition, or study population is a context change that can be represented
+as an ordinary variable; it is not the structural reversal sought here.
+Different organisms may supply separate cases, but cannot supply opposite
+sides of one case's inference transfer.
 Do not declare one grain fundamentally wrong or infer irreducibility from an
 unexplained effect. Assess why each grain is pragmatically appropriate and where
 its explanatory reach ends. Context can matter when it reorganizes the relevant
@@ -71,7 +78,7 @@ real entities or supplying a complete account of collective phenomena.'''
 ROOT = 'collection'
 COLUMNS = (*QUALITY_RUBRIC,'argument_progress')
 THEORY_COLUMNS = (*QUALITY_RUBRIC,*THEORY_RUBRIC)
-CREDIT_VERSION = 'question-discovery-v11.7'
+CREDIT_VERSION = 'question-discovery-v11.8'
 WINDOW = 4
 STOP_EPSILON = 0.001
 ROOT_STOP_YIELD = 0.0
@@ -1350,7 +1357,12 @@ class Run:
         if not facts:
             return {'kind':'theory_unavailable','reason':'No acquired source claims'}
         fresh=[ref for ref in facts if ref not in self.cycle_initial_facts]
-        reviewed=[self.state.case(key) for key,row in self.state.data.items() if row['current']]
+        reviewed=[self.state.case(key) for key,row in self.state.data.items()
+                  if (row['current'] and row['current']['argument_progress']['system_match']
+                      and row['current']['argument_progress']['system_strength']>0)]
+        if not reviewed:
+            return {'kind':'theory_unavailable',
+                    'reason':'No reviewed argument has source-grounded same-system frames'}
         reviewed.sort(key=lambda case:(case['argument_progress']['score'],
                                         quality_utility(case['epistemic_quality'])),reverse=True)
         chosen=[];themes=set()
@@ -1542,8 +1554,8 @@ class Run:
             'evaluator_policy':self.state.evaluator_policy,
             'case_identity':'one biological process and question pair per inquiry; separately assign a conceptual translation theme across biological inquiries',
             'candidate_origin':'exact retrieved source spans plus explicitly provisional inference',
-            'paired_inference_record':'source-grounded candidates remain provisional; each review records two question-relative derivations, an explicit translation and failed bridge, and a fixed-category rival account; source reports and inferred steps are distinguished',
-            'credit_formula':'one raw dominated union hypervolume over three epistemic coordinates and derived argument_progress per coherent material, summed across conceptual themes plus one cross-case account archive; argument_progress = 0.1 max(D1,D2) + 0.1 min(D1,D2) + 0.8 min(D1,D2,W), with each derivation bounded by its weakest required step and W by translation, reversal, category break, fixed-category challenge and pragmatic use; no admission gate',
+            'paired_inference_record':'source-grounded candidates remain provisional; each review records two question-relative derivations in one focal organism or interacting system, an explicit translation and failed bridge, and a fixed-category rival account; source reports and inferred steps are distinguished',
+            'credit_formula':'one raw dominated union hypervolume over three epistemic coordinates and derived argument_progress per coherent material, summed across conceptual themes plus one cross-case account archive; argument_progress = 0.1 max(D1,D2) + 0.1 min(D1,D2) + 0.8 min(D1,D2,W), scaled by same-system warrant and zero for different or unresolved organisms; each derivation is bounded by its weakest required step and W by translation, reversal, category break, fixed-category challenge and pragmatic use',
             'learning_feedback':'each positive method gain is allocated once across distinct first evidence-origin cycles for newly used citations and the current reasoning cycle; visit-order forecasts are recomputed after delayed shares; this allocation does not add method credit',
             'root_attention':{'rule':'smoothed expected attributed gain per action visit, recomputed after delayed feedback, plus exploration*sqrt(log(cycles+2)/(visits+1))',
                               'exploration':UCB_EXPLORATION,'initial_expected_yield':YIELD_PRIOR,
@@ -1557,7 +1569,7 @@ class Run:
             'scientific_gates':False,'source_provenance_validation':True,
             'report_preference':'same-evidence epistemic utility; first canonical credit measurement persists; every material alternative is offered',
             'search_limit':SEARCH_LIMIT,'reading_window_chars':WINDOW_CHARS,
-            'post_collection_selection':'only after stopping: all seven task-fit scores >=0.70; retain every inquiry in complete report',
+            'post_collection_selection':'only after stopping: all eight task-fit scores >=0.70 and shared-system match; retain every inquiry in complete report',
             'failure_rule':'four consecutive failed structured operations or unavailable provider ends as execution failure',
             'bounds':'ten is a reporting milestone, not a credit capacity or stop; no run-wide iteration, source, time or spend cap; numerical continuation governs',
             'model_tiers':self.providers['model_tiers'],
@@ -1585,6 +1597,7 @@ class Run:
             selected=[];selected_themes=set()
             for case in ranked:
                 if (case['theme_id'] not in selected_themes and case['measurements']
+                        and case['argument_progress']['system_match']
                         and all(row['score']>=0.70 for row in case['measurements'].values())):
                     selected.append(case['key']);selected_themes.add(case['theme_id'])
             report={'run_complete':self.unavailable is None,'question':self.question,'target':self.target,
@@ -1598,7 +1611,7 @@ class Run:
                 'queries':self.queries,'cycle_outcomes':self.cycle_outcomes,
                 'output_directory':str(self.output),'provider_failure':self.unavailable,
                 'operation_attempts':self.operation_attempts,'operation_successes':self.operation_successes,
-                'post_collection_filtering':'all seven task-fit scores >=0.70 and at most one representative per conceptual theme, after Episode closure only; all accounts retained',
+                'post_collection_filtering':'all eight task-fit scores >=0.70 and shared-system match, at most one representative per conceptual theme, after Episode closure only; all accounts retained',
                 'completion':{'ended_by':record.ended_by,'units':record.units_consumed},
                 'interpretation':'Source-driven discovery of pragmatically useful causal frames with continuous provisional judgments. Numerical saturation is observed lack of improvement, not truth or literature exhaustion.'}
             (self.output/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
@@ -1665,6 +1678,13 @@ class Run:
                     'Failure mechanism: '+bridge['failure_mechanism'],'',
                     'Consequence: '+bridge['consequence'],''])
                 alternative=argument['fixed_category_alternative']
+                system=argument['shared_system']
+                lines.extend(['### Shared biological system','',
+                    'Status: '+system['status'],'',
+                    'Focal system: '+system['focal_system'],'',
+                    'Frame-one organisms: '+', '.join(system['organisms_frame_one']),'',
+                    'Frame-two organisms: '+', '.join(system['organisms_frame_two']),'',
+                    'Overlap reasoning: '+system['overlap_reasoning'],''])
                 lines.extend(['### Fixed-category alternative','',
                     'Status: '+alternative['status'],'',
                     'Shared vocabulary: '+alternative['fixed_vocabulary'],'',

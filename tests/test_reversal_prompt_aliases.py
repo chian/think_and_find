@@ -25,6 +25,12 @@ class ReversalPromptAliasTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Episode context exceeds"):
             render_reversal_request(request)
 
+    def test_search_prompt_requires_one_focal_biological_system(self):
+        request = {"operation": "form_search", "research_question": "Biological question",
+                   "acquisition_scope": "general discovery", "response_contract": {"type": "object"}}
+        rendered = render_reversal_request(request)
+        self.assertIn("same focal organism", rendered.instructions)
+
 
 if __name__ == "__main__":
     unittest.main()

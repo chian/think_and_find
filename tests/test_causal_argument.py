@@ -6,7 +6,7 @@ import copy
 import unittest
 
 from episodic_workflow.causal_argument import (
-    argument_brief, argument_progress, argument_refs, normalize_argument,
+    argument_brief, argument_contract, argument_progress, argument_refs, normalize_argument,
 )
 from episodic_workflow.reversal_task import COLUMNS, material_vector
 
@@ -46,6 +46,12 @@ def example_argument():
             "added_context_or_dependencies": "A context variable C",
             "reconciliation": "Test whether C alone explains both inferences",
             "status": "challenged", "evidence_refs": ["evidence:b"]},
+        "shared_system": {
+            "focal_system": "One experimentally matched biological system",
+            "organisms_frame_one": ["Species alpha"],
+            "organisms_frame_two": ["Species alpha"],
+            "overlap_reasoning": "Both frames concern the same focal population",
+            "status": "same", "evidence_refs": ["evidence:a", "evidence:b"]},
     }
 
 
@@ -53,7 +59,8 @@ def fit(**overrides):
     values = {name: {"score": 0.9} for name in (
         "first_frame_warrant", "second_frame_warrant", "translation_specificity",
         "inference_reversal", "category_relation_break", "fixed_category_challenge",
-        "pragmatic_pluralism")}
+        "pragmatic_pluralism", "same_system_warrant")}
+    values["same_system_warrant"]["score"] = 1.0
     for name, value in overrides.items():
         values[name]["score"] = value
     return values
@@ -90,6 +97,25 @@ class CausalArgumentTests(unittest.TestCase):
         self.assertAlmostEqual(near_miss["score"], 0.15)
         self.assertLess(near_miss["score"], complete)
 
+    def test_organism_switch_gets_no_case_credit(self):
+        argument = example_argument()
+        argument["shared_system"]["organisms_frame_two"] = ["Species beta"]
+        self.assertEqual(argument_progress(argument, fit(), ratings())["score"], 0)
+        argument["shared_system"]["organisms_frame_two"] = ["Species alpha"]
+        argument["shared_system"]["status"] = "different"
+        self.assertEqual(argument_progress(argument, fit(), ratings())["score"], 0)
+        argument["shared_system"]["status"] = "unresolved"
+        self.assertEqual(argument_progress(argument, fit(), ratings())["score"], 0)
+        argument["shared_system"]["status"] = "same"
+        argument["shared_system"]["evidence_refs"] = []
+        self.assertEqual(argument_progress(argument, fit(), ratings())["score"], 0)
+
+    def test_same_system_warrant_scales_credit(self):
+        argument = example_argument()
+        complete = argument_progress(argument, fit(), ratings())["score"]
+        uncertain = argument_progress(argument, fit(same_system_warrant=0.4), ratings())
+        self.assertAlmostEqual(uncertain["score"], 0.4 * complete)
+
     def test_open_frame_gets_only_bounded_partial_credit(self):
         argument = example_argument()
         argument["frame_two"]["conclusion_step_id"] = ""
@@ -114,6 +140,14 @@ class CausalArgumentTests(unittest.TestCase):
         argument = example_argument()
         argument["translation"]["evidence_refs"] = [["evidence:a"]]
         with self.assertRaises(ValueError):
+            normalize_argument(argument, {"evidence:a", "evidence:b"})
+
+    def test_shared_system_is_required_and_source_linked(self):
+        contract = argument_contract({"type": "string"})
+        self.assertIn("shared_system", contract["required"])
+        argument = example_argument()
+        argument["shared_system"]["evidence_refs"] = ["evidence:missing"]
+        with self.assertRaisesRegex(ValueError, "shared system references"):
             normalize_argument(argument, {"evidence:a", "evidence:b"})
 
     def test_argument_citations_cover_every_proof_obligation(self):
