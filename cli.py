@@ -27,14 +27,15 @@ from .method_loop.archive import iter_json, write_json
 
 PRAGMATIC_CAUSAL_PLURALISM_NAME = 'pragmatic causal pluralism'
 DEFAULT_CAUSAL_REPORTING_MILESTONE = 10
-# V12 centers the target on an explicit generalizable causal inference, its
-# supported theories, and tested limits of useful repair. Organism scope follows
-# that inference's warranted domain. The literal-zero stop and reporting
-# milestone remain unchanged. A version label alone never changes the target.
+# V12 centers the target on an explicit biological causal inference about a
+# natural phenomenon, its supported theories, and tested limits of useful
+# repair. Organism scope follows that inference's warranted domain. The
+# literal-zero stop and reporting milestone remain unchanged. A version label
+# alone never changes the target.
 # Prompt wording is intentionally outside this fingerprint so it can improve;
 # prompt edits still need a semantic comparison against this fixed task intent.
 _PRAGMATIC_CAUSAL_PLURALISM_INTENT_DIGEST = (
-    'de2f94baa78fb96a3c882f52339d7d61491f9d92ea5e80788e81cb1cf22701ed'
+    '33d0d751154af2aae87ec25d2e19fa439c30c5e43a952180faf00c7144246012'
 )
 
 

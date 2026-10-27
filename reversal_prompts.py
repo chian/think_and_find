@@ -66,6 +66,19 @@ def _compact_text(value, limit):
     return _short_text(value, limit)
 
 
+def _bounded_operation_message(selected, operation):
+    """Retain structured addresses while shortening an oversized handoff."""
+    for limit in (600, 450, 320, 240, 180, 120, 90, 60):
+        compact = _compact_text(selected, limit)
+        compact['context_compaction'] = {
+            'text_field_limit': limit,
+            'note': 'Long text fields were abbreviated; omitted text is not evidence of absence.'}
+        message = json.dumps(compact, ensure_ascii=False, separators=(',', ':'))
+        if len(message) <= MAX_ITERATION_CHARS - 1000:
+            return message
+    raise ValueError(f'{operation} Episode context exceeds its {MAX_ITERATION_CHARS}-character bound even after compacting addressable text')
+
+
 def _measurement_claim(value, cited, limit):
     claim = _claim(value)
     result = _fields(claim, ('id', 'source', 'source_kind', 'side'))
@@ -309,6 +322,9 @@ For a challenge, state an independently warranted target theory H_star, the exac
 The argument's two causal frames remain useful: the first warrants G locally and the second warrants the target theory. Each frame has source-report and inference steps with explicit premises and citations. The translation states which inference from G is carried into the target and how actors, interventions, outcomes, and relations map. The fixed-category alternative is the strongest simple repair, not an assertion that context matters. Keep provisional gaps explicit. This is an objective and credit grammar, not a fixed research schedule.'''
 
 
+NATURAL_PHENOMENON_RULE = '''The research target is a phenomenon in a biological system, including laboratory and engineered systems. Name biological actors, a cause or contrast that could differ in that system, and a biological outcome. A model may supply a useful representation, mechanistic explanation, or test when its variables and predictions are warranted as mappings to the system. Changing a model input, solver constraint, or algorithmic objective and observing a different calculated output only establishes how that computation operates; it is not by itself the biological causal inference G. Seek evidence about what the organisms or communities do. Preserve positive credit for warranted evidence that a biological G works across settings, organisms, or scales; a reversal requires stronger evidence of lost biological predictive or explanatory use.'''
+
+
 GENERALIZATION_SCOPE_RULE = '''Always name the nature of the proposed generalizability before treating a target as a test. Specify the rule's domain in biological and causal terms, why the source inference might extend to that domain, and what changes of organism, population, or scale the rule claims to tolerate. Search may cross organisms when the stated and warranted domain calls for it. Rate a challenge by its fit to that domain and its failure of predictive or explanatory reuse, never by organism difference alone. In argument.generalization, record supported theories, typed formal additions, target-domain reasoning, and tested repairs with source references. A repair that still predicts and preserves earlier uses cannot earn a large failure reward.'''
 
 
@@ -321,13 +337,13 @@ TRANSFER_OPERATIONS = frozenset({
 
 
 TRANSFER_STAGE_GUIDANCE = {
-    'form_search': '''Use the current rule, domain, credit components and evidence gaps to choose a consequential query: a new supported consequence, a target within the claimed domain, or a repair's discriminating prediction. Choose based on what could most improve the argument; there is no required order. A query is a hypothesis about evidence, not a claimed finding.''',
-    'extract_claims_and_discover': '''Separate source facts from a candidate generalizable rule. In inference_pair, name generalizable_rule, proposed_domain and domain_rationale explicitly. An unsupported target remains open; do not fabricate an opposed inference.''',
-    'synthesize_discovery': '''Prefer a distinct, independently testable consequence of the same rule or a target theory and repair test over a topical analogy. Keep domain warrant and source citations visible.''',
+    'form_search': '''Use the current rule, domain, credit components and evidence gaps to choose a consequential query: a new supported consequence, a target within the claimed domain, or a repair's discriminating prediction. State the natural phenomenon, biological cause or contrast, and biological outcome in the search hypothesis and information need. Put those biological terms in the literal query; model or algorithm names may help find evidence but should not be its sole target. Laboratory and engineered systems remain eligible. Choose based on what could most improve the argument; there is no required order. A query is a hypothesis about evidence, not a claimed finding.''',
+    'extract_claims_and_discover': '''Separate source facts from a candidate generalizable rule. In inference_pair, name generalizable_rule, proposed_domain and domain_rationale explicitly. A method paper may supply model details, but a candidate G needs a warranted claim about a natural biological outcome; an algorithm-only result is a source fact or search lead, not a biological candidate. An unsupported target remains open; do not fabricate an opposed inference.''',
+    'synthesize_discovery': '''Prefer a distinct, independently testable biological consequence of the same rule or a target theory and repair test over a topical analogy. Keep domain warrant and source citations visible. Do not promote a model's input-output mapping into a biological causal rule without evidence for the model-to-system translation.''',
     'resolve_candidate_identities': '''Group uses of the same rule under one inquiry even when the rule's warranted domain includes different organisms. Keep different rules distinct even if they share organisms or a failure theme.''',
-    'assess_case_construct': '''The generalization object carries the rule, domain, supporting theories and typed additions, target-domain comparison, and repair tests. Source_report steps cite exact claims; inference steps name earlier premises. A counted application needs a distinct causal question and source-supported consequence beyond the source proof of the rule, an explicit derivation from that rule, relation_to_rule application, and warranted status. Mark subpaths, conjuncts and readouts of the original model as component or restatement. A research direction or plausible mechanism is provisional. A repair needs named graph edits, a formal change and tested_support_ids linking it to earlier supported theories; a failed repair with no tested prior use cannot support a large failure bonus. Empty arrays are valid for provisional work.''',
+    'assess_case_construct': '''The generalization object carries the rule, domain, supporting theories and typed additions, target-domain comparison, and repair tests. Source_report steps cite exact claims; inference steps name earlier premises. State what biological change G predicts and why model variables map to it; calculated output changes alone do not warrant G. A counted application needs a distinct causal question and source-supported consequence beyond the source proof of the rule, an explicit derivation from that rule, relation_to_rule application, and warranted status. Mark subpaths, conjuncts and readouts of the original model as component or restatement. A research direction or plausible mechanism is provisional. A repair needs named graph edits, a formal change and tested_support_ids linking it to earlier supported theories; a failed repair with no tested prior use cannot support a large failure bonus. Empty arrays are valid for provisional work.''',
     'assess_case_challenge': '''Seek the strongest useful repair. A context variable or added edge counts as an ordinary extension when it predicts the target and preserves earlier support. A claim that repairs fail needs explicit, source-grounded tests of independent constraint and predictive use.''',
-    'measure_answer_quality': '''Rate each support under support_warrants and each repair under repair_warrants. Penalize components of the original rule counted as separate theories, duplicate consequences, speculative mechanisms presented as warranted theories, unwarranted derivations, target-only fitting and claims of universal impossibility. A target outside the warranted domain gives no failure bonus.''',
+    'measure_answer_quality': '''Rate each support under support_warrants and each repair under repair_warrants. Give generalization_warrant and first_frame_warrant zero if G only says that altering an algorithm's inputs or constraints changes its calculated outputs, without a warranted biological cause-outcome claim. Do not penalize genuine scope evidence for a biological G. Penalize components of the original rule counted as separate theories, duplicate consequences, speculative mechanisms presented as warranted theories, unwarranted derivations, target-only fitting and claims of universal impossibility. A target outside the warranted domain gives no failure bonus.''',
     'develop_theory': '''Compare the same rule's uses and losses of use across reviewed arguments. Say which formal additions still preserve generalization and which target theory demands a different causal construction.''',
     'measure_theory_quality': '''Credit a theory of generalization limits only when it preserves the distinct uses and repair outcomes in the cited reviewed cases.''',
 }
@@ -460,6 +476,7 @@ def render_reversal_request(request):
     if op not in INSTRUCTION_TEMPLATES:
         raise ValueError(f'No instruction template for model operation {op}')
     instructions = 'Standing research task:\n' + request['research_question']
+    instructions += '\n\nNatural-phenomenon boundary:\n' + NATURAL_PHENOMENON_RULE
     if op in TRANSFER_OPERATIONS:
         instructions += '\n\nPragmatic causal frames and inference translation:\n' + CAUSAL_TRANSFER_FRAMEWORK
         instructions += '\n\nExplicit generalizability requirement:\n' + GENERALIZATION_SCOPE_RULE
@@ -487,7 +504,10 @@ def render_reversal_request(request):
                          else _render_value(selected))
         message = '\n'.join(context_lines)
     if len(message) > MAX_ITERATION_CHARS:
-        raise ValueError(f'{op} Episode context exceeds its {MAX_ITERATION_CHARS}-character bound; select addressable argument records')
+        message = _bounded_operation_message(selected, op)
+        instructions += ('\n\nThis iteration view abbreviates long text fields. '
+                         'Keep every supplied identity and citation distinct; '
+                         'treat omitted text as uncertainty, not as evidence of absence.')
     if aliases:
         instructions += '\n\nUse only the temporary reference labels supplied for this call. Do not invent a reference.'
     prompt = instructions + '\n\nIteration message:\n' + message

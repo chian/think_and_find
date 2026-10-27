@@ -28,12 +28,12 @@ from .reversal_prompts import MAX_ITERATION_CHARS
 
 
 RUBRIC = {
-    'generalization_warrant': 'Measure whether the same particular source-grounded causal inference is stated as a reusable rule with explicit variable and intervention meanings and a biologically justified proposed domain: 0 a fact merely restated as universal, no cited source, or an unrelated new rule substituted under an old inquiry; 0.5 a plausible but incompletely warranted scope; 1 a well-specified inference and domain supported by evidence. A changed rule needs an explicit source-grounded revision. The domain determines relevant targets.',
+    'generalization_warrant': 'Measure whether the same particular source-grounded inference is about a natural biological phenomenon: name the biological cause or contrast, biological outcome, causal relation, variable meanings, and justified domain. Laboratory and engineered organisms are natural systems for this purpose. A model may warrant the inference when its mapping to the biology is supported. Score 0 for an algorithm-only rule whose purported cause is changing a model input or constraint and whose outcome is only a calculated output, even if its operation is mechanically certain; also score 0 for an uncited universal restatement or unrelated substituted rule. Score 0.5 for an incompletely warranted biological scope and 1 for a well-specified, supported biological inference. A changed rule needs an explicit source-grounded revision. The domain determines relevant targets.',
     'target_domain_warrant': 'Measure whether the target theory falls within the proposed inference domain or a source-justified extension of it: 0 an unsupported leap beyond that domain; 0.5 plausible but uncertain inclusion; 1 well-supported inclusion. A different organism is allowed when the rule genuinely generalizes across organisms; organism change alone is not failure.',
     'target_theory_warrant': 'Measure independent empirical or theoretical warrant for the target hypothesis or theory and its causal predictions: 0 imagined or merely the negation of the proposed rule; 0.5 partial support; 1 a useful independently warranted target theory.',
     'repair_audit': 'Measure whether the argument explicitly tests the strongest plausible repairs to the proposed inference, including formally stated context variables, dependencies, mappings, or fitted assumptions where relevant: 0 no concrete repair, a viable repair ignored, or a bare assertion of impossibility; 0.5 a partial, source-grounded audit; 1 the pertinent simple repairs are specified and their prediction and preservation effects are compared.',
     'predictive_loss': 'Measure whether proposed repairs lose reusable predictive or explanatory value: 0 a simple independently constrained repair predicts the target and retains earlier supported uses; 0.5 a consequential but unresolved loss; 1 tested plausible repairs need target-specific fitting, lose independent constraint or discrimination, or damage prior supported hypotheses. Do not claim universal impossibility.',
-    'first_frame_warrant': 'Continuously measure source support for the first causal inference in the explicit inference pair, at the grain suited to its question: 0 merely descriptive, invented, or a hypothesis refuted by later evidence; 0.5 a partly warranted causal relation; 1 a warranted causal inference among stated actors and relations. A true claim about a different outcome does not warrant the inference proposed for transport.',
+    'first_frame_warrant': 'Continuously measure source support for the first biological causal inference in the explicit inference pair, at the grain suited to its question: 0 merely descriptive, invented, refuted, or only the fact that changing an algorithm input changes its computed output; 0.5 a partly warranted biological causal relation; 1 a warranted inference among biological actors and relations. A model prediction needs a supported mapping to the natural phenomenon. A true claim about a different outcome does not warrant the inference proposed for transport.',
     'second_frame_warrant': 'Continuously measure independent source support for the second causal inference in the explicit inference pair: 0 imagined, merely descriptive, or only the negation of a rejected first hypothesis; 0.5 partly warranted; 1 a well-supported causal inference with its own actors and relations. Independent warrant may come from the same paper or other papers; paper count is not a scientific gate.',
     'translation_specificity': 'Measure whether the proposed translation names the exact source inference, maps its actors, intervention, outcome, and relation, and states a plausible bridge premise: 0 no particular inference or map; 0.5 a partial map with a consequential gap; 1 a specific, biologically intelligible attempted transport. A merely imaginable but unlicensed prediction is weak.',
     'inference_reversal': 'Measure whether transporting the source-grounded generalizable inference yields a consequentially incompatible prediction in an independently warranted target theory within its justified domain: 0 the transported prediction was never licensed, organism change alone explains the contrast, a prior unsupported hypothesis was falsified, or the outcomes are unrelated; 0.5 a plausible linked failure with a major gap; 1 a clear linked failure while both local causal constructions remain useful.',
@@ -49,14 +49,21 @@ QUALITY_RUBRIC = {
 THEORY_RUBRIC = {
     'cross_case_grounding': 'Measure whether the account compares acquired generalizable inferences, their supported theories, and exact source claims: 0 generic philosophy or organism differences alone; 0.5 partly grounded comparison; 1 well-supported comparison retaining differences in scope and repair outcomes.',
     'category_construction': 'Measure whether the account explains how each question and grain constructs its actors, categories, interventions, and relations: 0 categories taken as fixed names; 0.5 some construction explained; 1 clear, empirically anchored comparison of category choices.',
-    'causal_nontransportability': 'Measure whether a reusable source inference supports distinct hypotheses yet loses predictive or explanatory use in a warranted target theory after concrete repairs are tested: 0 an organism switch alone, a rejected unsupported guess, or a useful routine modifier; 0.5 an incompletely warranted failure; 1 a specific supported failure of transport and repair without claiming metaphysical irreducibility.',
+    'causal_nontransportability': 'Measure whether a reusable biological causal inference supports distinct hypotheses yet loses predictive or explanatory use in a warranted target theory after concrete repairs are tested: 0 an organism switch alone, a rejected unsupported guess, a useful routine modifier, or only a contrast between algorithms and their calculated outputs; 0.5 an incompletely warranted biological failure; 1 a specific supported failure of biological transport and repair without claiming metaphysical irreducibility.',
     'pragmatic_research_use': 'Measure whether the account explains why each grain suits its biological problem and identifies concrete evidence that could revise the proposed mapping: 0 no use or test; 0.5 partial rationale or broad test; 1 consequential problem-relative rationale and discriminating research directions.',
 }
 QUESTION = '''Discover the scope and limits of generalizable biological causal inferences.
 A causal explanation relates entities or categories constructed at a grain suited
-to a biological question. Identify a particular source-grounded causal inference
+to a biological question. Begin with a natural phenomenon in an organism,
+population, community, or other biological system, including laboratory or
+engineered systems. Identify a particular source-grounded causal inference
 that plausibly generalizes: state its rule, variables, intervention meanings,
-abstraction, proposed domain, and the evidence for that scope. Derive distinct
+abstraction, proposed domain, and the evidence for that scope. The cause and
+outcome must refer to the biological system. Changing an input to an algorithm
+and obtaining a different calculated output establishes how the algorithm
+operates; without a warranted model-to-system mapping it is not a biological
+causal inference. Models can help formulate or test biological inferences.
+Derive distinct
 useful hypotheses or theories it supports. When a support needs a small addition,
 state the changed variables, dependencies, or mapping and show that the core rule
 and prior predictions survive. Seek an independently warranted target theory
@@ -83,7 +90,7 @@ real entities or supplying a complete account of collective phenomena.'''
 ROOT = 'collection'
 COLUMNS = (*QUALITY_RUBRIC,'argument_progress')
 THEORY_COLUMNS = (*QUALITY_RUBRIC,*THEORY_RUBRIC)
-CREDIT_VERSION = 'question-discovery-v12.7'
+CREDIT_VERSION = 'question-discovery-v12.8'
 WINDOW = 4
 STOP_EPSILON = 0.001
 ROOT_STOP_YIELD = 0.0

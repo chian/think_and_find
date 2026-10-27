@@ -152,6 +152,12 @@ the scale result alone does not show that a biological intervention causes the
 predicted community outcome. Fix the choice and warrant of `G`, not the credit
 for warranted similarity.
 
+Discovery therefore searches for biological causes, contrasts, and outcomes
+in living systems, including laboratory and engineered systems. Modeling papers
+remain useful when they connect their variables and predictions to those
+systems. A result confined to the behavior of a solver is a method fact or
+search lead, not the causal phenomenon the task seeks.
+
 Model requests now have explicit size bounds. Identity and synthesis calls
 select relevant whole inquiry records under separate budgets, and theory
 measurement receives a compact prior account. Full case histories and theory

@@ -220,6 +220,14 @@ class CausalArgumentTests(unittest.TestCase):
         self.assertEqual(result["support_breadth"], 0)
         self.assertEqual(result["challenge_strength"], 0)
 
+    def test_zero_biological_generalization_warrant_blocks_all_progress(self):
+        result = progress(example_argument(), fit_values=fit(
+            generalization_warrant=0, first_frame_warrant=0))
+        self.assertEqual(result["generalization_strength"], 0)
+        self.assertEqual(result["support_breadth"], 0)
+        self.assertEqual(result["challenge_strength"], 0)
+        self.assertEqual(result["score"], 0)
+
     def test_reviewed_component_overrides_declared_application_and_warrant_score(self):
         argument = example_argument()
         result = progress(argument, support_values={"h1": {
