@@ -439,6 +439,7 @@ def argument_progress(argument, fit, step_warrants, support_warrants, repair_war
         strength = (min(local, support_warrants[item["id"]]["score"])
                     if item["status"] == "warranted"
                     and item["relation_to_rule"] == "application"
+                    and support_warrants[item["id"]].get("reviewed_relation") == "application"
                     and item["evidence_refs"] else 0.0)
         candidates.append((strength, index, item["id"], key, theory_key))
     seen_consequences = set()

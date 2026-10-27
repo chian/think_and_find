@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import unittest
 
 from episodic_workflow.reversal_prompts import _replace, render_reversal_request
@@ -32,6 +33,51 @@ class ReversalPromptAliasTests(unittest.TestCase):
         self.assertIn("nature of the proposed generalizability", rendered.instructions)
         self.assertIn("Search may cross organisms", rendered.instructions)
         self.assertIn("there is no required order", rendered.instructions)
+
+    def test_long_review_keeps_supports_and_repairs_within_episode_bound(self):
+        long_text = "Causal premise and biological qualification. " * 35
+        references = [f"evidence:{index:024x}" for index in range(36)]
+        facts = [{"id": ref, "source": "https://example.org/study",
+                  "source_kind": "primary", "side": "mapping",
+                  "claim": long_text, "quote": long_text}
+                 for ref in references]
+        argument = {"frame_one": {"question": long_text,
+                    "steps": [{"id": "s1", "claim": long_text,
+                               "reasoning": long_text,
+                               "warrant_refs": [references[0]]}]},
+                    "generalization": {
+                        "rule": long_text, "proposed_domain": long_text,
+                        "supports": [{"id": f"support_{index}", "theory": long_text,
+                                      "derivation": long_text, "evidence_refs": [references[index]]}
+                                     for index in range(4)],
+                        "repair_tests": [{"id": f"repair_{index}",
+                                          "formal_change": long_text,
+                                          "evidence_refs": [references[index]]}
+                                         for index in range(4)]}}
+        answer = {"conclusion": long_text, "argument": argument,
+                  "evidence_refs": references[:22]}
+        request = {"operation": "measure_answer_quality",
+                   "research_question": "Scope of a causal inference",
+                   "source_claims": facts,
+                   "inquiry_generalization": {"generalizable_rule": long_text,
+                                              "proposed_domain": long_text},
+                   "answer": answer, "previous_answer": None,
+                   "known_materials": {},
+                   "rubric": {"generalization_warrant": "Source-grounded rule"},
+                   "quality_rubric": {"source_fidelity": "Faithful citation"},
+                   "response_contract": {"type": "object", "properties": {}}}
+        rendered = render_reversal_request(request)
+        message = json.loads(rendered.iteration_message)
+        self.assertLessEqual(len(rendered.iteration_message), 48000)
+        self.assertEqual(len(message["proposed_answer"]["argument"]["generalization"]["supports"]), 4)
+        self.assertEqual(len(message["proposed_answer"]["argument"]["generalization"]["repair_tests"]), 4)
+        self.assertEqual(len(message["cited_source_claims"]), 22)
+        request["previous_answer"] = answer
+        request["known_materials"] = {"answer:previous": answer}
+        revised = render_reversal_request(request)
+        previous = json.loads(revised.iteration_message)["previous_answer"]
+        self.assertLessEqual(len(revised.iteration_message), 48000)
+        self.assertIn("frame_conclusions", previous)
 
 
 if __name__ == "__main__":

@@ -83,7 +83,7 @@ real entities or supplying a complete account of collective phenomena.'''
 ROOT = 'collection'
 COLUMNS = (*QUALITY_RUBRIC,'argument_progress')
 THEORY_COLUMNS = (*QUALITY_RUBRIC,*THEORY_RUBRIC)
-CREDIT_VERSION = 'question-discovery-v12.3'
+CREDIT_VERSION = 'question-discovery-v12.6'
 WINDOW = 4
 STOP_EPSILON = 0.001
 ROOT_STOP_YIELD = 0.0
@@ -1498,14 +1498,17 @@ class Run:
             *argument_refs(argument)]))
         known=case['materials']
         measurement_schema=schema({'score':{'type':'number','minimum':0,'maximum':1},
-            'evidence_refs':{'type':'array','items':{'type':'string','enum':options}},'rationale':TEXT})
+            'evidence_refs':{'type':'array','items':{'type':'string'}},'rationale':TEXT})
         fit_schema=schema({name:measurement_schema for name in RUBRIC})
         quality_schema=schema({name:measurement_schema for name in QUALITY_RUBRIC})
         step_schema=schema({name:schema({identity:measurement_schema for identity in identities})
                             for name,identities in step_ids(argument).items()})
         support_ids=[item['id'] for item in argument['generalization']['supports']]
         repair_ids=[item['id'] for item in argument['generalization']['repair_tests']]
-        support_schema=schema({identity:measurement_schema for identity in support_ids})
+        support_measurement_schema=schema({**measurement_schema['properties'],
+            'reviewed_relation':{'type':'string','enum':[
+                'application','component','restatement','speculative']}})
+        support_schema=schema({identity:support_measurement_schema for identity in support_ids})
         repair_schema=schema({identity:measurement_schema for identity in repair_ids})
         previous_schema=(schema({'candidate_fit':fit_schema,'epistemic_quality':quality_schema})
                          if case['current_answer'] else {'type':'null'})
@@ -1531,6 +1534,10 @@ class Run:
         for frame_name,identities in step_ids(argument).items():
             self.validate_measurements(steps[frame_name],identities,options)
         self.validate_measurements(measured.get('support_warrants'),support_ids,options)
+        for identity,row in measured['support_warrants'].items():
+            if row.get('reviewed_relation') not in (
+                    'application','component','restatement','speculative'):
+                raise ValueError(f'Support {identity} needs an independent relation verdict')
         self.validate_measurements(measured.get('repair_warrants'),repair_ids,options)
         previous=measured.get('previous_measurements')
         if case['current_answer']:
@@ -1592,6 +1599,7 @@ class Run:
             'child_stop_threshold':STOP_EPSILON,'root_observation':'one integrated acquisition, frame synthesis, case inquiry and cross-case reasoning cycle',
             'synthesis_context_characters':SYNTHESIS_CONTEXT_CHARS,
             'theory_source_context_characters':THEORY_CONTEXT_CHARS,
+            'review_handoff':'bounded citation-first JSON view, with text truncation and unshown-claim counts; compact measurement schema validates reference identities after response; full reviewed argument retained in state',
             'scientific_gates':False,'source_provenance_validation':True,
             'report_preference':'same-evidence epistemic utility; first canonical credit measurement persists; every material alternative is offered',
             'search_limit':SEARCH_LIMIT,'reading_window_chars':WINDOW_CHARS,

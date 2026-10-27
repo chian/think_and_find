@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import json
 import math
 import unittest
 from pathlib import Path
@@ -111,7 +112,8 @@ def progress(argument, fit_values=None, step_values=None, support_values=None, r
     return argument_progress(argument,
         fit() if fit_values is None else fit_values,
         ratings() if step_values is None else step_values,
-        {"h1": {"score": 0.9}} if support_values is None else support_values,
+        {"h1": {"score": 0.9, "reviewed_relation": "application"}}
+        if support_values is None else support_values,
         {"r1": {"score": 0.9}} if repair_values is None else repair_values)
 
 
@@ -181,16 +183,19 @@ class CausalArgumentTests(unittest.TestCase):
             "preservation_argument": "Z does not alter H1's tested prediction"}
         argument["generalization"]["supports"].append(second)
         with_new = progress(argument, support_values={
-            "h1": {"score": 0.9}, "h2": {"score": 0.9}})["score"]
+            "h1": {"score": 0.9, "reviewed_relation": "application"},
+            "h2": {"score": 0.9, "reviewed_relation": "application"}})["score"]
         self.assertGreater(with_new, baseline)
         second["consequence"] = "Prediction H1"
         duplicate = progress(argument, support_values={
-            "h1": {"score": 0.9}, "h2": {"score": 0.9}})["score"]
+            "h1": {"score": 0.9, "reviewed_relation": "application"},
+            "h2": {"score": 0.9, "reviewed_relation": "application"}})["score"]
         self.assertAlmostEqual(duplicate, baseline)
         second["consequence"] = "Prediction H2"
         second["theory"] = "Theory H1"
         same_theory = progress(argument, support_values={
-            "h1": {"score": 0.9}, "h2": {"score": 0.9}})["score"]
+            "h1": {"score": 0.9, "reviewed_relation": "application"},
+            "h2": {"score": 0.9, "reviewed_relation": "application"}})["score"]
         self.assertAlmostEqual(same_theory, baseline)
 
     def test_provisional_research_direction_is_not_supported_theory_credit(self):
@@ -207,6 +212,15 @@ class CausalArgumentTests(unittest.TestCase):
         result = progress(argument)
         self.assertEqual(result["support_breadth"], 0)
         self.assertEqual(result["challenge_strength"], 0)
+
+    def test_reviewed_component_overrides_declared_application_and_warrant_score(self):
+        argument = example_argument()
+        result = progress(argument, support_values={"h1": {
+            "score": 0.9, "reviewed_relation": "component"}})
+        self.assertEqual(result["support_breadth"], 0)
+        self.assertEqual(result["challenge_strength"], 0)
+        self.assertAlmostEqual(result["score"],
+            0.05 * result["generalization_strength"])
 
     def test_viable_repair_or_unwarranted_target_has_no_large_bonus(self):
         argument = example_argument()
@@ -293,7 +307,8 @@ class CausalArgumentTests(unittest.TestCase):
         def measured(score=0.9):
             return {"score": score, "evidence_refs": ["evidence:a"],
                     "rationale": "The cited claim bears on this assessment"}
-        case = {"facts": [{"id": "evidence:a"}, {"id": "evidence:b"}],
+        case = {"facts": [{"id": "evidence:a"}, {"id": "evidence:b"},
+                          *[{"id": f"evidence:{index:024x}"} for index in range(34)]],
                 "evidence_version": "v1", "current_answer": None,
                 "materials": {}, "material_id": None,
                 "inference_pair": {"generalizable_rule": "X changes Y across D",
@@ -313,7 +328,8 @@ class CausalArgumentTests(unittest.TestCase):
                     "step_warrants": {
                         "frame_one": {"a1": measured(), "a2": measured()},
                         "frame_two": {"b1": measured()}},
-                    "support_warrants": {"h1": measured()},
+                    "support_warrants": {"h1": {**measured(),
+                        "reviewed_relation": "application"}},
                     "repair_warrants": {"r1": measured()},
                     "previous_measurements": None, "revision_summary": "Initial review"}
         run.ask = ask
@@ -334,8 +350,11 @@ class CausalArgumentTests(unittest.TestCase):
         event = run.measure_answer("case_1", answer, "construct", "v1")
         contract = captured["contract"]["properties"]
         self.assertIn("h1", contract["support_warrants"]["properties"])
+        self.assertIn("reviewed_relation", contract["support_warrants"]
+                      ["properties"]["h1"]["required"])
         self.assertIn("r1", contract["repair_warrants"]["properties"])
         self.assertEqual(captured["inquiry_generalization"]["proposed_domain"], "Domain D")
+        self.assertLess(len(json.dumps(captured["contract"])), 32000)
         self.assertGreater(event["review"]["argument_progress"]["challenge_strength"], 0)
 
 

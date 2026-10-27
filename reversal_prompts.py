@@ -52,6 +52,96 @@ def _claim(value):
     return _fields(value, ('id', 'title', 'source', 'claim', 'quote', 'side', 'source_kind'))
 
 
+def _short_text(value, limit):
+    if not isinstance(value, str) or len(value) <= limit:
+        return value
+    return value[:limit].rstrip() + f' [and {len(value)-limit} omitted characters]'
+
+
+def _compact_text(value, limit):
+    if isinstance(value, Mapping):
+        return {key: _compact_text(item, limit) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_compact_text(item, limit) for item in value]
+    return _short_text(value, limit)
+
+
+def _measurement_claim(value, cited, limit):
+    claim = _claim(value)
+    result = _fields(claim, ('id', 'source', 'source_kind', 'side'))
+    result['claim'] = _short_text(claim.get('claim', ''), limit if cited else limit // 2)
+    if cited:
+        result['quote'] = _short_text(claim.get('quote', ''), limit)
+    return result
+
+
+def _known_material_brief(value, limit):
+    argument = value.get('argument') or {}
+    generalization = argument.get('generalization') or {}
+    return {'conclusion': _short_text(value.get('conclusion', ''), limit),
+            'rule': _short_text(generalization.get('rule', ''), limit),
+            'theories': [_short_text(item.get('theory', ''), limit // 2)
+                         for item in generalization.get('supports', [])[:8]],
+            'target_theory': _short_text(generalization.get('target_theory', ''), limit)}
+
+
+def _previous_measurement_brief(value, limit):
+    if not value:
+        return None
+    argument = value.get('argument') or {}
+    generalization = argument.get('generalization') or {}
+    return {'conclusion': _short_text(value.get('conclusion', ''), limit),
+            'rule': _short_text(generalization.get('rule', ''), limit),
+            'domain': _short_text(generalization.get('proposed_domain', ''), limit),
+            'frame_conclusions': {
+                name: _short_text(next((step.get('claim', '') for step in
+                    (argument.get(name) or {}).get('steps', [])
+                    if step.get('id') == (argument.get(name) or {}).get('conclusion_step_id')), ''), limit)
+                for name in ('frame_one', 'frame_two')},
+            'supports': [{key: _short_text(item.get(key, ''), limit)
+                          for key in ('id', 'question', 'theory', 'consequence',
+                                      'relation_to_rule', 'status')}
+                         for item in generalization.get('supports', [])],
+            'repairs': [{'id': item.get('id'), 'status': item.get('status'),
+                         'formal_change': _short_text(
+                             (item.get('addition') or {}).get('formal_change', ''), limit)}
+                        for item in generalization.get('repair_tests', [])],
+            'evidence_refs': value.get('evidence_refs', [])}
+
+
+def _measurement_context(request):
+    answer = request['answer']
+    cited = set(answer.get('evidence_refs') or [])
+    known = request.get('known_materials') or {}
+    recent_known = list(known.items())[-8:]
+    source_claims = request['source_claims']
+    cited_claims = [item for item in source_claims if item['id'] in cited]
+    uncited_claims = [item for item in source_claims if item['id'] not in cited]
+    def core(value):
+        return _fields(value, ('conclusion', 'argument')) if value else None
+    for limit in (450, 320, 240, 180, 150, 120, 90):
+        selected = {
+            'cited_source_claims': [_measurement_claim(item, True, limit)
+                                    for item in cited_claims],
+            'other_claim_summaries': [{
+                'id': item['id'], 'claim': _short_text(item.get('claim', ''), 80)}
+                for item in uncited_claims[:8]],
+            'unshown_other_claim_count': max(0, len(uncited_claims)-8),
+            'inquiry_generalization': _compact_text(
+                request.get('inquiry_generalization'), limit),
+            'proposed_answer': _compact_text(core(answer), limit),
+            'previous_answer': _previous_measurement_brief(
+                request.get('previous_answer'), limit),
+            'known_materials': {key: _known_material_brief(value, limit)
+                                for key, value in recent_known},
+            'unshown_known_material_count': len(known) - len(recent_known),
+            'text_field_limit': limit,
+        }
+        if len(json.dumps(selected, ensure_ascii=False, separators=(',', ':'))) <= MAX_ITERATION_CHARS - 1000:
+            return selected
+    raise ValueError('Review argument is too large for a bounded measurement view')
+
+
 def _pair_brief(value):
     return _fields(value, ('frame_one_causal_inference',
                            'frame_two_causal_inference',
@@ -169,11 +259,7 @@ def _select(request):
                 'current_answer': _answer(request.get('current_answer')),
                 'discovered_hypothesis': _case(hypothesis)}
     if op == 'measure_answer_quality':
-        return {'source_claims': [_claim(item) for item in request['source_claims']],
-                'proposed_answer': _answer(request['answer']),
-                'previous_answer': _answer(request.get('previous_answer')),
-                'known_materials': {key: _answer(value) for key, value in
-                                    request['known_materials'].items()}}
+        return _measurement_context(request)
     if op == 'develop_theory':
         return {'source_claims': [_claim(item) for item in request['source_claims']],
                 'reviewed_cases': [_case(item) for item in request['reviewed_cases']],
@@ -206,7 +292,7 @@ INSTRUCTION_TEMPLATES = {
 
     'assess_case_challenge': '''Challenge the local inference, proposed domain, every supported theory and its derivation. Check whether each claimed new theory has a genuinely distinct prediction and cited warrant, and whether its formal addition preserves earlier uses. Ask whether the target theory is independently warranted and lies inside the justified domain. Test the strongest simple repairs, including context variables, missing dependencies, scale maps or parameter assumptions where relevant. For each repair, ask whether it predicts the target with independently constrained inputs and retains the prior theories. If one does, mark it works and narrow the conclusion; if uncertain, mark unresolved. An organism switch by itself, a later refutation of an unwarranted guess, or mere computational difficulty is not a failed generalization. Preserve useful local findings and state discriminating evidence.''',
 
-    'measure_answer_quality': '''Measure the explicit generalization and challenge on continuous task-fit and epistemic coordinates. Rate each source and inference step under step_warrants. Under support_warrants, rate every supported theory's source warrant, derivation from the same rule, genuinely new causal question and consequence, and preservation under its formal addition; give zero to components of the original source proof, subpaths, measurement readouts, paraphrases, extra citations, suggested experiments, or plausible but untested mechanisms. Check the declared status; mark an unwarranted theory provisional rather than awarding support credit. Under repair_warrants, rate the evidence and reasoning for each tested repair's target prediction, independent constraints, and effect on prior uses. Compare the reviewed rule with inquiry_generalization and previous_answer; a materially different rule needs an explicit source-grounded revision rather than receiving reuse credit under the old inquiry. Rate generalization_warrant and target_domain_warrant from the stated scope, not from a blanket organism rule. Rate target_theory_warrant independently. repair_audit and predictive_loss require concrete comparisons; a viable simple repair gets zero large-failure credit. A careful negative answer can score well for source fidelity while scoring low on task fit. Assess previous and proposed answers against the same claims. Scores do not admit, reject, or stop research. Treat cosmetic rewrites as the same material.''',
+    'measure_answer_quality': '''Measure the explicit generalization and challenge on continuous task-fit and epistemic coordinates. Rate each source and inference step under step_warrants. Under support_warrants, independently set reviewed_relation for each theory: application only when it answers a genuinely new causal question with a source-warranted consequence beyond the proof and predictions already used to establish G; component for a conjunct, subpath, measurement readout, explanatory restatement, or original prediction of G; restatement for a paraphrase or extra citation; speculative for a plausible but untested mechanism. Do not defer to the answer's declared relation_to_rule. In the rationale, explain the verdict and then rate its source warrant, derivation from the same rule, new consequence, and preservation under its formal addition. Components, restatements, and speculation receive no reuse credit even if their source claims are strong. Check the declared status; an unwarranted theory is provisional. Under repair_warrants, rate the evidence and reasoning for each tested repair's target prediction, independent constraints, and effect on prior uses. Compare the reviewed rule with inquiry_generalization and previous_answer; a materially different rule needs an explicit source-grounded revision rather than receiving reuse credit under the old inquiry. Rate generalization_warrant and target_domain_warrant from the stated scope, not from a blanket organism rule. Rate target_theory_warrant independently. repair_audit and predictive_loss require concrete comparisons; a viable simple repair gets zero large-failure credit. The review handoff abbreviates long text fields, shows full claim excerpts only for cited claims, and may summarize or omit other claims; treat truncation and unshown claims as uncertainty, not evidence of absence. A careful negative answer can score well for source fidelity while scoring low on task fit. Assess previous and proposed answers against the same claims. Scores do not admit, reject, or stop research. Treat cosmetic rewrites as the same material.''',
 
     'develop_theory': '''Develop or revise an account of pragmatic causal pluralism from acquired inferences and reviewed cases. Compare explicitly stated generalizable rules, the distinct theories each supports, their formal additions, and independently warranted targets where transport and plausible repairs lose usefulness. Explain why each original and target theory remains useful for its own question. A change of organism can supply a relevant test only when the proposed domain includes it; organism difference itself is not an explanation. Do not turn a refuted unsupported hypothesis into two valid causalities. Separate source reports, case interpretations and cross-case inference. Cite only supplied claims and cases. Provide three single-sentence decision fields of at most 40 words each. next_frame_gap names an unresolved generalizable rule, support derivation, target-domain test or repair class. next_evidence_need names independent evidence that could resolve it. avoid_pattern names an unproductive shortcut. These guide discovery, not truth or stopping.''',
 
@@ -394,9 +480,12 @@ def render_reversal_request(request):
                     for item in request['prior_attempts']]
         selected['prior_response_failures'] = failures
         instructions += '\n\nIf the iteration message includes a prior response failure, correct that contract error in this response.'
-    context_lines = (_search_context_lines(selected) if op == 'form_search'
-                     else _render_value(selected))
-    message = '\n'.join(context_lines)
+    if op == 'measure_answer_quality':
+        message = json.dumps(selected, ensure_ascii=False, separators=(',', ':'))
+    else:
+        context_lines = (_search_context_lines(selected) if op == 'form_search'
+                         else _render_value(selected))
+        message = '\n'.join(context_lines)
     if len(message) > MAX_ITERATION_CHARS:
         raise ValueError(f'{op} Episode context exceeds its {MAX_ITERATION_CHARS}-character bound; select addressable argument records')
     if aliases:

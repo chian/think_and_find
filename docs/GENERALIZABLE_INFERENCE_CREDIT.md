@@ -39,12 +39,14 @@ claim and ordinary repairs lose reusable predictive or explanatory value.
 Use source-backed, distinct `H_i` to build bounded, diminishing positive
 credit for the *same* `G`. Each proposed support records whether it is an
 application, a component of the original rule, a restatement, or speculation.
-Only applications can earn reuse credit. Each also has a warranted, provisional,
-or unsupported status. A merely plausible mechanism or suggested experiment
-stays provisional and earns no support credit. A warranted derivation earns
-credit only when the inference, addition, prediction, and source support are
-explicit. A new `H_i` adds credit only for a genuinely new consequence, not a
-second citation or paraphrase.
+Only applications can earn reuse credit, and the reviewer must independently
+confirm that relation in a structured verdict. A numerical warrant score alone
+cannot turn a component of the source proof into reuse credit. Each also has a
+warranted, provisional, or unsupported status. A merely plausible mechanism or
+suggested experiment stays provisional and earns no support credit. A warranted
+derivation earns credit only when the inference, addition, prediction, and
+source support are explicit. A new `H_i` adds credit only for a genuinely new
+consequence, not a second citation or paraphrase.
 
 Give a substantially larger bounded bonus for a challenge only when all of
 these are strong: the local warrant and domain of `G`; prior support breadth;
@@ -62,13 +64,25 @@ The representation and score do not impose a fixed sequence of research
 operations. Log each score component and its cited source and inference IDs so
 the behavior can be audited after a long run.
 
+The full argument stays in durable state. The quality-review handoff uses a
+bounded JSON view: it retains every support and repair identity, includes
+abbreviated cited source claims and a small catalog of other claims, and labels
+truncated text and omitted claim counts. Previous answers are summarized by
+their rule, frame conclusions, supports, repairs, and citations. The reviewer
+is instructed to treat missing detail as uncertainty. The measurement response
+schema uses compact string references; the runtime checks every returned
+reference against the acquired claims after the model responds. This keeps a
+large argument from silently overflowing the Episode message and schema limits,
+but a highly expanded argument may still need paged source and argument review.
+
 The implemented task coordinate is
 
 ```text
 g = min(source_derivation_strength, generalization_warrant)
-s_i = min(g, support_warrant_i), with zero for components, restatements,
-      speculation, provisional or unsupported status, uncited or repeated
-      theories or consequences
+s_i = min(g, support_warrant_i), with zero unless both the argument and the
+      independent reviewer classify the support as an application; also zero
+      for speculative, provisional, unsupported, uncited, or repeated theories
+      or consequences
 B = 1 - exp(-sum_i s_i)
 C = min(g, B, target_theory_strength, target_domain_warrant,
         repair_audit_strength, transport_failure_strength)
