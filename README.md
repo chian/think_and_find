@@ -122,6 +122,36 @@ number or order of steps. Full arguments remain in durable state, while
 cross-case reasoning receives compact dependency paths. See
 [the inference credit design](docs/GENERALIZABLE_INFERENCE_CREDIT.md).
 
+### Causal inference, theory, and scope
+
+Keep three objects distinct. A **named biological causal inference** `G` is a
+scoped claim about how a change in a biological cause affects a biological
+outcome, with the relevant mechanism or relations stated. A **hypothesis or
+theory** `H` combines `G` with other causal links or candidate mechanisms to
+explain a larger phenomenon. A **theory prediction** states what `H` predicts
+and what part of that prediction depends on `G`. There is no required number
+of links or fixed order for constructing `H`.
+
+Evidence that `G` still works in another organism, setting, or scale is
+**scope evidence**. A warranted similarity deserves positive credit because
+it establishes more of `G`'s generalizability, even when it does not create a
+new theory prediction. A warranted reversal deserves more credit when `G`
+loses useful predictive or explanatory work for a target theory and plausible
+repairs fail to preserve its earlier uses. A change of organism or model size
+alone is neither a reversal nor a reason to discard valid scope evidence.
+
+A model or algorithm can help formulate and test `G`, but changing an input to
+an algorithm and observing a different computed output is not, by itself, a
+biological causal inference. The claim must say what would change in the
+biological system and why the model's variables and operations warrant that
+claim. In the current cFBA record, applying the same optimization method to a
+genome-scale network is genuine evidence about the stated `G`'s scope and
+deserves positive scope credit. The problem is that this `G` describes an
+algorithm's predictive capability rather than a biological causal inference;
+the scale result alone does not show that a biological intervention causes the
+predicted community outcome. Fix the choice and warrant of `G`, not the credit
+for warranted similarity.
+
 Model requests now have explicit size bounds. Identity and synthesis calls
 select relevant whole inquiry records under separate budgets, and theory
 measurement receives a compact prior account. Full case histories and theory

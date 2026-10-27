@@ -33,6 +33,17 @@ structural failure. Conversely, an unsupported leap outside the declared and
 warranted domain does not earn reversal credit. A grain or scale change is
 interesting when the inferential role of `G` fails despite a plausible domain
 claim and ordinary repairs lose reusable predictive or explanatory value.
+Warranted evidence that the same `G` works at a new scale or in a new organism
+strengthens its scope and deserves positive credit. It need not be a new
+theory-level prediction to matter. A reversal earns more credit because it
+shows a consequential limit to useful transport after repairs are examined.
+
+`G` must be an inference about a biological system. A computational method can
+represent or test that inference, but changing its input and obtaining a
+different model output does not alone establish a biological causal effect.
+Name the biological cause, outcome, and model-to-system warrant separately
+from the algorithm's calculation. This criterion concerns which inference is
+chosen as `G`; it does not remove positive credit for warranted scope evidence.
 
 ## Credit objective
 
