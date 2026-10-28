@@ -20,6 +20,8 @@ from .method_loop.episode_binding.web_search_binding import SearchPageProposer
 from .case_reports.research.documents import Document, Span, rank_spans
 from .case_reports.research.model_tiers import ModelTier
 from .configured_providers import reversal_research_providers
+from .task_executors._http import ProviderError
+from .task_executors.evidence_extraction.argo import ModelOutputError
 from .task_executors.outbreak_search.queries import source_locator, source_text
 from .credit_assignment.attainment import AttainmentArchive, hypervolume
 from .causal_argument import (argument_brief, argument_contract, argument_progress, argument_refs,
@@ -92,6 +94,8 @@ COLUMNS = (*QUALITY_RUBRIC,'argument_progress')
 THEORY_COLUMNS = (*QUALITY_RUBRIC,'theory_progress')
 CREDIT_VERSION = 'question-discovery-v12.9'
 WINDOW = 4
+PROVIDER_RETRY_INITIAL_S = 5.0
+PROVIDER_RETRY_MAX_S = 300.0
 STOP_EPSILON = 0.001
 ROOT_STOP_YIELD = 0.0
 UCB_EXPLORATION = 0.01
@@ -109,6 +113,21 @@ SIDES = ('frame_one', 'frame_two', 'mapping')
 def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
                                     allow_nan=False).encode()).hexdigest()
+
+
+def retryable_provider_failure(exc):
+    """Only transport outages are retried; rejected model output is separate."""
+    if not isinstance(exc, ProviderError) or isinstance(exc, ModelOutputError):
+        return False
+    message=str(exc)
+    return (message.startswith(('Provider connection failed:', 'Codex connection failed:'))
+            or bool(re.match(r'^(?:Provider|Codex) returned HTTP (?:5\d\d|408|429)(?:\b|:)', message)))
+
+
+def provider_retry_delay(failures):
+    """Capped exponential delay after consecutive transient transport failures."""
+    return min(PROVIDER_RETRY_MAX_S,
+               PROVIDER_RETRY_INITIAL_S * 2 ** min(failures - 1, 16))
 
 
 def quality_utility(measurements):
@@ -1065,30 +1084,40 @@ class Run:
             print(f"{self.sequence}: {event['event']} {event.get('case','')} {route.get('model','')} {event.get('reason','')}",file=sys.stderr,flush=True)
 
     def ask(self,operation,key,tier=ModelTier.REASONING,**request):
-        self.operation_attempts[operation]=self.operation_attempts.get(operation,0)+1
-        try:
-            payload={'operation':operation,'research_question':self.question,**request}
-            if operation=='measure_answer_quality':
-                payload.update(rubric=RUBRIC,quality_rubric=QUALITY_RUBRIC)
-            if operation=='measure_theory_quality':
-                payload.update(rubric=THEORY_RUBRIC,quality_rubric=QUALITY_RUBRIC)
-            response=self.providers['agent'](payload,tier=tier)
+        payload={'operation':operation,'research_question':self.question,**request}
+        if operation=='measure_answer_quality':
+            payload.update(rubric=RUBRIC,quality_rubric=QUALITY_RUBRIC)
+        if operation=='measure_theory_quality':
+            payload.update(rubric=THEORY_RUBRIC,quality_rubric=QUALITY_RUBRIC)
+        transport_failures=0
+        while True:
+            self.operation_attempts[operation]=self.operation_attempts.get(operation,0)+1
+            try:
+                response=self.providers['agent'](payload,tier=tier)
+            except Exception as exc:
+                if retryable_provider_failure(exc):
+                    transport_failures+=1
+                    delay=provider_retry_delay(transport_failures)
+                    self.record({'event':'provider_retry_wait','operation':operation,
+                        'case':key,'transport_failures':transport_failures,
+                        'delay_seconds':delay,'error':str(exc)})
+                    time.sleep(delay)
+                    continue
+                message=str(exc)
+                self.failure_streaks[operation]=self.failure_streaks.get(operation,0)+1
+                if 'invalid_json_schema' in message:
+                    self.unavailable={'scope':'response_schema_contract','error':message}
+                if ('Codex login is unavailable' in message or 'Codex returned HTTP 401' in message
+                        or 'Codex returned HTTP 403' in message or 'monthly usage limit exceeded' in message):
+                    self.unavailable={'scope':'provider_transport','error':message}
+                if self.failure_streaks[operation]>=WINDOW:
+                    self.unavailable={'scope':'operation_contract','operation':operation,
+                        'attempts':self.operation_attempts[operation],
+                        'error':'Four consecutive operation responses failed; this is an execution failure, not scientific saturation.'}
+                raise
             self.operation_successes[operation]=self.operation_successes.get(operation,0)+1
             self.failure_streaks[operation]=0
             return response
-        except Exception as exc:
-            message=str(exc)
-            self.failure_streaks[operation]=self.failure_streaks.get(operation,0)+1
-            if 'invalid_json_schema' in message:
-                self.unavailable={'scope':'response_schema_contract','error':message}
-            if ('Codex login is unavailable' in message or 'Codex returned HTTP 401' in message
-                    or 'Codex returned HTTP 403' in message or 'monthly usage limit exceeded' in message):
-                self.unavailable={'scope':'provider_transport','error':message}
-            if self.failure_streaks[operation]>=WINDOW:
-                self.unavailable={'scope':'operation_contract','operation':operation,
-                    'attempts':self.operation_attempts[operation],
-                    'error':'Four consecutive operation responses failed; this is an execution failure, not scientific saturation.'}
-            raise
 
     def store_source(self,document,raw):
         if document.sha256 not in self.sources:
@@ -1645,7 +1674,7 @@ class Run:
             'report_preference':'same-evidence epistemic utility; first canonical credit measurement persists; every material alternative is offered',
             'search_limit':SEARCH_LIMIT,'reading_window_chars':WINDOW_CHARS,
             'post_collection_selection':'only after stopping: all task-fit scores >=0.70 and a source-grounded challenge; retain every inquiry in complete report',
-            'failure_rule':'four consecutive failed structured operations or unavailable provider ends as execution failure',
+            'failure_rule':'transient provider transport failures retry with 5, 10, 20, ... seconds capped at 300 while the current unit remains pending; other failures retain the existing operation-contract and explicit unavailable-provider handling',
             'bounds':'ten is a reporting milestone, not a credit capacity or stop; no run-wide iteration, source, time or spend cap; numerical continuation governs',
             'model_tiers':self.providers['model_tiers'],
             'page_relevance_model':self.providers['assessor'].model,
