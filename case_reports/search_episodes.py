@@ -81,6 +81,7 @@ class OutbreakSearchEpisodeState:
     stop: bool = False
 
     def to_report(self) -> CqCalibrationChildReport:
+        score_history, identity_history = self._credit_history()
         return score_candidate_outbreak_sources(
             self._search_records(),
             extra_outputs={"search_specs": self._search_specs()},
@@ -89,7 +90,8 @@ class OutbreakSearchEpisodeState:
                 for observation in self.observations
                 for error in observation.errors
             ),
-            score_history=self._score_history(),
+            score_history=score_history,
+            identity_history=identity_history or None,
         )
 
     def as_record(self) -> dict[str, Any]:
@@ -125,8 +127,10 @@ class OutbreakSearchEpisodeState:
             )
         )
 
-    def _score_history(self) -> tuple[float, ...]:
+    def _credit_history(self) -> tuple[tuple[float, ...], tuple[tuple[str, ...], ...]]:
         scores: list[float] = []
+        samples: list[tuple[str, ...]] = []
+        seen: set[str] = set()
         for end in range(1, len(self.observations) + 1):
             observations = self.observations[:end]
             report = score_candidate_outbreak_sources(
@@ -138,7 +142,10 @@ class OutbreakSearchEpisodeState:
                 },
             )
             scores.append(report.score)
-        return tuple(scores[:-1])
+            current = set(report.credited_criteria)
+            samples.append(tuple(sorted(current - seen)))
+            seen = current
+        return tuple(scores[:-1]), tuple(samples)
 
 
 @dataclass(frozen=True)

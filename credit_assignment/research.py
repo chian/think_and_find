@@ -1,14 +1,14 @@
-"""Numerical yield control for finite, declared scientific requirements.
-
-This reuses the repository's rolling marginal-credit rarefaction rule. It is
-an operational saturation heuristic, not a statistical confidence interval
-or a claim that the literature has been exhausted.
-"""
+"""Episode credit and the copied nano-graphrag incidence yield controller."""
 
 from dataclasses import dataclass
+import json
 import math
 
-from .cq_calibration import cq_normalization_rarefaction
+from .incidence_rarefaction import (
+    ChannelSchema, ControllerConfig, EstimatorController,
+    OBSERVATION_FAILED, OBSERVATION_OBSERVED,
+    adaptive_marginal_credit_threshold,
+)
 
 
 @dataclass(frozen=True)
@@ -35,7 +35,7 @@ class ResearchController:
     """Deduplicate at this scope, never add up children's accumulated credit."""
 
     def __init__(self, columns, *, window=4, root_window=None, capacity=2, epoch="research-v2", initial=None, groups=None,
-                 sum_qualities=False, point_scores=False, yield_threshold=None):
+                 sum_qualities=False, point_scores=False, yield_threshold=None, scope_path=None):
         if yield_threshold is not None and (isinstance(yield_threshold, bool) or
                 not isinstance(yield_threshold, (int, float)) or not math.isfinite(yield_threshold) or yield_threshold < 0):
             raise ValueError("Yield threshold must be finite and nonnegative")
@@ -66,6 +66,33 @@ class ResearchController:
         self.stop = False
         self.reason = "continue"
         self.rarefaction = None
+        self._incidence = EstimatorController(
+            scope_path=tuple(scope_path or (("research", epoch),)), epoch=epoch,
+            channel_schema=ChannelSchema.single("scientific_credit"),
+            control=ControllerConfig.uniform(("scientific_credit",),
+                gamma=yield_threshold or 0.0, rho=0.0, streak_length=1),
+            window_size=(self.root_window if scope_path and len(scope_path) == 1 else window),
+            subsample_size=max(1, (self.root_window if scope_path and len(scope_path) == 1 else window) // 2),
+            threshold_adapter=(adaptive_marginal_credit_threshold
+                if yield_threshold is None else None),
+        )
+        self._observed_seen = {column: set(keys) for column, keys in self.seen.items()}
+        self._observed_qualities = {column: dict(rows) for column, rows in self.qualities.items()}
+
+    def _earned_identities(self):
+        """Identity atoms earned since this episode's last completed own unit."""
+        earned = [json.dumps(["identity", column, key], separators=(",", ":"))
+            for column, keys in self.seen.items()
+            for key in keys - self._observed_seen[column]]
+        earned.extend(json.dumps(["quality", column, key, quality], separators=(",", ":"))
+            for column, rows in self.qualities.items()
+            for key, quality in rows.items()
+            if quality > self._observed_qualities[column].get(key, 0.0))
+        return sorted(earned)
+
+    def _observe_credit_snapshot(self):
+        self._observed_seen = {column: set(keys) for column, keys in self.seen.items()}
+        self._observed_qualities = {column: dict(rows) for column, rows in self.qualities.items()}
 
     def _qualities(self, value):
         if self.sum_qualities or self.point_scores:
@@ -120,23 +147,28 @@ class ResearchController:
         # Failed assessment preserves credit but still contributes zero realized yield.
         self.history.append(score)
         if score < previous:
-            # Retractions invalidate the previous yield window, not the audit history.
+            # A changed scientific sheet begins a new estimation epoch while
+            # the score history remains available for audit.
             self.window_start = len(self.history) - 1
-        resolution = (1 - 1e-12) / (2 * len(self.columns) * self.capacity * len(self.groups))
-        if self.point_scores:
-            resolution = (1 - 1e-12) * (self.quality_resolution or 0.1)
-        elif self.quality_resolution is not None:
-            # The count-based floor must not hide a real reviewed rubric increment.
-            resolution = min(resolution, (1 - 1e-12) * self.quality_resolution /
-                             (max(len(group) for group in self.groups) * len(self.groups)))
-        verdict = cq_normalization_rarefaction(
-            self.history[self.window_start:], max_score=self._maximum(),
-            score_resolution=resolution, gain_threshold=self.yield_threshold,
-            window_size=self.root_window if is_root else self.window,
+            self._incidence = self._incidence.transitioned(
+                f"{self.epoch}:revision:{len(self.history)}")
+            self._observe_credit_snapshot()
+            earned = []
+        else:
+            earned = self._earned_identities() if value.evaluated else []
+            if value.evaluated:
+                self._observe_credit_snapshot()
+        incidence = self._incidence.advance(
+            unit_label, earned,
+            observation_status=OBSERVATION_OBSERVED if value.evaluated else OBSERVATION_FAILED,
+            is_root=is_root,
         )
-        self.rarefaction = verdict.as_record()
-        self.stop = verdict.should_yield
-        self.reason = verdict.outcome if value.evaluated or self.stop else "failed_observation"
+        complete = self._maximum() is not None and score >= self._maximum()
+        self.stop = complete or (incidence.stop and self.yield_threshold != 0)
+        self.reason = "complete" if complete else (
+            incidence.verdict.outcome if value.evaluated or self.stop else "failed_observation")
+        self.rarefaction = {"should_yield": self.stop, "outcome": self.reason,
+            "incidence": incidence.as_record()}
         return ResearchStep(self.stop, score, score - previous, value.evaluated, self.reason)
 
     def state(self):
@@ -162,4 +194,5 @@ class ResearchController:
 
     def transitioned(self, epoch):
         return ResearchController(self.columns, window=self.window, root_window=self.root_window, capacity=self.capacity, epoch=epoch,
-                                  groups=self.groups, sum_qualities=self.sum_qualities, point_scores=self.point_scores, yield_threshold=self.yield_threshold)
+                                  groups=self.groups, sum_qualities=self.sum_qualities, point_scores=self.point_scores,
+                                  yield_threshold=self.yield_threshold, scope_path=self._incidence.scope_path)

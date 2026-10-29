@@ -135,7 +135,8 @@ class ResearchRun:
         source = self.controller_specs[path[-1][1]]
         controller = ResearchController(source.credit_columns, window=self.limits.yield_window,
             root_window=self.limits.root_yield_window, initial=source.credit(source.ledger.result()), point_scores=True,
-            yield_threshold=self.limits.root_yield_threshold if len(path) == 1 else None)
+            yield_threshold=self.limits.root_yield_threshold if len(path) == 1 else None,
+            scope_path=path)
         self.live_controllers[path] = controller
         return controller
 

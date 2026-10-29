@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
-from statistics import median
+from dataclasses import dataclass, field, replace
+from fractions import Fraction
+from functools import reduce
 from typing import Any, Iterable, Mapping
 
+from .incidence_rarefaction import (
+    ChannelSchema, ControllerConfig, DEFAULT_EFFICIENCY_FRACTION, EstimatorController,
+    NumericBand, OBSERVATION_OBSERVED, STATUS_NORMAL, adaptive_marginal_credit_threshold,
+)
 from .simple import CalculationError
 
 
@@ -146,6 +151,7 @@ class CqRarefactionReport:
     window_size: int
     observations: int
     outcome: str
+    statistical_estimate: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.score < 0.0:
@@ -208,6 +214,7 @@ class CqRarefactionReport:
             "window_size": self.window_size,
             "observations": self.observations,
             "outcome": self.outcome,
+            "statistical_estimate": dict(self.statistical_estimate),
         }
 
     @property
@@ -691,12 +698,19 @@ def cq_normalization_rarefaction(
     score_history: Iterable[float],
     *,
     max_score: float | None,
+    identity_history: Iterable[Iterable[str]] | None = None,
     score_resolution: float = 1.0,
-    efficiency_fraction: float = 0.5,
+    efficiency_fraction: float = DEFAULT_EFFICIENCY_FRACTION,
     window_size: int = 2,
     gain_threshold: float | None = None,
 ) -> CqRarefactionReport:
-    """Stop on marginal saturation, or completion when a finite ceiling exists."""
+    """Use nano-graphrag's incidence estimator on explicit score quanta.
+
+    Legacy callers retain only cumulative criterion scores. Their positive
+    increments are atomized after rationalizing float scores and fed
+    as one incidence sample per completed observation. The research Episode
+    controller instead supplies its actual scientific credit identities.
+    """
 
     if gain_threshold is not None and (isinstance(gain_threshold, bool) or
             not isinstance(gain_threshold, (int, float)) or not math.isfinite(gain_threshold) or gain_threshold < 0):
@@ -721,43 +735,72 @@ def cq_normalization_rarefaction(
         raise ValueError("score_history cannot decrease")
 
     score = scores[-1]
+    gains = tuple(Fraction(str(value)).limit_denominator(1_000_000)
+        - Fraction(str(previous)).limit_denominator(1_000_000)
+        for previous, value in zip((0.0, *scores[:-1]), scores))
+    positive = [gain for gain in gains if gain > 0]
+    resolution = Fraction(str(score_resolution))
+    if positive:
+        denominator = math.lcm(*(item.denominator for item in (*positive, resolution)))
+        quantum = Fraction(reduce(math.gcd, (int(item * denominator)
+            for item in (*positive, resolution))), denominator)
+    else:
+        quantum = resolution
+    samples = None if identity_history is None else tuple(tuple(sample) for sample in identity_history)
+    if samples is not None and len(samples) != len(scores):
+        raise ValueError("One identity sample is required for each completed score observation")
+    def threshold_adapter(context):
+        update = adaptive_marginal_credit_threshold(context)
+        if efficiency_fraction == DEFAULT_EFFICIENCY_FRACTION:
+            return update
+        candidates = []
+        if update.one_result_resolution.status_code == STATUS_NORMAL:
+            candidates.append(update.one_result_resolution.value)
+        if update.productive_unit_baseline.status_code == STATUS_NORMAL:
+            candidates.append(efficiency_fraction * update.productive_unit_baseline.value)
+        return replace(update, efficiency_fraction=efficiency_fraction,
+            gamma=NumericBand.exact(max(candidates)) if candidates else update.gamma)
+
+    controller = EstimatorController(
+        scope_path=(("criterion", "score-history"),), epoch="score-history",
+        channel_schema=ChannelSchema.single("criterion_credit"),
+        control=ControllerConfig.uniform(("criterion_credit",),
+            gamma=gain_threshold or 0.0, rho=0.0, streak_length=1),
+        window_size=window_size, subsample_size=max(1, window_size // 2),
+        threshold_adapter=threshold_adapter if gain_threshold is None else None,
+    )
+    step = None
+    for index, gain in enumerate(gains):
+        atoms = (samples[index] if samples is not None else
+            tuple(f"score:{index}:{part}" for part in range(int(gain / quantum))))
+        step = controller.advance(str(index), atoms, observation_status=OBSERVATION_OBSERVED)
+    if step is None:
+        raise ValueError("At least one score observation is required")
+    estimate = step.as_record()
+    should_yield = (max_score is not None and score >= max_score) or (step.stop and gain_threshold != 0)
+    outcome = "complete" if max_score is not None and score >= max_score else (
+        "saturated" if should_yield else "continue")
     baseline_index = max(0, len(scores) - window_size - 1)
     recent_gain = score - scores[baseline_index]
-    score_gains = tuple(
-        next_score - current_score
-        for current_score, next_score in zip(scores, scores[1:])
-    )
-    productive_gains = tuple(
-        gain for gain in score_gains[-window_size:] if gain > 0.0
-    )
-    productive_gain_baseline = (
-        median(productive_gains) if productive_gains else None
-    )
-    threshold_candidates = [score_resolution]
-    if productive_gain_baseline is not None:
-        threshold_candidates.append(
-            productive_gain_baseline * efficiency_fraction
-        )
-    gain_threshold = max(threshold_candidates) if gain_threshold is None else gain_threshold
-    should_yield = max_score is not None and score >= max_score
-    outcome = "complete" if should_yield else "continue"
-    if not should_yield and len(scores) > window_size:
-        should_yield = recent_gain < gain_threshold
-        if should_yield:
-            outcome = "saturated"
+    threshold = step.verdict.config.gamma
+    productive_gain_baseline = None
 
     return CqRarefactionReport(
         should_yield=should_yield,
         score=score,
         max_score=max_score,
         recent_gain=recent_gain,
-        gain_threshold=gain_threshold,
+        gain_threshold=threshold,
         score_resolution=score_resolution,
         efficiency_fraction=efficiency_fraction,
         productive_gain_baseline=productive_gain_baseline,
         window_size=window_size,
         observations=len(scores),
         outcome=outcome,
+        statistical_estimate={"identity_basis": "declared_credits" if samples is not None else "rationalized_score_quanta",
+            "quantum": str(quantum),
+            "threshold_units": "expected_next_hypervolume_credit",
+            "paired_incidence": estimate},
     )
 
 

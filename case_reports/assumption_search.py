@@ -101,6 +101,7 @@ class AssumptionSearchEpisodeState:
     stop: bool = False
 
     def to_report(self) -> AssumptionSearchReport:
+        score_history, identity_history = self._credit_history()
         return score_assumption_sources(
             self.child,
             self._search_records(),
@@ -110,7 +111,8 @@ class AssumptionSearchEpisodeState:
                 for observation in self.observations
                 for error in observation.errors
             ),
-            score_history=self._score_history(),
+            score_history=score_history,
+            identity_history=identity_history or None,
         )
 
     def as_record(self) -> dict[str, Any]:
@@ -144,21 +146,18 @@ class AssumptionSearchEpisodeState:
             )
         )
 
-    def _score_history(self) -> tuple[float, ...]:
+    def _credit_history(self) -> tuple[tuple[float, ...], tuple[tuple[str, ...], ...]]:
         scores: list[float] = []
+        samples: list[tuple[str, ...]] = []
+        seen: set[str] = set()
         for end in range(1, len(self.observations) + 1):
             observations = self.observations[:end]
-            report = score_assumption_sources(
-                self.child,
-                self._search_records(observations),
-                extra_outputs={
-                    "search_specs": tuple(
-                        observation.search for observation in observations
-                    ),
-                },
-            )
-            scores.append(report.score)
-        return tuple(scores[:-1])
+            candidates = candidate_sources_from_search_records(self._search_records(observations))
+            current = set(_assumption_credit_ids(tuple(item.search for item in observations), candidates))
+            scores.append(float(len(current)))
+            samples.append(tuple(sorted(current - seen)))
+            seen = current
+        return tuple(scores[:-1]), tuple(samples)
 
 
 @dataclass(frozen=True)
@@ -432,6 +431,17 @@ def assumption_search_specs(
     return ()
 
 
+def _assumption_credit_ids(search_specs, candidates):
+    return tuple(name for name, present in (
+        ("scoped_queries_formulated", bool(search_specs)),
+        ("search_results_returned", bool(candidates)),
+        ("source_metadata_present", any(candidate.get("source_ref") and
+            (candidate.get("title") or candidate.get("doi") or candidate.get("url"))
+            for candidate in candidates)),
+        ("retrieved_text_present", any(candidate.get("text") for candidate in candidates)),
+    ) if present)
+
+
 def score_assumption_sources(
     child: str,
     search_records: tuple[dict[str, Any], ...],
@@ -439,6 +449,7 @@ def score_assumption_sources(
     extra_outputs: Mapping[str, Any] | None = None,
     errors: tuple[CalculationError, ...] = (),
     score_history: tuple[float, ...] = (),
+    identity_history: tuple[tuple[str, ...], ...] | None = None,
 ) -> AssumptionSearchReport:
     """Score reusable assumption-search output with rarefaction."""
 
@@ -451,21 +462,11 @@ def score_assumption_sources(
         }
     )
 
-    score = float(
-        bool(outputs.get("search_specs"))
-        + bool(candidates)
-        + any(
-            candidate.get("source_ref")
-            and (candidate.get("title")
-                 or candidate.get("doi")
-                 or candidate.get("url"))
-            for candidate in candidates
-        )
-        + any(candidate.get("text") for candidate in candidates)
-    )
+    score = float(len(_assumption_credit_ids(outputs.get("search_specs"), candidates)))
     rarefaction = cq_normalization_rarefaction(
         score_history + (score,),
         max_score=4.0,
+        identity_history=identity_history,
     )
     if errors:
         outputs["provider_errors"] = tuple(
