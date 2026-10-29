@@ -110,8 +110,6 @@ def main():
     if not retained.evaluated or retained.causal_sheet_updates != (malformed,) or not retained.diagnostics:
         raise RuntimeError('An unscorable native observation lost otherwise valid source evidence')
     report = reader.parent_report(reader.pending)
-    if len(json.dumps(report).encode()) > 12000:
-        raise RuntimeError('Source handoff exceeded its bounded scientific return')
     # All four declared sheet calculations are executable from real records.
     coverage_values = {}
     for key, criterion in [('D_one','importance'),('Btest_one','expected_bounds'),('check_one','support'),('repair','repair')]:

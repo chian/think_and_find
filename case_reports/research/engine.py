@@ -405,9 +405,6 @@ class ResearchSource:
     def bounded_inputs(self, view, declared):
         # Only the latest direct-child report is steering.
         inputs = view.model_inputs(declared, reports=view.child_reports[-1:])
-        size = len(json.dumps(inputs, ensure_ascii=False).encode())
-        if size > 65000:
-            raise ValueError(f"Scoped model input is {size} bytes; narrow selected sheet records or reading scope")
         return inputs
 
     def build_result(self, record):

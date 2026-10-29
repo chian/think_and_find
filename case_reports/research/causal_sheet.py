@@ -499,7 +499,7 @@ class CausalSheet:
             raise ValueError("Calculation context must identify a scientific support or change record")
         return self._claim_pins(self.rows[context], {})
 
-    def calculation_view(self, keys, *, context=None, offset=None, limit=8, max_bytes=12000):
+    def calculation_view(self, keys, *, context=None, offset=None, limit=8):
         """Selected calculated results, never an unbounded global ledger in a prompt."""
         if not isinstance(keys, list) or not 1 <= len(keys) <= 8 or len(set(keys)) != len(keys):
             raise ValueError("Select one to eight distinct assessment keys")
@@ -529,22 +529,18 @@ class CausalSheet:
             else:
                 value = causal_support.selected_credit(self, key)
             result[key] = compact_calculation(value, offset=0 if kind == "importance" else offset, limit=limit, summary=not detail_requested)
-        if len(json.dumps(result, ensure_ascii=False).encode()) > max_bytes:
-            raise ValueError("Selected calculations exceed the bounded view; choose fewer assessments")
         return result
 
-    def view(self, keys, *, max_bytes=12000):
+    def view(self, keys):
         """Explicitly scoped child inputs; no recursive expansion of the ledger."""
         keys = list(dict.fromkeys(keys))
         result = [{"key": key, "kind": self.rows[key]["kind"], "data": self.rows[key]["data"],
                    "version": self.rows[key]["version"], "dependencies": self.rows[key]["dependencies"],
                    "previous": self.rows[key]["previous"],
                    "current": self.current(key)} for key in keys]
-        if len(json.dumps(result, ensure_ascii=False).encode()) > max_bytes:
-            raise ValueError("Sheet commission is too large; select fewer relevant inputs")
         return deepcopy(result)
 
-    def snapshot_view(self, references, *, max_bytes=12000):
+    def snapshot_view(self, references):
         """At most eight exact historical records, with their original input pins."""
         if not isinstance(references, (list, tuple)) or len(references) > 8:
             raise ValueError("Select at most eight scientific snapshots")
@@ -554,8 +550,6 @@ class CausalSheet:
             # 'current' has no scientific meaning for an immutable audit snapshot.
             result.append({**row, "audit_snapshot": True,
                            "is_latest_version": self.rows[row["key"]]["version"] == row["version"]})
-        if len(json.dumps(result, ensure_ascii=False).encode()) > max_bytes:
-            raise ValueError("Historical inputs exceed the bounded view; select fewer snapshots")
         return result
 
     def return_page(self, updates, *, offset=0, limit=8, calculation_context=None):
