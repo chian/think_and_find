@@ -216,6 +216,9 @@ def record_schema(kind):
         return causal_support.record_schema(kind, SNAPSHOT_SCHEMA)
     if kind == "importance":
         return protocol_schema()
+    if kind == "source_formalization":
+        from .source_formalization import record_schema as formalization_schema
+        return formalization_schema()
     if kind == "importance_result":
         raise ValueError("Calculation receipts are host-generated, never model-authored records")
     if kind in {"expectation", "expectation_break", "expectation_support"}:

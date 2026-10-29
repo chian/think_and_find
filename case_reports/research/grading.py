@@ -7,7 +7,7 @@ from importlib import import_module
 GRADING_FIELDS = {
     "expectation_test": ("expectation", "assessment", "scope", "claim_relation", "claim_intervention", "target", "grounds", "rationale"),
     "repair_assessment": ("break", "expectation_test", "target", "target_test", "candidate", "alternatives", "claim_relation", "construction_cases", "test_cases", "rationale", "limitations"),
-    "support_assessment": ("support", "application", "importance", "bounds_test", "prediction", "facts", "limitations"),
+    "support_assessment": ("support", "application", "importance", "bounds_test", "source_formalization", "prediction", "facts", "limitations"),
 }
 MODULES = {"expectation_test": "bounds", "repair_assessment": "repairs", "support_assessment": "support_grading"}
 CALCULATORS = {"expectation_test": "grade_bounds", "repair_assessment": "grade_repair", "support_assessment": "grade_support"}

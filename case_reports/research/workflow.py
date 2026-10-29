@@ -25,6 +25,9 @@ Choose a Search Strategy child for source evidence or a Reasoning child for a sp
 Use returned source findings, their bearing on G and expected generalizability bounds,
 and unresolved questions to formulate the Reasoning commission. Supply selected record keys
 and exact historical snapshots; the child receives its own assignment, not your transcript.
+When a sourced theoretical statement could support or challenge G, commission its
+formalization and comparison where the source permits it. Keep an empirical
+measurement as a typed observation rather than inventing a causal equation for it.
 For an empty sheet, Search Strategy may start with inputs=[] and snapshots=[].
 For an already formalized observation need, commission a support_assessment key among
 Search Strategy inputs. Source readers can then match native quantity, units and numeric
@@ -57,7 +60,7 @@ COMMISSION_SCHEMA = {"type": "object", "additionalProperties": False,
         "snapshots": {"type": "array", "maxItems": 8, "items": SNAPSHOT_SCHEMA}}}
 
 
-SCIENTIFIC_KINDS = ["inference", "premise", "theory", "application", "reasoning", "comparison", "repair", "importance",
+SCIENTIFIC_KINDS = ["inference", "premise", "theory", "application", "reasoning", "comparison", "repair", "importance", "source_formalization",
     "expectation", "expectation_break", "expectation_support", "support_contribution", "causal_change", *GRADING_FIELDS]
 
 
@@ -132,6 +135,12 @@ SHEET_TOOLS = ("Use the following scientific sheet tools within your assigned re
         "As new hypotheses appear, retain the previous expectation, the triggering finding, and the reason for a revision. "
         "Record whether a repair follows through better definitions or a missing dependency within general rules, or introduces a special rule/fudge factor outside them. "
         "Choose equations, a linked pair in an SCM, or discrete simulation/master equations without a required order. "
+        "When a sourced theoretical statement bears on G, record source_formalization tied to its evidence and the G importance protocol. "
+        "Use the same formal method and named circumstance inputs; give the source-derived equations or rules, focal G realization, "
+        "declared G alteration, answer, quantity/units, public derivation and limitations. Do not copy G's model as a source claim "
+        "unless the source actually supports that mapping. A source measurement is an observation, not a causal model to invent. "
+        "The host compares executed source and G predictions and their common intervention on declared circumstances; "
+        "the model cannot assign a match verdict. Conflicts within expected generalizability bounds remain visible. "
         "Use evaluate with one assessment and one to eight predeclared case_ids; the host computes paired answers. "
         "For original G after revision, select evaluation_context as its scoped support, change or executable assessment key. "
         "Use calculate with one to eight scoring-sheet keys to inspect computed results. "
@@ -144,6 +153,8 @@ SHEET_TOOLS = ("Use the following scientific sheet tools within your assigned re
         "and original-G claim_relation over baseline/altered answers plus the shared claim_intervention. The host checks that the paired answers "
         "realize that intervention. An empty/unrepresentable G relation stays unresolved. "
         "Use support_assessment to connect an expectation_support, its application and importance protocol to that same expectation_test. "
+        "Set source_formalization to the sourced formal claim key when counting a theoretical hypothesis; use an empty string "
+        "for an observation-only assessment. Ground the formalization in the expectation_support argument and public reasoning. "
         "Supply prediction quantity/units and selected source observations with their declared case IDs; the host calculates dependence and alignment. "
         "Native source conditions must match the numeric circumstances; source uncertainty is reported, never invented as a scoring tolerance. "
         "Use support_contribution.checks to reference these assessments. Text references alone earn no support. Additional aligned observations can "

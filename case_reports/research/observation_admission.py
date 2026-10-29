@@ -70,7 +70,8 @@ def assess_returned_observations(source, result):
                     "argument": "Compare this source observation within the explicitly commissioned G/B_G realization",
                     "limitations": "Source extraction and the supplied model/quantity mapping remain explicit scientific inputs"})
                 staged.put(argument_key, "reasoning", {
-                    "author": "host:observation-comparison", "premises": [template["application"], evidence_key, template["importance"]],
+                    "author": "host:observation-comparison", "premises": [template["application"], evidence_key, template["importance"],
+                        *([template["source_formalization"]] if template.get("source_formalization") else [])],
                     "steps": ["Match source-native quantity, units and numeric conditions to the commissioned prediction and fixed circumstances",
                               "Execute the declared paired model comparison; derive alignment and G dependence with the support calculator"],
                     "conclusion": "The attached assessment reports computed alignment, dependence or unresolved operands",

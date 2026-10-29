@@ -13,6 +13,7 @@ from ...credit_assignment import causal_support
 from .grading import GRADING_FIELDS, module_for, grade_record, compact_calculation
 from .importance import (PROTOCOL_FIELDS, RESULT_FIELDS, validate_protocol, validate_result,
                          result_key, score_importance, protocol_identity)
+from . import source_formalization
 
 
 # Deliberately closed records. References below are scientific object identities,
@@ -24,6 +25,7 @@ FIELDS = {
     "application": ("inference", "inference_version", "theory", "context_key", "context", "context_distinction", "direction",
                     "inference_use", "consequence_without_inference"),
     "evidence": ("source", "locator", "study_id", "finding", "measurements"),
+    "source_formalization": source_formalization.FIELDS,
     "reasoning": ("author", "premises", "steps", "conclusion", "limitations"),
     "verification": ("reasoning", "reviewer", "verdict", "checks", "counterexample"),
     "comparison": ("left", "right", "mapping", "conflict", "repair_search_bounds"),
@@ -51,7 +53,7 @@ BOUND_CHANGES = {"expand_bounds", "shrink_bounds", "change_inference", "repair_t
 REPAIR_KINDS = {"not_a_repair", "better_definition", "missing_dependency", "general_rule", "exceptional_patch", "unresolved"}
 REVISION_FIELDS = {"prior", "triggers", "changes", "change", "repair_kind", "proposed_rule",
                    "general_rules", "rule_reasoning", "retained", "lost", "new_predictions", "limitations"}
-TRIGGER_KINDS = {"evidence", "premise", "theory", "application", "reasoning", "verification",
+TRIGGER_KINDS = {"evidence", "source_formalization", "premise", "theory", "application", "reasoning", "verification",
                  "comparison", "repair", "expectation_break", "importance_result", *GRADING_FIELDS}
 
 
@@ -156,6 +158,8 @@ class CausalSheet:
                 expected = set(accepted(kind, data))
             elif "verification_required" in data:
                 expected.add("verification_required")  # Retired audit field, no scoring meaning.
+        if kind == "support_assessment" and isinstance(data, dict) and "source_formalization" not in data:
+            expected.discard("source_formalization")  # Historical assessments remain readable, without hypothesis credit.
         if kind == "application" and isinstance(data, dict) and "inference_version" not in data:
             expected.discard("inference_version")
         if kind not in FIELDS or not isinstance(data, dict) or set(data) != expected:
@@ -179,6 +183,8 @@ class CausalSheet:
             refs = [data["comparison"], *data["construction_evidence"], *data["test_evidence"]]
         elif kind == "importance":
             refs = [data["application"]]
+        elif kind == "source_formalization":
+            refs = source_formalization.references(data)
         elif kind == "importance_result":
             refs = [data["assessment"]]
         elif kind in {"support_contribution", "causal_change"}:
@@ -322,6 +328,8 @@ class CausalSheet:
             module_for(kind).validate(self, key, data)
         elif kind == "importance":
             validate_protocol(data)
+        elif kind == "source_formalization":
+            source_formalization.validate(self, key, data)
         elif kind == "importance_result":
             self._require_kind(data["assessment"], "importance")
             validate_result(data, self.rows[data["assessment"]]["data"])
@@ -585,6 +593,9 @@ class CausalSheet:
                                   source_version=measurements.get("source_version"),
                                   bearing=measurements.get("relevance_basis", "")[:800],
                                   reasoning_question=measurements.get("reasoning_question", "")[:800])
+                elif row["kind"] == "source_formalization":
+                    detail.update(evidence=data["evidence"], assessment=data["assessment"],
+                                  method=data["method"], quantity=data["quantity"], units=data["units"])
                 elif row["kind"] == "expectation":
                     revision = data["revision"]
                     detail.update(basis=data["basis"], prior=revision["prior"] if revision else None,
@@ -595,7 +606,7 @@ class CausalSheet:
                     detail.update(inference=data["inference"], expectation=data["expectation"])
             meaning = " ".join(str(data[name]) for name in (
                 "statement", "name", "distinction", "context", "inference_use", "finding",
-                "conclusion", "argument", "limitations", "conflict", "adjustment", "costs", "basis", "bounds", "rationale", "question", "contrast", "error") if name in data)
+                "conclusion", "argument", "derivation", "limitations", "conflict", "adjustment", "costs", "basis", "bounds", "rationale", "question", "contrast", "error") if name in data)
             if row["kind"] == "verification":
                 meaning = " ".join(data["checks"]) + " " + data["counterexample"]
             rows.append({"key": key, "kind": row["kind"], "version": row["version"], "status": status,

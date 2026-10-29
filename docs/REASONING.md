@@ -29,6 +29,15 @@ premises, alternatives and unresolved questions. New information can change an
 interpretation without changing the source text. A failed attempt preserves
 valid partial work and explains what needs repair.
 
+For a theoretical source claim about G, a Reasoning or scientific episode may
+record a source-linked formalization using the same method and circumstance
+inputs as G's importance protocol. It states the derivation and limitations.
+The host executes the source and G formalisms and exposes aligned, conflicting
+and unresolved comparisons. A model's assertion that two claims agree is not
+the comparison. A source measurement remains a measured target, including a
+Boolean target when the reported result supports one, rather than an invented
+SCM or simulation rule.
+
 Scoring needs explicit meanings and operands for the contribution being measured.
 Investigation progress and support for a favored conclusion are different
 quantities: a useful refutation can improve the investigation. The numerical

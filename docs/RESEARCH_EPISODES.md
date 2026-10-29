@@ -45,6 +45,18 @@ calculations. A resolved negative result can complete an assigned calculation.
 The calculators establish consequences within the supplied formal models and
 source mappings; model verdicts have no numerical effect.
 
+A sourced theoretical statement can be recorded as `source_formalization`, linked
+to its evidence and one G importance protocol. It uses that protocol's method
+(equations, acyclic SCM or discrete simulation), named circumstance inputs and
+output quantity/units. The support assessment compares the executed source and
+G models, including their declared common G alteration, within the tested
+expected generalizability bounds. Conflicting or unresolved cases remain in the
+calculation. A matching source formalization can support a dependent hypothesis;
+an unformalized theoretical statement cannot. This comparison checks consequences
+of authored formalizations, not fidelity of the source-to-model derivation or
+agreement over unexamined circumstances. Empirical observations are kept as
+typed measured targets rather than manufactured causal models.
+
 Literature roles project scientific contributions attributable to their returned
 evidence, with scope determined by their actual responsibility:
 

@@ -10,7 +10,7 @@ from fractions import Fraction
 CRITERIA = {
     "importance": "Compute changed circumstance mass / total declared mass; calculation progress measures resolved mass",
     "expected_bounds": "Circumstance mass with resolved scope, expected behavior and G relation / declared mass",
-    "support": "Resolved assigned hypothesis/observation comparisons / selected comparison count",
+    "support": "Resolved source-formalization/G and observation/G comparisons / selected comparison count",
     "repair": "Circumstance mass with resolved repair and applicable scoped-necessity comparisons / declared mass",
 }
 CRITERION_KINDS = {"importance": "importance", "expected_bounds": "expectation_test",
@@ -27,7 +27,7 @@ def compile_sheet(sheet):
         inferences.setdefault(application["inference"], {})[key] = value
     from ..case_reports.research.grading import GRADING_FIELDS, grade_record
     subsheets = {kind: {key: grade_record(sheet, key) for key, _ in sheet.of_kind(kind)} for kind in GRADING_FIELDS}
-    return {"calculation": "causal-support-and-change-v2", "assessments": assessments, "subsheets": subsheets,
+    return {"calculation": "causal-support-and-change-v3", "assessments": assessments, "subsheets": subsheets,
             "support_credit": compile_support(sheet),
             "inferences": inferences,
             "meaning": "Each fraction measures G's influence for its recorded application, contrast, question and measure. "
@@ -51,7 +51,7 @@ def _calculation_coverage(sheet, subject, criterion, pins):
     identity = sha256(json.dumps(operands, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     if criterion == "support":
         hypothesis = grade["hypothesis"]["status"]
-        resolved = int(hypothesis in {"demonstrated", "not_demonstrated_in_expected_bounds"})
+        resolved = int(hypothesis in {"demonstrated", "not_demonstrated_in_expected_bounds", "source_statement_conflict"})
         known_fact_states = {"aligned", "not_aligned", "quantity_or_units_mismatch", "source_conditions_mismatch",
                              "outside_expected_bounds", "G_relation_not_satisfied"}
         resolved += sum(fact["status"] in known_fact_states for fact in grade["facts"])

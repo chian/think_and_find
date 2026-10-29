@@ -14,11 +14,14 @@ from .dependence import dependence_result, paired_case_result, answer_matches
 from .importance import rational
 from .support_observations import observation_identity, observation_target
 
-FIELDS = ("support", "application", "importance", "bounds_test", "prediction", "facts", "limitations")
+FIELDS = ("support", "application", "importance", "bounds_test", "source_formalization", "prediction", "facts", "limitations")
+LEGACY_FIELDS = tuple(name for name in FIELDS if name != "source_formalization")
 
 
 def references(data):
-    return [data[name] for name in ("support", "application", "importance", "bounds_test")] + [item["evidence"] for item in data["facts"]]
+    return ([data[name] for name in ("support", "application", "importance", "bounds_test")] +
+            ([data["source_formalization"]] if data.get("source_formalization") else []) +
+            [item["evidence"] for item in data["facts"]])
 
 
 def context_pins(sheet, data):
@@ -30,7 +33,7 @@ def context_pins(sheet, data):
 
 
 def validate(sheet, key, data):
-    if not isinstance(data, dict) or set(data) != set(FIELDS):
+    if not isinstance(data, dict) or set(data) not in (set(FIELDS), set(LEGACY_FIELDS)):
         raise ValueError("Support assessment needs its exact executable operands")
     for name in ("support", "application", "importance", "bounds_test", "limitations"):
         if not isinstance(data[name], str) or not data[name].strip():
@@ -49,10 +52,20 @@ def validate(sheet, key, data):
         raise ValueError("Support dependence protocol must address the selected application")
     if bounds_test["expectation"] != support["expectation"] or bounds_test["assessment"] != data["importance"]:
         raise ValueError("Support and B_G subscoring sheets must share the exact expected bounds and formal protocol")
+    formalization = data.get("source_formalization", "")
+    if formalization:
+        sheet._require_kind(formalization, "source_formalization")
+        formal = sheet.rows[formalization]["data"]
+        if formal["assessment"] != data["importance"]:
+            raise ValueError("Source statement and G must use the same formal protocol and circumstance domain")
+        if not any(sheet._depends_on(ground, formalization) for ground in support["grounds"]):
+            raise ValueError("The B_G support argument must ground the source formalization")
     prediction = data["prediction"]
     if not isinstance(prediction, dict) or set(prediction) != {"quantity", "units"} or any(
             not isinstance(value, str) or not value.strip() for value in prediction.values()):
         raise ValueError("Prediction quantity and units must be explicit; no implicit conversions")
+    if formalization and (formal["quantity"], formal["units"]) != (prediction["quantity"], prediction["units"]):
+        raise ValueError("Source and G predictions must name the same quantity and units")
     if not isinstance(data["facts"], list) or len(data["facts"]) > 16:
         raise ValueError("Select at most sixteen observations per support assessment")
     case_ids = {case["id"] for case in protocol["domain"]["cases"]}
@@ -69,7 +82,7 @@ def validate(sheet, key, data):
             raise ValueError("An observation can be selected once per support assessment")
         seen.add(identity)
     prior = sheet.rows.get(key)
-    if prior and any(prior["data"][name] != data[name] for name in FIELDS if name != "limitations"):
+    if prior and any(prior["data"].get(name, "") != data.get(name, "") for name in FIELDS if name != "limitations"):
         raise ValueError("Support comparison operands are fixed; create an explicit new assessment for a changed comparison")
 
 
@@ -169,8 +182,21 @@ def grade_support(sheet, key):
             pending_cases.append(case["id"])
         elif classification["original_G_relation"] is True and classification["baseline_fits"] is True and receipt["baseline"] != receipt["altered"]:
             witnesses.append(case["id"])
-    hypothesis_status = ("stale_operands" if not current else "demonstrated" if witnesses else
-                         "unresolved" if pending_cases else "not_demonstrated_in_expected_bounds")
+    source_comparison = None
+    formalization = data.get("source_formalization", "")
+    if formalization:
+        from .source_formalization import compare as compare_source
+        source_comparison = compare_source(sheet, formalization, data["bounds_test"], pins=pins)
+    model_dependence = bool(witnesses)
+    hypothesis_status = ("stale_operands" if not current else
+                         "unresolved" if not model_dependence and pending_cases else
+                         "not_demonstrated_in_expected_bounds" if not model_dependence else
+                         "awaiting_formal_source_statement" if not formalization else
+                         "demonstrated" if source_comparison["status"] in {"aligned", "partial_alignment"} and any(
+                             case["case_id"] in witnesses and case["status"] == "aligned"
+                             for case in source_comparison["cases"]) else
+                         "source_statement_conflict" if source_comparison["status"] == "conflict" else
+                         "source_statement_unresolved")
     formal_identity = None
     identity_error = ""
     if hypothesis_status == "demonstrated":
@@ -191,7 +217,7 @@ def grade_support(sheet, key):
         status = "unresolved"
         if not current:
             status = "stale_operands"
-        elif hypothesis_status != "demonstrated":
+        elif not model_dependence:
             status = "application_dependence_not_demonstrated"
         elif classification["in_scope"] is not True:
             status = "outside_expected_bounds"
@@ -225,6 +251,7 @@ def grade_support(sheet, key):
         "hypothesis": {"identity": formal_identity, "status": hypothesis_status, "identity_error": identity_error,
             "witness_cases": witnesses, "unresolved_cases": pending_cases},
         "facts": fact_results, "dependence": dependence["calculation"],
+        "source_comparison": source_comparison,
         "limitations": [data["limitations"], "Executed consequences are conditional on the supplied formal realization, units and circumstance-to-source mapping.",
             "Formal fingerprints substitute static equations and normalize variable names, but do not prove every algebraic or dynamical equivalence; source extraction fidelity remains auditable.",
             "Aligned observations count in a dependent application even if the altered prediction also aligns; discrimination is reported separately."]}
@@ -235,6 +262,7 @@ def record_schema(snapshot_schema=None):
     def obj(properties):
         return {"type": "object", "additionalProperties": False, "required": list(properties), "properties": properties}
     return obj({"support": text, "application": text, "importance": text, "bounds_test": text,
+        "source_formalization": {"type": "string"},
         "prediction": obj({"quantity": text, "units": text}),
         "facts": {"type": "array", "maxItems": 16, "items": obj({"evidence": text, "observation": text, "case_id": text})},
         "limitations": text})

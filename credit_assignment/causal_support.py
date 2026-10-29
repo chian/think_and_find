@@ -120,6 +120,9 @@ def validate(sheet, key, kind, data):
             sheet._require_kind(check, "support_assessment")
             if sheet.rows[check]["data"]["support"] != data["support"]:
                 raise ValueError("Support contribution and subscoring assessments must share one exact B_G support claim")
+            formalization = sheet.rows[check]["data"].get("source_formalization", "")
+            if formalization and not sheet._depends_on(data["argument"], formalization):
+                raise ValueError("The public support derivation must address the formalized source statement")
         return
 
     sheet._require_kind(data["break"], "expectation_break")
@@ -172,13 +175,13 @@ def _current_operands(sheet, key, pins):
 
 
 SUPPORT_POLICY = {
-    "name": "executed-support-equal-component-units-v1",
-    "hypothesis_unit": "One canonical supporting theory/hypothesis group with executed dependence inside its expected bounds; contexts and parameterizations do not multiply it",
+    "name": "executed-support-equal-component-units-v2",
+    "hypothesis_unit": "One canonical theory/hypothesis group with executed G dependence and an aligned same-method source formalization inside its expected bounds; contexts and parameterizations do not multiply it",
     "observation_unit": "One identified source observation aligned with a computed prediction in a dependent application inside expected bounds",
     "aggregation": "hypothesis_count + observation_count",
     "change_factor": "qualifying restored original-scope circumstance mass / original-scope mass",
     "origin": "Explicit implementation convention for component aggregation and restored-mass scaling; not user-specified relative scientific weights",
-    "meaning": "Counts are support for G as represented, not certainty, empirical probabilities or statistical independence",
+    "meaning": "Counts are support for G as represented, not certainty, empirical probabilities, verified source transcription or statistical independence",
 }
 
 
@@ -356,7 +359,7 @@ def compile_support(sheet):
         "claims": claims, "expectations": expectations, "contributions": contributions,
         "changes": changes, "points": points, "total": str(total), "resolution": str(min(resolutions)),
         "point_dependencies": {key: sorted(values) for key, values in point_dependencies.items()},
-        "meaning": "Support components require executed dependence and, for facts, computed agreement with source operands in expected generalizability bounds. "
+        "meaning": "Hypothesis support requires executed dependence and an aligned same-method source formalization; fact support requires executed dependence and computed agreement with source observations in expected generalizability bounds. "
             "Change credit uses restored targets not rescued by compared G-preserving alternatives, within the declared comparison only. "
             "Later support revalues original G after a break. Counts and scaling follow the exposed implementation convention, not certainty or statistical independence. "
             "Unexecuted, unrepresentable, stale and text-only operands remain explicit pending entries; model verdicts never supply numerical credit."}
