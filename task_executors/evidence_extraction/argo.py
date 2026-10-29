@@ -63,10 +63,11 @@ class ArgoClient:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
         payload: dict[str, Any] = {"model": self.model, "messages": messages, "user": self.user}
-        if self.model.lower().startswith("gpt55"):
+        model_key = self.model.lower().replace("-", "").replace(" ", "").replace("_", "")
+        if model_key.startswith("gpt55"):
             payload["max_completion_tokens"] = 16000
-            if self.reasoning_effort in {"low", "medium", "high"}:
-                payload["reasoning_effort"] = self.reasoning_effort
+        if model_key.startswith(("gpt5", "gpt6", "o1", "o3", "o4")) and self.reasoning_effort is not None:
+            payload["reasoning_effort"] = self.reasoning_effort
         body = post_json(
             f"{self.base_url}/chat/completions",
             payload,

@@ -35,7 +35,11 @@ class ResearchController:
     """Deduplicate at this scope, never add up children's accumulated credit."""
 
     def __init__(self, columns, *, window=4, root_window=None, capacity=2, epoch="research-v2", initial=None, groups=None,
-                 sum_qualities=False, point_scores=False):
+                 sum_qualities=False, point_scores=False, yield_threshold=None):
+        if yield_threshold is not None and (isinstance(yield_threshold, bool) or
+                not isinstance(yield_threshold, (int, float)) or not math.isfinite(yield_threshold) or yield_threshold < 0):
+            raise ValueError("Yield threshold must be finite and nonnegative")
+        self.yield_threshold = yield_threshold
         self.columns = tuple(dict.fromkeys(columns))
         if not self.columns or window < 2 or capacity < 1:
             raise ValueError("Research control requires columns, window >= 2 and positive capacity")
@@ -127,7 +131,7 @@ class ResearchController:
                              (max(len(group) for group in self.groups) * len(self.groups)))
         verdict = cq_normalization_rarefaction(
             self.history[self.window_start:], max_score=self._maximum(),
-            score_resolution=resolution,
+            score_resolution=resolution, gain_threshold=self.yield_threshold,
             window_size=self.root_window if is_root else self.window,
         )
         self.rarefaction = verdict.as_record()
@@ -158,4 +162,4 @@ class ResearchController:
 
     def transitioned(self, epoch):
         return ResearchController(self.columns, window=self.window, root_window=self.root_window, capacity=self.capacity, epoch=epoch,
-                                  groups=self.groups, sum_qualities=self.sum_qualities, point_scores=self.point_scores)
+                                  groups=self.groups, sum_qualities=self.sum_qualities, point_scores=self.point_scores, yield_threshold=self.yield_threshold)

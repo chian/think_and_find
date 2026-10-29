@@ -1,27 +1,9 @@
-"""Controlled research episodes and source-grounded quantitative models."""
-
+"""One iterative research application for pragmatic causal pluralism."""
 from .configured_providers import (
-    ProviderConfigurationError,
-    WorkflowEvidenceProviders,
-    WorkflowProviderConfig,
-    firecrawl_argo_config_from_env,
-    firecrawl_argo_providers,
-    run_configured_evaluate_safety_guideline_episode,
-    run_configured_safety_guideline_request,
-    run_configured_guideline_research,
+    ProviderConfigurationError, WorkflowProviderConfig, firecrawl_argo_config_from_env,
+    firecrawl_argo_research_providers, run_configured_research,
 )
-from .case_reports.research import ResearchLimits, ResearchProviders, run_guideline_research
-
-__all__ = [
-    "ProviderConfigurationError",
-    "WorkflowEvidenceProviders",
-    "WorkflowProviderConfig",
-    "firecrawl_argo_config_from_env",
-    "firecrawl_argo_providers",
-    "run_configured_evaluate_safety_guideline_episode",
-    "run_configured_safety_guideline_request",
-    "run_configured_guideline_research",
-    "ResearchLimits",
-    "ResearchProviders",
-    "run_guideline_research",
-]
+from .case_reports.research import ResearchLimits, ResearchProviders, run_research
+__all__ = ["ProviderConfigurationError", "WorkflowProviderConfig", "firecrawl_argo_config_from_env",
+           "firecrawl_argo_research_providers", "run_configured_research", "ResearchLimits",
+           "ResearchProviders", "run_research"]

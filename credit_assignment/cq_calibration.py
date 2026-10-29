@@ -694,9 +694,13 @@ def cq_normalization_rarefaction(
     score_resolution: float = 1.0,
     efficiency_fraction: float = 0.5,
     window_size: int = 2,
+    gain_threshold: float | None = None,
 ) -> CqRarefactionReport:
     """Stop on marginal saturation, or completion when a finite ceiling exists."""
 
+    if gain_threshold is not None and (isinstance(gain_threshold, bool) or
+            not isinstance(gain_threshold, (int, float)) or not math.isfinite(gain_threshold) or gain_threshold < 0):
+        raise ValueError("gain_threshold must be finite and nonnegative")
     scores = tuple(float(score) for score in score_history)
     if not scores:
         raise ValueError("score_history must contain at least one score")
@@ -734,7 +738,7 @@ def cq_normalization_rarefaction(
         threshold_candidates.append(
             productive_gain_baseline * efficiency_fraction
         )
-    gain_threshold = max(threshold_candidates)
+    gain_threshold = max(threshold_candidates) if gain_threshold is None else gain_threshold
     should_yield = max_score is not None and score >= max_score
     outcome = "complete" if should_yield else "continue"
     if not should_yield and len(scores) > window_size:

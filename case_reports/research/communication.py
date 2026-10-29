@@ -406,3 +406,12 @@ def decision_diagnostics(diagnostics):
 
 def compact_assumption(assessment):
     return {k: assessment[k] for k in ("subject", "field", "value", "statement", "reasonableness")}
+
+
+def compact_reading_coverage(attempts):
+    """Decision-sized source coverage; full ranges and question histories stay in the audit."""
+    return [{"source": row["source"], "source_version": row["source_version"], "document_characters": row["document_characters"],
+             "examined_characters": sum(b-a for a,b in row["examined_ranges"]),
+             "reviewed_characters": sum(b-a for a,b in row["reviewed_ranges"]),
+             "attempts": row["attempts"], "outcomes": row["outcomes"]}
+            for row in reading_coverage(attempts)[-8:]]

@@ -19,10 +19,10 @@ class ModelTier(str, Enum):
 
 CALL_SITE_TIERS = MappingProxyType({
     "propose_guideline_action": ModelTier.REASONING,
-    "propose_investigation_strategy": ModelTier.REASONING,
+    "propose_reasoning_action": ModelTier.REASONING,
     "propose_strategy_query": ModelTier.REASONING,
     "choose_research_source": ModelTier.FAST,
-    "propose_page_child": ModelTier.FAST,
+    "propose_page_child": ModelTier.REASONING,
     "propose_table_query": ModelTier.REASONING,
     "extract_research_evidence": ModelTier.REASONING,
     "review_research_evidence": ModelTier.REASONING,

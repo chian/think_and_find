@@ -1,106 +1,106 @@
-# Generic research task and scope
+# Task authority and episode ownership
 
-## Objective
+The user's original scientific instructions, including their later corrections,
+define this one generic research task type: finding and assessing examples of
+pragmatic causal pluralism across natural phenomena. Recover and read those messages when resolving
+its causal-inference definitions, theory relationships, generalizability bounds
+and useful reversals. This file does not replace or abbreviate that authority.
 
-Adapt the copied episodic workflow to investigate a user-defined question through
-both evidence acquisition and reasoning. The system should maintain a developing
-answer, identify unresolved inferences, acquire information that bears on them,
-and revise its conclusions when the evidence warrants it.
+The application must investigate through the existing Episode structure. Every
+Episode revisits a scoped decision using its assignment, actual outcomes and
+requested child returns. Research order emerges from those choices. The parent
+can reconsider an interpretation, commission relevant evidence work or select
+another useful operation as its information changes.
 
-The deliverable is a reasoned answer with traceable evidence and explicit limits.
-A source inventory or a populated table may support that answer, but does not
-establish that the requested reasoning has been completed.
+The deliverable requires reasoning with traceable evidence and explicit limits.
+An inventory of sources, filled fields, operational success or numerical yielding
+alone does not establish that the scientific request has been answered.
 
-## Present boundary
+The existing Episode hierarchy is wired to the causal scoring sheets. Candidate
+inferences have explicit identities and their own application, comparison and
+repair assessments. The framework can discover and revisit multiple candidates.
 
-The migration preserved the existing executable implementation and rewrote its
-design documentation. Its domain CLI path, records, calculation catalog and
-credit policy remain available. A subsequent task-specific reasoning prototype
-adds the causal-reversal path and its separate credit policy. Generic reasoning
-operations and task-neutral records remain design work.
-The copied repository is now published separately. Generic reasoning records
-remain future work.
+Instructions to the coding agent to study methodological literature specify
+how to develop the formalism and scoring criteria. They are not research targets
+for the application. The runtime objective is defined in
+`case_reports/research/task.py`; it prescribes no author, paper, or example.
+The earlier runs directed at methodological literature pursued the wrong task
+and are not evidence of successful scientific execution.
 
-## Task contract
+## Original scientific instructions
 
-A generic task should declare its question, requested outputs, relevant units of
-analysis, supplied premises, and criteria for what constitutes a useful result.
-Where the user requests a collection, its target count and diversity dimensions
-belong to this contract. Do not turn one task's criteria into universal defaults.
+The following complete user messages were recovered from the original session
+logs. They are quoted verbatim. Later corrections govern earlier formulations.
+The [full recovered discussion](/home/chia/recovered-instructions/think-and-find/full-relevant-user-transcript.md)
+retains the surrounding user instructions with exact source locations.
 
-Unknown distinctions can be investigated and revised. A task contract cannot
-assume that every scientifically relevant context can be listed in advance.
-Changes to categories, comparisons or scope need an explicit recorded reason;
-they must not silently weaken the user's requested result.
+**2026-10-23T16:23:58.597Z** — session `01a16051-c42a-7c40-ad2c-8ad2ac4565ac`, original log line 8965.
 
-## Evidence and inference
+> The prompts look good, but I want to plan with you some ideas for improving them. The idea of vaguely finding contradictions is rough. At best, it is a very very vague set of instructions. SO it could use some few-shot examples and perhaps it could use some formalisms. For example, it might be good to break down each hypothesis into parts - candidate inferences is what Gentner would call them. Another way of thinking of them would be linked pairs in an SCM. If you can break a hypothesis down atomically and show that under one framing, scale, etc.., you have one candidate inference and at another scale, you have the opposite one, that is what we are looking for formulaically. It's not 100% locked down but this should be more defining.
 
-Preserve these distinctions in state and reporting:
+**2026-10-27T15:22:42.087Z** — session `01a179b5-73fa-79b2-ba5b-07959985a86d`, original log line 5587.
 
-- Retrieved source text and exact quotations, with source/version/span identity.
-- Source-reported claims and the context in which the source makes them.
-- User-supplied premises and definitions.
-- Inferences that combine or interpret evidence.
-- Hypotheses, contrary evidence and unresolved questions.
-- Conclusions and the task criteria they satisfy, fail, or leave unresolved.
+> I think I know what you mean by bridge. You mean generalizable causal inference. So to identify what you call the bridge, we must first identify which "facts" we expect, based on the analysis or system we are solving, to be generalizable rules. By defining those explicitly, we can target searching for when that generalization breaks and why. Adding another link in the causal structure is a trivial break and easily fixed. A fix that breaks the generalizability on other systems is a problematic break and the thing we are looking for. Does that make sense to you? So for that to work, we need two things. We need to identify the generalizable causal inference being proposed, and we need to know what overall hypothesis or theory that generalizable causal inference supports. We then need a credit assignment that adds credit when finding more hypotheses or theories that this same generalizable causal inference supports or can be trivially added to to support (and we should make that formal addition). And then finally, we need a big credit add when we find the opposite. A theory or hypothesis that this generalizable causal inference is not compatible with for a non-trivial reason. I.e., we need to find something where the origianl generalizable causal inference does not fit the hypothesis or theory and in addition, any fixes to that are not useful. I.e., cannot further be used by that theory. This is why I suggested scale and course-graining. B/c often when looking at larger systems, a microscopic fact is not very useful and in fact gets in the way of identifying the larger pattern. You don't look at where all the atoms are to figure out the bending mode of the spoon. It's not only implausible and unwieldy, the fundamental physics do not support it without a lot of fitting assumptions which then render the theory really not very predictive anyhow.
 
-An inference need not appear verbatim in a source. Its premises must remain
-traceable, and its status must not be relabeled as an extracted observation.
-Exact quotation checks establish faithful transcription, not the validity of an
-argument. A numerical calculation establishes a consequence of its inputs, not
-the truth of its assumptions.
+**2026-10-27T15:27:59.230Z** — session `01a179b5-73fa-79b2-ba5b-07959985a86d`, original log line 5647.
 
-## Reasoning during acquisition
+> I think you should make it a goal to implement and test this. In addition, you should not hard-prompt no new organisms and so on. It should depend on how the generalizable causal inference should generalize. If it's an ecological rule about herbivores, it absolutely can involve new animals. Does this make sense? You should prompt this to rely on explicitly naming the nature of the generalizability
 
-Reasoning should determine which uncertainty matters next and which evidence
-could discriminate between competing interpretations. That information need
-must reach the strategy, search, source-selection and reading operations.
-Returned evidence and failed attempts should update the parent investigation.
+**2026-10-27T22:24:29.774Z** — session `01a179b5-73fa-79b2-ba5b-07959985a86d`, original log line 8235.
 
-For a comparative task, finding two claims is only the beginning. The investigation
-may need to examine whether their actors, interventions, outcomes, time horizons
-and categories are comparable. The comparison can produce a new question rather
-than a binary verdict. These dimensions are an example of a task-specific
-reasoning contract, not an exhaustive definition of sufficient context.
+> Perhaps we need better language to distinguish these two things. The consequence should apply to a hypothesis or theory. A hypothesis or theory should involve many causal links or candidate inferences or mechanisms. The individual inference being generalized needs to have a name that is distinguished easily. As you can see, there is a lot of typing to make the point precise.
 
-## Runtime and progress
+**2026-10-27T22:26:18.863Z** — session `01a179b5-73fa-79b2-ba5b-07959985a86d`, original log line 8251.
 
-The operator's current requirement is **no scientific gates**. Represent warrant,
-comparability, uncertainty and task fit through continuous measurements. Continue
-according to numerically measured improvement; apply collection filters only
-afterward. A duplicate conclusion, a fresh evaluator rating or restoration of
-previously credited work earns no additional credit. Current scientific answers
-and historical credit memory remain distinct.
+> This is evidence of G's scope and that should get credit. That's what we said and designed. A reversal should get even more credit, but a similarity still get's credits. Freeze that language somewhere in a readme so I can refer back to it as needed. The real problem here is btw not in the credit unless it counted this as a reversal for some reason, the real issue here is that it said an algorithm is causal. Do you understand why this is not what we are after?
 
-Compose the existing Episode runtime and acquisition bindings. Retain the
-separation between semantic work and numerical continuation. A model may propose
-queries, interpretations and structured judgments; continuation and credit use
-declared numerical rules over recorded results.
+**2026-10-27T22:28:19.949Z** — session `01a179b5-73fa-79b2-ba5b-07959985a86d`, original log line 8313.
 
-The inherited calculation weights are not a generic reasoning policy. Define
-future progress from the declared task and its actual results, with explicit
-rules for duplication, revision and unresolved work. Do not award completion
-merely for calls, sources, filled fields or a repeated judgment. Stopping and
-success remain distinct outcomes.
+> Try to restrict the search to natural phenomena. A calculator (which is ultimately what this is) is causal of predicting some calculation result and always is. But that's not helpful per se. That's a mechanistic operation where you are providing the mechanism. So that's kind of tautological.
 
-## Current discovery implementation: 2026-10-27
 
-The operator clarified that a task-specific question must discover its own cases.
-The fixed three-case pilot was an investigation/calibration fixture, not the
-requested search space. Its historical record is in
-[CREDIT_EXPERIMENT.md](CREDIT_EXPERIMENT.md).
+## Current design and precedence
 
-The active binding starts with a biological causal-generalization question and
-an empty collection. Each inquiry centers on a particular source-grounded
-causal inference and its proposed domain. Source reading supplies candidate
-rules; reviews build explicit derivations of distinct theories it supports,
-formal additions, an independently warranted target theory, and repair tests.
-The warranted domain decides which organisms and scales are relevant. Numerical
-attention balances general discovery and existing inquiries. Continuous quality
-and fit contribute separate credit coordinates; scientific eligibility never
-closes an episode. Collection filtering happens only after numerical stopping.
+The later discussion in the current conversation makes the scientific requirements
+into a scoring rubric: a global sheet records the state of a generalized causal
+inference and children supply evidence or reasoning for scoped subsheets. The
+scientific parent reasons about that state and chooses further work within the
+existing iterative Episodes. This is the organizing design, rather than the
+older list of accounting proposals.
 
-[GENERALIZABLE_INFERENCE_CREDIT.md](GENERALIZABLE_INFERENCE_CREDIT.md) defines
-the active proof obligations and credit objective. Ten strong examples are an
-empirical result to assess from actual sources, not an initial condition or a
-consequence of program exit. Generic task-neutral interfaces remain separate work.
+[The consolidated scoring specification](CAUSAL_SCORING_SHEET.md) describes that
+one design, its subsheets, communication and credit meanings, and the remaining
+implementation gaps. It distinguishes explicit requirements from proposed
+formalization and does not claim that the current implementation satisfies them.
+
+The recovered transcript linked above ends before the current conversation's
+scoring-sheet discussion. It is historical context, not a complete specification.
+In particular, the older attained-volume and fractional-feedback proposals do
+not by themselves define the later rubric's scientific operands. Their prior
+acceptance is retained; the later discussion does not explicitly cancel them.
+Their integration must be explained against the rubric before calling the
+result a completed credit design. Neither restoring old code nor counting
+completed sheet fields accomplishes that integration.
+
+Halpern and Lakatos were assigned to the coding agent as methodological reading
+for constructing the criteria. They were not assigned to the application as a
+research objective. The runtime investigates natural phenomena generally, with
+no prescribed author, case or second task binding.
+
+The latest clarification makes expected generalizability bounds provisional,
+revisable expectations whose purpose is to reveal and explain where expectations
+break. Literature and reasoning across literature ground them where available;
+provisional judgment is explicitly permitted for these bounds when unavailable.
+Bounds may expand or shrink as hypotheses are investigated. Preserve the change
+and its reason, distinguishing better definitions/missing dependencies within
+general rules from special exceptions or magic fudge factors. This permission
+for judgment does not extend to subjective numerical scoring.
+
+Expected generalizability bounds now have structured versioned expectation,
+break and support records. Revisions retain exact prior expectations, triggering
+scientific snapshots, proposed rules and their retained/lost consequences.
+Bounded inspect and commission paths expose historical public records; G changes
+invalidate current expectations without erasing the original claim. Later
+support can address that original claim and expected-bounds version explicitly.
+The offline synthetic demonstration is `scripts/show_expected_bounds.py`;
+it validates state/link behavior, not scientific proof or empirical discovery.

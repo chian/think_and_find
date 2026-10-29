@@ -1,22 +1,17 @@
-# Research composition and retained domain helpers
+# Research Episodes
 
-`research/` contains the existing active research composition: goal state,
-hypotheses, acquisition, evidence admission, contextual assessment, calculation
-tools and reporting. Other modules here retain the domain-specific source and
-assumption admission compositions that its public API still imports.
+`research/` contains the scientific parent, scoped Investigation, Strategy,
+Search, Page and iterative reading sources. Each revisits its assigned decision
+using actual outcomes. The shared `method_loop` runtime owns iteration.
 
-These modules are copied intact so the workspace remains self-contained.
-They are not a completed generic judgment interface. Their outbreak terminology,
-scalar assumptions, scientific review contracts and output definitions need
-examination when the generic implementation is designed.
+The parent reasons over the shared causal scoring sheet and commissions specific
+scientific questions. Investigations can reason, seek evidence or independently
+verify a named argument. Children return bounded changes and provenance; the
+parent uses those findings in its next decision. Calculation, retrieval and
+source extraction remain tools selected within episodes.
 
-The generic parent should maintain a developing answer and use unresolved
-inferences to select further acquisition. The existing strategy > search > page >
-reading hierarchy provides its acquisition foundation. All three reading paths
-are retained: source-table queries, document-order report windows and lexical
-probes. Exact source evidence and inferred conclusions remain distinct records.
-
-See [episode ownership](../docs/RESEARCH_EPISODES.md),
-[reasoning design](../docs/REASONING.md) and [search coverage](../docs/SEARCH.md).
-Historical domain assumptions or review procedures are not universal requirements
-for arbitrary research tasks.
+Scientific support and investigation progress have separate projections. Follow
+[episode ownership](../docs/RESEARCH_EPISODES.md),
+[reasoning and communication](../docs/REASONING.md),
+[search responsibilities](../docs/SEARCH.md) and the
+[scoring sheet](../docs/CAUSAL_SCORING_SHEET.md).

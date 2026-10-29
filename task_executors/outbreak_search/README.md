@@ -59,19 +59,14 @@ byte windows; the maximum window probability is retained for each page.
   `retrieval.mode`, and the fetched URL when available so candidate records
   preserve the concrete text-acquisition path passed to LLM extraction.
 
-## Scoring and yield
+## Episode ownership
 
-The searched outbreak child scores normalized candidates for:
-
-- scoped disease and setting queries
-- at least one returned candidate
-- source metadata plus retrievable text
-- a retrieved page body that can be sent to LLM extraction
-- coverage across multiple query purposes or sources
-
-The method-loop search episode evaluates the cumulative score after each
-scoped query and yields through the shared Cq rarefaction rule when all source
-criteria pass or the observed score gain saturates.
+The Strategy episode chooses literal queries for its assigned uncertainty.
+The Search episode repeatedly chooses which returned source to examine, using
+page outcomes and relevance information. Provider adapters execute selected
+requests and retain actual results and failures. Their response counts and
+successful transport do not establish scientific progress or choose when the
+episode ends. Continuation uses the episode's configured numerical controller.
 
 ## Failure modes
 
@@ -84,9 +79,7 @@ normalizer and must return an iterable of result objects.
 
 Retrieval provider exceptions become `retrieval_error` child errors tied to
 the source ref, URL, DOI, or search result that could not be fetched, including
-DOI and URL values nested under provider metadata. Partial retrieval errors are
-kept in `provider_errors` when other retrieved sources satisfy the search
-child's score; they block the child when they prevent enough full source text
-from being gathered. Candidates without retrieved text can still be retained as
+DOI and URL values nested under provider metadata. Retrieval failures retain the affected source and actual error so the
+owning episode can choose how to proceed. Candidates without retrieved text can still be retained as
 repair context, but they cannot become `EvidenceSource` records for LLM
 extraction.

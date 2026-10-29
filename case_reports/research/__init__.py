@@ -1,5 +1,4 @@
-"""Goal-directed research episodes for conditional indoor-air estimates."""
-
-from .workflow import ResearchLimits, ResearchProviders, run_guideline_research
-
-__all__ = ["ResearchLimits", "ResearchProviders", "run_guideline_research"]
+"""Iterative scientific reasoning and literature acquisition for causal pluralism."""
+from .engine import ResearchLimits, ResearchProviders
+from .workflow import run_research
+__all__ = ["ResearchLimits", "ResearchProviders", "run_research"]

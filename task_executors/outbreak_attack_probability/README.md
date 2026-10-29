@@ -29,10 +29,9 @@ observed indoor reproductive number.
 - `observed_indoor_reproductive_number`: observed secondary infections per
   index case.
 
-## Scoring and failure modes
+## Input shapes and validation
 
-The searched `build_attack_probability` episode asks the LLM for one of four
-supported source shapes:
+The numerical tool accepts these source input shapes:
 
 - `attendee_count`, `index_case_count`, and `secondary_case_count`
 - `attendee_count`, `index_case_count`, and a reported `attack_probability`
@@ -44,5 +43,5 @@ exposed non-index people. Count values must remain whole raw counts after
 normalization. Reported attack probabilities may be raw fractions or percents,
 but the normalized fraction must match the raw value. Unsupported evidence,
 unsupported units, fractional counts, invalid probabilities, and inconsistent
-normalized values fail closed before the deterministic susceptible-count and
-secondary-attack leaves run.
+normalized values produce input errors for the calling episode. The calculation is a selected
+tool action within that episode.

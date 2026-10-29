@@ -1,38 +1,41 @@
-# Progress and numerical continuation
+# Episode contribution and numerical continuation
 
-`attainment.py` now supplies the task-specific reasoning binding's persistent
-union hypervolume. It preserves coherent answer vectors and the first measurement
-for an identified contribution. Repeated/covered material adds zero volume; all
-attempts remain in task state and audit independently of that numerical result.
-This archive does not select the current scientific answer. The active operator
-policy has no scientific admission gates; see
-[the repair plan](../docs/ITERATIVE_CREDIT_PLAN.md). The inherited domain modules
-below retain their historical behavior and are not the causal-reversal policy.
+A numerical projection measures what actual work contributes under the episode's
+assigned scope and result contract. Define the meaning and operands of each
+component before using it to steer continuation. Scoring definitions, functions
+that populate them and the episode's substantive instructions have separate
+responsibilities.
 
-This package preserves the copied application's calculation credit, evidence
-progress and yield policies. `research.py` serves the active research composition;
-other modules support the retained domain calculations and legacy compositions.
-The implementation and its numerical weights are unchanged by the migration.
+The episode chooses work from its available alternatives. The configured local
+yield estimator/controller observes completed own units and governs numerical
+continuation. Its observations do not prescribe which action to choose.
 
-A generic reasoning task needs a declared projection from its recorded results
-into numerical progress. Its policy must distinguish acquired evidence, resolved
-inferences, revisions and satisfaction of the requested outputs. The existing
-calculation weights are not automatically that policy.
+Record outcomes before projecting credit. One completed child supplies one
+parent-level observation through its return. Internal child calls do not create
+extra parent turns, and child scores are not summed into parent progress.
+Repeated facts, report construction and shared-state refreshes do not manufacture
+new contributions.
 
-Semantic judgments supply continuous assessments and reasons. The active
-discovery task projects epistemic quality and fit into separate continuous
-coordinates, without scientific admission gates or a fit multiplier.
-`portfolio_frontier` combines whole canonical answers across source-discovered
-inquiries, with a fixed requested capacity and separate cardinality states.
-Parents recompute their own volume, independently of current report preference;
-they never sum child volumes or maximize incompatible coordinates within an
-inquiry. Repeated records, restored answers and fresh score draws cannot
-manufacture progress. See [the current numerical policy](../docs/DISCOVERY_PLAN.md).
+Keep investigation progress distinct from support for a particular conclusion.
+Useful negative findings and corrections can advance the investigation while
+weakening that conclusion. Numerical yielding does not establish scientific
+completion, correctness or exhaustive search.
 
-Keep progress separate from success. Numerical yield can end an Episode without
-establishing a correct answer, exhaustive search, or completion of the user's
-criteria. Preserve the current policy until its generic replacement is explicitly
-implemented; this documentation selects no replacement formula or thresholds.
+This directory contains inherited numerical utilities, including `research.py`
+and `attainment.py`. Their availability does not select a causal-research scoring
+policy. The removed binding's weights, gates, scheduling and attribution rules
+are not current instructions. Resolve the scientific scoring requirements from
+the user's original messages and inspect the actual episode trace with them.
 
-See [task scope](../docs/CURRENT_GOAL.md) and
-[the implementation checklist](../docs/IMPLEMENTATION_CHECKLIST.md).
+`causal_sheet.py` compiles importance from changed circumstance mass divided by
+declared total mass, with unresolved bounds and a separate explicitly commissioned
+resolved-mass projection. Ordinal grades and their numerical anchors are removed.
+The operands and current limitations are documented in
+[`CAUSAL_SCORING_SHEET.md`](../docs/CAUSAL_SCORING_SHEET.md). These are sheet
+calculations for the existing Episodes, not a new binding or controller.
+
+`causal_support.py` supplies identified support units and support-proportional
+change credit linked to exact expected-generalizability-bounds versions. The
+current operational support count keeps hypothesis and observation counts visible;
+it is not certainty. Later support for original G revalues existing changes.
+Scientific definitions/arguments remain separate from host arithmetic.

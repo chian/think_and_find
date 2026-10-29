@@ -1,56 +1,37 @@
-# Checkpoint ownership and continuation
+# Durable Episode state
 
-## Preserved mechanism
+Reconstruction restores the actual episode assignment, selected work, received
+information, committed results, reading positions and controller observations.
+A completed provider reply is reused from its original record. An unanswered
+request remains distinguishable from a completed action.
 
-`checkpoint.py` and `method_loop/reconstruction.py` retain the original local
-checkpoint implementation. The design adapts ordered reconstruction mechanisms
-from OpenChia into repository-owned code; it has no sibling repository runtime
-dependency. Relevant original attribution and license notices remain in source.
+The existing journal records external requests and replies plus Episode
+lifecycle frames. Its manifest, ordered records, pending marker and physical
+attempts support reconstruction. Preserve source versions, identities, original
+contracts and implementation provenance. Changed code or scientific instructions
+must not silently reinterpret a prior run.
 
-The CLI records external requests and replies and Episode lifecycle frames.
-Continuation reconstructs state from a matching saved history before permitting
-new work. Ordinary resume requires compatible code, Python/runtime identity,
-inputs and non-secret provider settings. Credentials are supplied afresh.
+The complete recursive trace belongs in durable audit storage. Active decisions
+receive selected information through their contracts. Archived histories must
+not become a default context dump, and reconstruction must not manufacture
+new credit or completed-action observations.
 
-The copied CLI also retains an explicit compatible-fork interface for admitting
-specified changed implementation files at a committed unit boundary. A fork is
-a separate experiment, not silent migration of an existing result.
+The launcher exposes checkpoint and resume for this causal research application.
+Versioned sheet updates are part of the ordinary ResearchResult recorded at
+Episode boundaries. The mechanism remains serial; it does not establish durable
+independent child execution or external-effect reconciliation. Checkpoints from
+the former domain binding must not be resumed as this application.
 
-No checkpoints or historical run outputs were copied into this workspace. These
-mechanisms are retained source capabilities, not operations performed during
-the migration.
+Credentials stay outside recorded requests and checkpoints. Runtime artifacts
+are separate from tracked source documentation.
 
-## State boundary
+The corrected application schema explicitly binds each application to its named
+candidate inference. Older single-inference sheets are not silently migrated.
+Runs whose request directed the application to perform development reading are
+invalid research runs; retain them only as audit evidence, not resumable research
+or seed material. A corrected run starts from the generic runtime objective.
 
-A generic reasoning workflow will need continuation to reconstruct evidence,
-current arguments and their premises, revisions, unresolved questions, selected
-searches, reading cursors, contracts and numerical controller history. The current
-implementation reconstructs the existing domain records; generic reasoning state
-must be added through the same boundary when implemented.
-
-Changing a task definition, inference contract, model route or code must not
-silently reinterpret a prior run as if it had executed the new design. Explicit
-compatibility and provenance are required for any future continuation mechanism.
-
-## Storage and external effects
-
-The retained journal uses a manifest, ordered committed records, a pending request
-marker and physical-attempt records. Its implementation includes hash checks,
-atomic writes and an exclusive owner lock. These are implementation properties
-to preserve, not a claim that this migration retested crash recovery.
-
-Completed observational provider replies can be reconstructed locally. An
-unanswered request is different from a committed result. The current mechanism
-is serial and does not provide a generic reconciliation protocol for external
-state-changing operations or concurrent Episode execution.
-
-Provider credentials do not belong in recorded requests, outputs or checkpoints.
-Source and model content can remain in research artifacts, so those artifacts
-are separate from the source workspace and from the eventual Git repository.
-
-## Existing CLI compatibility
-
-The existing `--checkpoint-path`, `--resume` and explicit fork flags remain on the
-preserved launcher. Its registered inputs are still domain-specific. A generic
-CLI and generic task registration are pending work; this documentation does not
-claim those interfaces already exist.
+A run launched with `--root-yield-threshold 0` retains the same scientific parent
+and ledger because nonnegative recent gain cannot fall strictly below zero.
+The threshold is stored with checkpoint limits and retained on resume. Child
+episodes preserve their individual numerical thresholds and decision contracts.

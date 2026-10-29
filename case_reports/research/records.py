@@ -537,6 +537,7 @@ class ResearchResult(ClosedRecord):
     source_event_types: tuple[Mapping[str, Any], ...] = ()
     source_target_relationships: tuple[Mapping[str, Any], ...] = ()
     scenario_parameter_relations: tuple[Mapping[str, Any], ...] = ()
+    causal_sheet_updates: tuple[Mapping[str, Any], ...] = ()
 
     def as_record(self):
         return {"facts": [f.as_record() for f in self.facts],
@@ -548,7 +549,8 @@ class ResearchResult(ClosedRecord):
                 "reading_attempts": list(self.reading_attempts),
                 "source_event_types": list(self.source_event_types),
                 "source_target_relationships": list(self.source_target_relationships),
-                "scenario_parameter_relations": list(self.scenario_parameter_relations)}
+                "scenario_parameter_relations": list(self.scenario_parameter_relations),
+                "causal_sheet_updates": list(self.causal_sheet_updates)}
 
     def audit_identifiers(self):
         return tuple(f.key for f in self.facts)
@@ -591,9 +593,15 @@ class Ledger:
         self.source_event_types = {}
         self.source_target_relationships = {}
         self.scenario_parameter_relations = {}
+        from .causal_sheet import CausalSheet
+        self.causal_sheet = CausalSheet()
         self.merge(inherited)
 
     def merge(self, result):
+        # Validate scientific deltas before mutating other admitted records.
+        # This preserves conflicting child proposals for explicit reconsideration
+        # instead of silently replacing a newer premise or score.
+        self.causal_sheet.merge(result.causal_sheet_updates)
         self.facts.update((f.key, f) for f in result.facts)
         for estimate in result.estimates:
             model = estimate.get("parameterization")
@@ -665,7 +673,8 @@ class Ledger:
                               reading_attempts=tuple(self.reading_attempts.values()),
                               source_event_types=tuple(self.source_event_types.values()),
                               source_target_relationships=tuple(self.source_target_relationships.values()),
-                              scenario_parameter_relations=tuple(self.scenario_parameter_relations.values()), **kwargs)
+                              scenario_parameter_relations=tuple(self.scenario_parameter_relations.values()),
+                              causal_sheet_updates=tuple(self.causal_sheet.history), **kwargs)
 
 
 def compatible_estimates(left, right):
