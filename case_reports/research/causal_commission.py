@@ -227,6 +227,10 @@ def record_schema(kind):
     for name in FIELDS[kind]:
         if name in ENUMS:
             schema = {"type": "string", "enum": sorted(ENUMS[name])}
+        elif kind == "reasoning" and name == "premises":
+            schema = {"type": "array", "minItems": 1,
+                      "description": "Exact scientific record keys, not premise prose. Create a premise record first for a new assumption, then use its key here; use evidence keys for source-grounded premises. Records earlier in this batch may also be referenced.",
+                      "items": {"type": "string", "minLength": 1}}
         elif name in LIST_FIELDS:
             schema = {"type": "array", "items": {"type": "string", "minLength": 1}}
         elif name == "measurements":
@@ -238,6 +242,17 @@ def record_schema(kind):
         properties[name] = schema
     return {"type": "object", "additionalProperties": False,
             "required": list(FIELDS[kind]), "properties": properties}
+
+
+def _reference_locations(value, reference, path="data"):
+    """Identify the fields that supplied one rejected scientific record key."""
+    if isinstance(value, dict):
+        return [location for name, item in value.items()
+                for location in _reference_locations(item, reference, f"{path}.{name}")]
+    if isinstance(value, (list, tuple)):
+        return [location for index, item in enumerate(value)
+                for location in _reference_locations(item, reference, f"{path}[{index}]")]
+    return [path] if value == reference else []
 
 
 def read_sheet_result(sheet, commission, records, *, actor, owned_subjects=()):
@@ -254,6 +269,10 @@ def read_sheet_result(sheet, commission, records, *, actor, owned_subjects=()):
     updates = []
     owned_subjects = set(owned_subjects)
     visible = set(commission.inputs) | {subject for subject, _ in commission.assignments}
+    # An iterative child can build on records it admitted in earlier own units.
+    # Owned records remain scoped even when they are outside the small selected
+    # input page shown for the current decision.
+    visible.update(owned_subjects)
     if commission.calculation_context:
         visible.add(commission.calculation_context)
     visible.update(sheet.inferences_for(visible))
@@ -275,8 +294,18 @@ def read_sheet_result(sheet, commission, records, *, actor, owned_subjects=()):
         if record["key"] in sheet.rows and record["key"] not in visible:
             raise ValueError("Child cannot revise an uncommissioned scientific record")
         references = staged._references(kind, data) | set(record["dependencies"])
-        if not references <= visible:
-            raise ValueError("Reader used inputs outside its scoped commission; request those inputs explicitly")
+        missing = references - visible
+        if missing:
+            locations = []
+            for reference in sorted(missing):
+                fields = _reference_locations(data, reference)
+                if reference in record["dependencies"]:
+                    fields.extend(f"dependencies[{index}]" for index, item in enumerate(record["dependencies"])
+                                  if item == reference)
+                locations.append(f"{reference!r} at {', '.join(fields) if fields else 'scientific reference'}")
+            raise ValueError(f"{kind} record {record['key']!r} used unscoped keys: {'; '.join(locations)}. "
+                             "Use commissioned or own admitted records, create new records earlier in the batch, "
+                             "or ask the parent to commission other inputs")
         update = staged.propose(record["key"], kind, data, dependencies=record["dependencies"])
         allowed_snapshots = {(ref["key"], ref["version"]) for ref in commission.snapshots}
         allowed_snapshots.update((key, sheet.rows[key]["version"]) for key in visible if key in sheet.rows)

@@ -119,7 +119,12 @@ def _reasoning_commission_schema(source, visible):
 
 
 SHEET_TOOLS = ("Use the following scientific sheet tools within your assigned responsibility. "
-        "Only exact catalog keys belong in reference fields; put scientific instructions in question. "
+        "Reference only commissioned inputs, selected sheet inputs, your own admitted records, or records "
+        "created earlier in the same batch. The catalog is an index; inspect another catalog key before using it. "
+        "Put scientific instructions in question. "
+        "reasoning.premises contains record keys, never sentences: put a new assumption's text in "
+        "premise.statement and list that premise's key, or list selected evidence keys for source claims. "
+        "You may reference records you admitted in earlier decisions of this reasoning episode. "
         "Record public scientific derivations rather than a plan to reason later. "
         "Every record must contain exactly its data schema fields; use empty arrays/strings where appropriate. "
         "Dependencies name existing scientific keys or earlier records in the same batch, not prose. "
