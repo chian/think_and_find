@@ -11,7 +11,7 @@ from .engine import ResearchLimits, ResearchProviders, ResearchRun, ResearchSour
 from .records import ResearchResult
 from .report import ResearchReport
 from ...credit_assignment.causal_sheet import CRITERIA, CRITERION_KINDS
-from .importance import evaluate_cases
+from .importance import evaluate_cases, result_key
 from .grading import GRADING_FIELDS
 from .task import RESEARCH_OBJECTIVE
 
@@ -25,6 +25,12 @@ Choose a Search Strategy child for source evidence or a Reasoning child for a sp
 Use returned source findings, their bearing on G and expected generalizability bounds,
 and unresolved questions to formulate the Reasoning commission. Supply selected record keys
 and exact historical snapshots; the child receives its own assignment, not your transcript.
+When an executable result reports an error, inspect the receipt and its protocol. Do not
+repeat that evaluation: the receipt is deterministic for an immutable protocol. Correct
+the formal expression in a newly keyed protocol, then reconnect any source formalization
+and scoring operands that depended on the old protocol. If you commission Reasoning for
+the repair, include the protocol and the source formalization or other expression-bearing
+records the child must inspect, along with the failed receipts.
 When a sourced theoretical statement could support or challenge G, commission its
 formalization and comparison where the source permits it. Keep an empirical
 measurement as a typed observation rather than inventing a causal equation for it.
@@ -81,7 +87,9 @@ def _sheet_tool_contract(source, kinds):
     """Schemas of primitive sheet operations; these do not define child roles."""
     sheet = source.ledger.causal_sheet
     visible = _visible_keys(source)
-    gradable = [key for key in visible if sheet.rows[key]["kind"] == "importance"]
+    gradable = [key for key in visible if sheet.rows[key]["kind"] == "importance" and
+                any(result_key(key, case["id"]) not in sheet.rows
+                    for case in sheet.rows[key]["data"]["domain"]["cases"])]
     contexts = ["", *(key for key in visible if sheet.rows[key]["kind"] in
                      {"expectation_support", "support_contribution", "causal_change", *GRADING_FIELDS})]
     return {"type": "object", "additionalProperties": False,
@@ -150,8 +158,8 @@ SHEET_TOOLS = ("Use the following scientific sheet tools within your assigned re
         "For original G after revision, select evaluation_context as its scoped support, change or executable assessment key. "
         "Use calculate with one to eight scoring-sheet keys to inspect computed results. "
         "The exact_typed_answer comparator compares Boolean or exact rational answers; define a Boolean answer expression for threshold questions. "
-        "Expressions support numeric literals, named variables, arithmetic + - * / and integer powers [-16,16], "
-        "comparisons, and/or/not, conditional expressions, abs/min/max. Equations are explicit acyclic assignments; "
+        "Expressions support numeric literals, named variables, arithmetic + - * /, integer powers [-16,16] written with **, "
+        "comparisons, and/or/not, conditional expressions, abs/min/max; ^ is unsupported. Equations are explicit acyclic assignments; "
         "simulation equations update synchronously for steps from initial expressions. No imports, arbitrary code or implicit solvers. "
         "Provide integer or rational/decimal text inputs and positive weights. A sample frequency is never a proof over continuous space. "
         "Use expectation_test to execute one realization of B_G: exact expectation snapshot, immutable scope predicate, expected answer target, "
@@ -171,6 +179,8 @@ SHEET_TOOLS = ("Use the following scientific sheet tools within your assigned re
         "original-scope fraction requiring a G change among the compared preserving alternatives. Empty or unexecuted alternatives leave necessity unresolved. "
         "The component aggregation and restoration scaling convention is exposed in policy_details; do not enter numerical merit grades. "
         "Later support for original G increases that existing change's value; never rediscover its break to claim the gain. "
+        "A result receipt, including one with an execution error, is final for that immutable protocol and case. "
+        "Inspect an error receipt and record a corrected protocol under a new key; do not evaluate the same case again. "
         "Use calculate for summary results; calculation_offset and calculation_limit retrieve bounded detail pages. "
         "Do not revise G merely to rephrase it or revise its expected bounds; use expectation/support revisions for those changes. "
         "Define scientific operands rather than assigning grades, importance results, or a global merit score.")
@@ -242,8 +252,10 @@ class ScientificSource(ResearchSource):
         return self.run.global_goal.credit(result)
 
     def propose(self, view):
-        actions = ["record", "inspect", "calculate", "evaluate", "search_strategy", "reasoning"]
         schema, visible = _sheet_tool_contract(self, self.record_kinds)
+        actions = ["record", "inspect", "calculate", "search_strategy", "reasoning"]
+        if schema["properties"]["assessment"] is not False:
+            actions.append("evaluate")
         schema["properties"]["action"] = {"enum": actions}
         commission_schema = _reasoning_commission_schema(self, visible)
         schema["properties"].update({
@@ -321,8 +333,11 @@ class ReasoningSource(ResearchSource):
         return reasoning_credit(result, self.initial, self.commission)
 
     def propose(self, view):
-        actions = ["record", "inspect", "calculate", "evaluate"]
         schema, visible = _sheet_tool_contract(self, self.record_kinds)
+        actions = ["record", "inspect", "calculate"]
+        if schema["properties"]["assessment"] is not False:
+            actions.append("evaluate")
+        schema["properties"]["action"] = {"enum": actions}
         proposal = self.run.agent(self.inputs(view, operation="propose_reasoning_action",
             instruction=self.instructions + SHEET_TOOLS, allowed_actions=actions,
             response_contract=schema, calculation_criteria=CRITERIA))

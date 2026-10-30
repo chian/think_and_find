@@ -164,6 +164,12 @@ class SheetCommission:
             raise ValueError("Calculation context must be an explicit record key or empty")
         investigation_credit(sheet, self.assignments, context=self.calculation_context)  # Validate assigned numerical operands.
         keys = set(self.inputs) | {subject for subject, _ in self.assignments}
+        for key in self.inputs:
+            if sheet.rows[key]["kind"] == "importance_result":
+                assessment = sheet.rows[key]["data"]["assessment"]
+                if assessment not in keys:
+                    raise ValueError(f"Reasoning commission includes failed or completed result {key!r} "
+                                     f"but omits its importance protocol {assessment!r}")
         if self.calculation_context:
             keys.add(self.calculation_context)
         keys.update(sheet.inferences_for(keys))

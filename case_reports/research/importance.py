@@ -171,6 +171,9 @@ def validate_protocol(data):
         raise ValueError("Provide explicit original, replacement and answer expressions")
     if type(model["steps"]) is not int or not isinstance(model["initial"], dict):
         raise ValueError("Initial state and step count must be explicit")
+    expressions = [*equations.values(), model["replacement"], model["answer"], *model["initial"].values()]
+    if any(isinstance(value, str) and "^" in value for value in expressions):
+        raise ValueError("Use ** for integer powers in executable expressions; ^ is not supported")
     if data["method"] == "simulation":
         if not 1 <= model["steps"] <= 1024 or set(model["initial"]) != set(equations):
             raise ValueError("Discrete simulation needs an initial expression for every state and 1..1024 steps")
@@ -243,6 +246,15 @@ def evaluate_cases(sheet, assessment, case_ids, *, context=None):
     cases = {case["id"]: case for case in protocol["domain"]["cases"]}
     if not set(case_ids) <= cases.keys():
         raise ValueError("Only predeclared circumstances may be evaluated")
+    repeated = []
+    for case_id in case_ids:
+        row = sheet.rows.get(result_key(assessment, case_id))
+        if row is not None and row["dependencies"].get(assessment) == sheet.rows[assessment]["version"]:
+            repeated.append((case_id, row["data"]["error"]))
+    if repeated:
+        detail = "; ".join(f"{case_id}: {error or 'already resolved'}" for case_id, error in repeated)
+        raise ValueError(f"These cases already have receipts for immutable protocol {assessment}: {detail}. "
+                         "Inspect the result; if its expression failed, record a corrected protocol under a new key")
     staged = type(sheet)(sheet.history)
     updates = []
     for case_id in case_ids:
