@@ -208,7 +208,8 @@ def bounds_schema(kind):
         **{name: text for name in ("proposed_rule", "general_rules", "rule_reasoning", "limitations")},
         "retained": array(consequence), "lost": array(consequence), "new_predictions": array(text)})
     return obj({"inference": text, "bounds": text, "basis": {"enum": sorted(BOUND_BASES)},
-                "rationale": text, "grounds": array(text),
+                "rationale": text,
+                "grounds": {**array(text), "description": "Scientific grounds: evidence, source formalization, premise, theory, application, reasoning, comparison, repair, expectation break, importance result or a grading-sheet record. An importance protocol itself is not evidence for expected bounds."},
                 "revision": {"anyOf": [{"type": "null"}, revision]}})
 
 
@@ -229,6 +230,17 @@ def record_schema(kind):
         raise ValueError("Calculation receipts are host-generated, never model-authored records")
     if kind in {"expectation", "expectation_break", "expectation_support"}:
         return bounds_schema(kind)
+    reference_descriptions = {
+        "theory": {"same_as": "Exact theory record key only for same_theory admission; otherwise empty string.",
+                   "compared_with": "Exact theory record keys, never inference or application keys."},
+        "application": {"inference": "Exact inference record key for G.",
+                        "theory": "Exact theory record key for this application."},
+        "comparison": {"left": "Exact application record key. Both sides must be different applications of the same G; never use an inference, evidence, theory or reasoning key.",
+                       "right": "Exact application record key. Both sides must be different applications of the same G; never use an inference, evidence, theory or reasoning key."},
+        "repair": {"comparison": "Exact comparison record key.",
+                   "construction_evidence": "Exact evidence record keys used to construct or fit the adjustment; reasoning records belong in a public argument, not here.",
+                   "test_evidence": "Exact evidence record keys from independent tests; reasoning records belong in a public argument, not here."},
+    }
     properties = {}
     for name in FIELDS[kind]:
         if name in ENUMS:
@@ -245,6 +257,8 @@ def record_schema(kind):
             schema = {"type": "string", "minLength": 0 if name in {"same_as", "reasoning", "counterexample"} else 1}
         if name == "inference_version":
             schema = {"type": "string", "description": "Exact version of G, including a commissioned historical version; empty uses current G"}
+        if name in reference_descriptions.get(kind, {}):
+            schema["description"] = reference_descriptions[kind][name]
         properties[name] = schema
     return {"type": "object", "additionalProperties": False,
             "required": list(FIELDS[kind]), "properties": properties}
@@ -261,11 +275,23 @@ def _reference_locations(value, reference, path="data"):
     return [path] if value == reference else []
 
 
+_TYPED_REFERENCE_FIELDS = {
+    "theory": {"same_as": "theory", "compared_with": "theory"},
+    "application": {"inference": "inference", "theory": "theory"},
+    "comparison": {"left": "application", "right": "application"},
+    "repair": {"comparison": "comparison", "construction_evidence": "evidence",
+               "test_evidence": "evidence"},
+    "importance": {"application": "application"},
+    "source_formalization": {"evidence": "evidence", "assessment": "importance"},
+}
+
+
 def read_sheet_result(sheet, commission, records, *, actor, owned_subjects=()):
-    """Validate reader/reasoner outputs atomically against the commissioned view.
+    """Admit individually valid records against the commissioned view.
 
     The caller supplies the exact sheet snapshot used for the commission. A later
-    global merge detects conflicting revisions. These are proposed factual/logic
+    global merge detects conflicting revisions. A malformed record cannot discard
+    earlier valid records in the same action. These are proposed factual/logic
     inputs, not an LLM's choice of total score or continuation verdict.
     """
     commission.request(sheet)
@@ -273,6 +299,7 @@ def read_sheet_result(sheet, commission, records, *, actor, owned_subjects=()):
         raise ValueError("The caller supplies the actual author/reviewer identity")
     staged = CausalSheet(sheet.history)
     updates = []
+    diagnostics = []
     owned_subjects = set(owned_subjects)
     visible = set(commission.inputs) | {subject for subject, _ in commission.assignments}
     # An iterative child can build on records it admitted in earlier own units.
@@ -283,46 +310,59 @@ def read_sheet_result(sheet, commission, records, *, actor, owned_subjects=()):
         visible.add(commission.calculation_context)
     visible.update(sheet.inferences_for(visible))
     for record in records:
-        if not isinstance(record, dict) or set(record) != {"key", "kind", "data", "dependencies"}:
-            raise ValueError("Reader records require key, kind, data, dependencies")
-        kind, data = record["kind"], dict(record["data"])
-        if kind == "reasoning":
-            data["author"] = actor
-        elif kind == "verification":
-            raise ValueError("Model verdicts are not verification; record a public reasoning critique instead")
-        if kind == "importance_result":
-            raise ValueError("Only the host evaluate action can produce importance results")
-        if kind in {"support_contribution", "causal_change"}:
-            if "verification_required" in data:
+        kind = record.get("kind", "<unknown>") if isinstance(record, dict) else "<unknown>"
+        key = record.get("key", "<unknown>") if isinstance(record, dict) else "<unknown>"
+        try:
+            if not isinstance(record, dict) or set(record) != {"key", "kind", "data", "dependencies"}:
+                raise ValueError("Reader records require key, kind, data, dependencies")
+            kind, data = record["kind"], dict(record["data"])
+            if kind == "reasoning":
+                data["author"] = actor
+            elif kind == "verification":
+                raise ValueError("Model verdicts are not verification; record a public reasoning critique instead")
+            if kind == "importance_result":
+                raise ValueError("Only the host evaluate action can produce importance results")
+            if kind in {"support_contribution", "causal_change"} and "verification_required" in data:
                 raise ValueError("The model-verdict credit gate has been removed")
-        if kind == "importance" and data["application"] not in visible and data["application"] not in owned_subjects:
-            raise ValueError("Child cannot define a protocol outside its scientific commission")
-        if record["key"] in sheet.rows and record["key"] not in visible:
-            raise ValueError("Child cannot revise an uncommissioned scientific record")
-        references = staged._references(kind, data) | set(record["dependencies"])
-        missing = references - visible
-        if missing:
-            locations = []
-            for reference in sorted(missing):
-                fields = _reference_locations(data, reference)
-                if reference in record["dependencies"]:
-                    fields.extend(f"dependencies[{index}]" for index, item in enumerate(record["dependencies"])
-                                  if item == reference)
-                locations.append(f"{reference!r} at {', '.join(fields) if fields else 'scientific reference'}")
-            raise ValueError(f"{kind} record {record['key']!r} used unscoped keys: {'; '.join(locations)}. "
-                             "Use commissioned or own admitted records, create new records earlier in the batch, "
-                             "or ask the parent to commission other inputs")
-        update = staged.propose(record["key"], kind, data, dependencies=record["dependencies"])
-        allowed_snapshots = {(ref["key"], ref["version"]) for ref in commission.snapshots}
-        allowed_snapshots.update((key, sheet.rows[key]["version"]) for key in visible if key in sheet.rows)
-        allowed_snapshots.update((key, staged.rows[key]["version"]) for key in visible)
-        if any((ref["key"], ref["version"]) not in allowed_snapshots
-               for ref in staged.snapshot_references(kind, data)):
-            raise ValueError("Reader used an uncommissioned historical snapshot; select its key/version explicitly")
-        staged.merge((update,))
+            if kind == "importance" and data["application"] not in visible:
+                raise ValueError("Child cannot define a protocol outside its scientific commission")
+            if key in sheet.rows and key not in visible:
+                raise ValueError("Child cannot revise an uncommissioned scientific record")
+            references = staged._references(kind, data) | set(record["dependencies"])
+            missing = references - visible
+            if missing:
+                locations = []
+                for reference in sorted(missing):
+                    fields = _reference_locations(data, reference)
+                    if reference in record["dependencies"]:
+                        fields.extend(f"dependencies[{index}]" for index, item in enumerate(record["dependencies"])
+                                      if item == reference)
+                    locations.append(f"{reference!r} at {', '.join(fields) if fields else 'scientific reference'}")
+                raise ValueError(f"Unscoped keys: {'; '.join(locations)}. Use commissioned or own admitted "
+                                 "records, create new records earlier in the batch, or ask the parent for inputs")
+            for field, expected_kind in _TYPED_REFERENCE_FIELDS.get(kind, {}).items():
+                value = data[field]
+                for reference in value if isinstance(value, list) else [value]:
+                    if reference and reference in staged.rows and staged.rows[reference]["kind"] != expected_kind:
+                        raise ValueError(f"{field} requires a {expected_kind} record key; "
+                                         f"{reference!r} is a {staged.rows[reference]['kind']} record")
+            update = staged.propose(key, kind, data, dependencies=record["dependencies"])
+            allowed_snapshots = {(ref["key"], ref["version"]) for ref in commission.snapshots}
+            allowed_snapshots.update((ref, sheet.rows[ref]["version"]) for ref in visible if ref in sheet.rows)
+            allowed_snapshots.update((ref, staged.rows[ref]["version"]) for ref in visible)
+            if any((ref["key"], ref["version"]) not in allowed_snapshots
+                   for ref in staged.snapshot_references(kind, data)):
+                raise ValueError("Uncommissioned historical snapshot; select its key/version explicitly")
+            staged.merge((update,))
+        except (ValueError, KeyError, TypeError) as exc:
+            diagnostics.append({"stage": "scientific_record", "status": "failed",
+                                "category": "invalid_action_contract",
+                                "why": f"{kind} record {key!r}: {exc}"})
+            continue
         updates.append(update)
-        visible.add(record["key"])
-        if record["key"] not in sheet.rows:
-            owned_subjects.add(record["key"])
+        visible.add(key)
+        if key not in sheet.rows:
+            owned_subjects.add(key)
     from .records import ResearchResult
-    return ResearchResult(causal_sheet_updates=tuple(updates))
+    return ResearchResult(causal_sheet_updates=tuple(updates), diagnostics=tuple(diagnostics),
+                          evaluated=bool(updates))

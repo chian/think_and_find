@@ -360,7 +360,9 @@ def protocol_schema():
         return {"type": "object", "additionalProperties": False,
                 "required": list(properties), "properties": properties}
     return obj({
-        "application": text, "method": {"enum": list(METHODS)},
+        "application": {"type": "string", "minLength": 1,
+                        "description": "Exact application record key; an inference, theory, evidence or reasoning key is invalid."},
+        "method": {"enum": list(METHODS)},
         "question": text, "contrast": text, "comparator": {"const": "exact_typed_answer"},
         "domain": obj({"kind": {"enum": ["finite", "sample"]}, "description": text, "measure": text,
             "cases": {"type": "array", "minItems": 1, "maxItems": 256, "items": obj({

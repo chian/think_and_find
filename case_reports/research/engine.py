@@ -306,8 +306,13 @@ class ResearchSource:
             status = self.run.global_goal.commit(self.pending_global or self.pending)
             self.run.refresh_controllers(self, status)
             self.evaluated_units += int(self.pending.evaluated)
+            rejected_records = sum(d.get("stage") == "scientific_record" and d.get("status") == "failed"
+                                   for d in changes.diagnostics)
             event = dict(unit=unit.label, evaluated=self.pending.evaluated,
-                operation_status="completed" if self.pending.evaluated else "failed",
+                operation_status=("partial" if self.pending.evaluated and rejected_records else
+                                  "completed" if self.pending.evaluated else "failed"),
+                record_admission={"accepted": len(changes.causal_sheet_updates),
+                                  "rejected": rejected_records},
                 gain=view.controller_step.gain, score=view.controller_step.score,
                 stop=view.controller_step.stop, model_calls=self.run.model_calls,
                 global_goal_score=status["investigation_score"], scientific_calculations=status["scientific_calculations"],

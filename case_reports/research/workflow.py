@@ -132,6 +132,13 @@ SHEET_TOOLS = ("Use the following scientific sheet tools within your assigned re
         "Put scientific instructions in question. "
         "reasoning.premises contains record keys, never sentences: put a new assumption's text in "
         "premise.statement and list that premise's key, or list selected evidence keys for source claims. "
+        "comparison.left and comparison.right must be two distinct application record keys for the same G; "
+        "never use an inference, theory, evidence or reasoning key there. If two applications do not exist, "
+        "record a public reasoning argument and its unresolved comparison instead of forcing a comparison record. "
+        "A repair references a comparison key; construction_evidence and test_evidence contain only evidence keys. "
+        "theory.compared_with contains only theory keys. importance.application contains an application key. "
+        "If one proposed record is rejected, earlier and later independently valid records can still be admitted; "
+        "read the admitted changes and the rejected record's diagnostic before repairing the batch. "
         "You may reference records you admitted in earlier decisions of this reasoning episode. "
         "Record public scientific derivations rather than a plan to reason later. "
         "Every record must contain exactly its data schema fields; use empty arrays/strings where appropriate. "
@@ -350,8 +357,10 @@ class ReasoningSource(ResearchSource):
         commission = replace(self.commission,
             inputs=tuple(dict.fromkeys([*self.commission.inputs, *self.selected_keys])),
             snapshots=tuple(self.scoped_snapshots()))
-        return read_sheet_result(self.ledger.causal_sheet, commission, records,
+        result = read_sheet_result(self.ledger.causal_sheet, commission, records,
             actor=self.actor, owned_subjects=self.ledger.causal_sheet.rows.keys() - initial_keys)
+        return replace(result, diagnostics=tuple(self.run.identify_diagnostic({**diagnostic,
+            "model_call": self.run.model_calls}) for diagnostic in result.diagnostics))
 
     def authorize_evaluation(self, assessment):
         initial_keys = {r["key"] for r in self.initial.causal_sheet_updates}
