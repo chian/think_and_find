@@ -20,6 +20,7 @@ from .causal_commission import SheetCommission
 from .grading import GRADING_FIELDS
 
 TREE = {
+    "discovery": ("scientific",),
     "scientific": ("search_strategy", "reasoning"),
     "reasoning": (),
     "search_strategy": ("search",),
@@ -34,7 +35,7 @@ class ResearchLimits:
     text_window_chars: int = 12000
     yield_window: int = 4
     root_yield_window: int = 12
-    root_yield_threshold: float | None = None
+    root_yield_threshold: float | None = 0.0
 
     def __post_init__(self):
         if self.root_yield_threshold is not None and (isinstance(self.root_yield_threshold, bool) or
@@ -114,6 +115,7 @@ class ResearchRun:
             self.implementation = providers.checkpoint.run_start_implementation(self.implementation)
         self.context = {"research_request": research_request}
         units = {
+            "discovery": "one completed scientific attempt from a selected starting question",
             "scientific": "a completed search strategy, reasoning commission, or scientific sheet action",
             "reasoning": "a completed derivation, check, comparison or calculation for the assigned logical question",
             "search_strategy": "a completed search for one proposed query",
@@ -125,7 +127,7 @@ class ResearchRun:
         }
         self.grains = {name: Grain(name, unit, "scoped findings and causal-sheet state", self.controller)
                        for name, unit in units.items()}
-        self.tree = EpisodeTree(self.grains["scientific"], {
+        self.tree = EpisodeTree(self.grains["discovery"], {
             self.grains[parent]: tuple(self.grains[name] for name in children)
             for parent, children in TREE.items() if children})
         self.emit_trace("run_started", research_request=research_request,
@@ -168,7 +170,7 @@ class ResearchRun:
             source.selected_keys = list(source.commission.inputs)
         self.sources[goal.goal_id] = source
         self.controller_specs[key] = source
-        if grain == "scientific":
+        if grain == "discovery":
             self.root_source, self.root_key = source, key
         episode = Episode(self.grains[grain], key, source, EpisodeRequest(
             goal, ResearchMessage(str(goal.objective), (), diagnostic_value(proposal or {})), contract),

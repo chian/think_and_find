@@ -1,23 +1,33 @@
-"""Scientific allocation and reasoning are distinct iterative decision owners."""
+"""Persistent discovery, scientific attempts and reasoning own distinct decisions."""
 from dataclasses import replace
 from copy import deepcopy
+from fractions import Fraction
 
 from ...method_loop import Context, EpisodeGoal
 from .acquisition import SearchStrategySource
-from .episode_contracts import SearchStrategyCommission
+from .episode_contracts import SearchStrategyCommission, ScientificAttemptCommission
 from .causal_commission import SheetCommission, record_schema, read_sheet_result, SNAPSHOT_SCHEMA
 from .causal_sheet import CausalSheet
-from .engine import ResearchLimits, ResearchProviders, ResearchRun, ResearchSource, selected_choice
+from .engine import ResearchLimits, ResearchProviders, ResearchRun, ResearchSource, changed_records, selected_choice
 from .records import ResearchResult
 from .report import ResearchReport
 from ...credit_assignment.causal_sheet import CRITERIA, CRITERION_KINDS
+from ...credit_assignment.causal_support import compile_support
 from .importance import evaluate_cases, result_key
 from .grading import GRADING_FIELDS
 from .task import RESEARCH_OBJECTIVE
 
+DISCOVERY_TASK = ("Launch repeated independent attempts at the generic scientific objective. "
+    "Choose a starting question for each attempt from unresolved candidates or a fresh natural-phenomenon direction. "
+    "Use the shared scientific sheet and the latest attempt's returned changes to avoid restarting an unchanged, "
+    "unproductive question. A previous attempt's yield is not scientific completion. "
+    "Do not research or grade at this level; each scientific attempt owns those decisions. "
+    "Only new executed global scientific points count at the root.")
+
 SCIENTIFIC_TASK = RESEARCH_OBJECTIVE + """
-Own the global discovery assessment across candidate inferences. Use the current
-subscoring sheets to decide where exploration, deeper reasoning, evidence, comparison,
+Own one scientific attempt, starting from the commissioned question, while pursuing the
+generic discovery objective. Use the current subscoring sheets to decide where
+exploration, deeper reasoning, evidence, comparison,
 repair assessment, or executable calculation could improve the assessment. You may
 introduce, revisit, or set aside candidates as outcomes warrant. Reuse an existing
 inference identity for the same claim; renaming a candidate is not new scientific work.
@@ -41,7 +51,7 @@ conditions and run that fixed comparison immediately. Broad source findings retu
 mandatory reasoning library. Source evidence comes through reading; never invent a
 citation or observation. Scientific merit and investigation progress are separate:
 useful negative findings can resolve uncertainty. The numerical controller governs
-continuation. A recorded candidate or a completed search is not an established example.
+the end of this attempt. A recorded candidate or a completed search is not an established example.
 """
 
 
@@ -76,8 +86,8 @@ def _visible_keys(source):
     keys.update(source.selected_keys)
     if source.commission:
         keys.update(source.commission.inputs)
-        keys.update(subject for subject, _ in source.commission.assignments)
-        if source.commission.calculation_context:
+        keys.update(subject for subject, _ in getattr(source.commission, "assignments", ()))
+        if getattr(source.commission, "calculation_context", ""):
             keys.add(source.commission.calculation_context)
     keys.update(sheet.inferences_for(source.selected_keys))
     return keys
@@ -232,7 +242,7 @@ def _execute_sheet_tool(source, proposal, visible_keys):
         assessment = proposal["assessment"]
         sheet._require_kind(assessment, "importance")
         source.authorize_evaluation(assessment)
-        evaluation_context = proposal.get("evaluation_context") or (source.commission.calculation_context if source.commission else None)
+        evaluation_context = proposal.get("evaluation_context") or getattr(source.commission, "calculation_context", None)
         if evaluation_context and evaluation_context not in visible_keys:
             raise ValueError("Select an explicitly visible historical claim context")
         return source.leaf(lambda: ResearchResult(causal_sheet_updates=tuple(
@@ -241,7 +251,7 @@ def _execute_sheet_tool(source, proposal, visible_keys):
         keys = proposal["keys"]
         source.authorize_inspection(keys)
         def calculate():
-            context = proposal.get("evaluation_context") or (source.commission.calculation_context if source.commission else None)
+            context = proposal.get("evaluation_context") or getattr(source.commission, "calculation_context", None)
             if context and context not in visible_keys:
                 raise ValueError("Select an explicitly visible historical claim context")
             source.last_calculation = sheet.calculation_view(keys, context=context, offset=proposal.get("calculation_offset"), limit=proposal.get("calculation_limit", 8))
@@ -250,13 +260,79 @@ def _execute_sheet_tool(source, proposal, visible_keys):
     raise ValueError("Unknown sheet tool")
 
 
-class ScientificSource(ResearchSource):
-    instructions = SCIENTIFIC_TASK
-    record_kinds = SCIENTIFIC_KINDS
+class DiscoverySource(ResearchSource):
+    """Keep the shared ledger and select a new start after each completed attempt."""
+
+    instructions = DISCOVERY_TASK
     credit_columns = ("global_goal_progress",)
+
+    def __init__(self, run):
+        super().__init__(run)
+        self.starting_questions = []
 
     def credit(self, result):
         return self.run.global_goal.credit(result)
+
+    def propose(self, view):
+        sheet = self.ledger.causal_sheet
+        scientific = [(key, row) for key, row in sheet.rows.items() if row["kind"] != "evidence"]
+        index = [{"key": key, "kind": row["kind"], "version": row["version"],
+                  "current": sheet.current(key),
+                  "label": str(row["data"].get("name", row["data"].get("statement",
+                      row["data"].get("bounds", row["data"].get("argument", "")))))[:160]}
+                 for key, row in scientific]
+        keys = [row["key"] for row in index]
+        schema = {"type": "object", "additionalProperties": False,
+            "required": ["question", "inputs", "snapshots", "rationale"],
+            "properties": {
+                "question": {"type": "string", "minLength": 1,
+                    "description": "One specific starting scientific question for a fresh attempt; the child still owns the generic objective."},
+                "inputs": {"type": "array", "maxItems": 8, "uniqueItems": True,
+                    "items": {"enum": keys} if keys else False},
+                "snapshots": {"type": "array", "maxItems": 8, "items": SNAPSHOT_SCHEMA},
+                "rationale": {"type": "string", "minLength": 1}}}
+        proposal = self.run.agent(self.bounded_inputs(view, {
+            "task": DISCOVERY_TASK, "objective": str(view.goal.objective),
+            "operation": "propose_discovery_attempt",
+            "instruction": DISCOVERY_TASK,
+            "candidate_index": index,
+            "previous_starts": {"questions": self.starting_questions[-8:],
+                                "total": len(self.starting_questions)},
+            "global_score": self.run.root_credit_projection(),
+            "response_contract": schema}))
+        self.last_proposal = proposal
+        commission = ScientificAttemptCommission(proposal["question"],
+            proposal["inputs"], proposal["snapshots"])
+        commission.request(sheet)
+        self.starting_questions.append(commission.question)
+        child = ScientificSource(self.run, self.ledger.result())
+        return self.edge(self.run.child(view, child, "scientific", commission.question,
+            contract=commission.report_contract(), proposal={"starting_question": commission.question,
+                                                          "inputs": list(commission.inputs)}))
+
+
+class ScientificSource(ResearchSource):
+    instructions = SCIENTIFIC_TASK
+    commission_type = ScientificAttemptCommission
+    record_kinds = SCIENTIFIC_KINDS
+    credit_columns = ("attempt_scientific_gain",)
+
+    def credit(self, result):
+        from .episode_credit import scientific_attempt_credit
+        return scientific_attempt_credit(result, self.initial)
+
+    def parent_report(self, result, completion=None, request=None):
+        from .episode_contracts import literature_report
+        report = literature_report(self, result, completion)
+        delta = changed_records(result, self.initial)
+        changed = [row for row in delta.causal_sheet_updates if row["kind"] != "evidence"]
+        after = compile_support(CausalSheet(tuple(result.causal_sheet_updates)))
+        before = compile_support(CausalSheet(tuple(self.initial.causal_sheet_updates)))
+        report.update(starting_question=self.commission.question,
+            scientific_changes={"items": [{"key": row["key"], "kind": row["kind"]}
+                                          for row in changed[:8]], "total": len(changed)},
+            score_change=str(Fraction(after["total"]) - Fraction(before["total"])))
+        return report
 
     def propose(self, view):
         schema, visible = _sheet_tool_contract(self, self.record_kinds)
@@ -310,7 +386,10 @@ class ScientificSource(ResearchSource):
         return ResearchResult(causal_sheet_updates=tuple(updates))
 
     def catalog_rows(self):
-        return list(self.ledger.causal_sheet.rows.items())
+        # Put scientific objects before their potentially much larger source
+        # evidence catalog, so an attempt can address existing candidates.
+        return sorted(self.ledger.causal_sheet.rows.items(),
+                      key=lambda item: item[1]["kind"] == "evidence")
 
     def authorize_inspection(self, keys):
         pass
@@ -406,10 +485,10 @@ def run_research(*, research_request=RESEARCH_OBJECTIVE, providers, limits=None)
     if not isinstance(research_request, str) or not research_request.strip():
         raise ValueError("Supply a scientific research request")
     run = ResearchRun(providers, limits or ResearchLimits(), research_request)
-    source = ScientificSource(run)
+    source = DiscoverySource(run)
     goal = EpisodeGoal.root(objective=research_request,
         result_contract={"result": "Candidate examples assessed through inference-specific theory, generalizability and reversal subsheets",
                          "uncertainty_retained": True}, task_context=run.context)
-    episode = run.episode("scientific", source, goal=goal)
+    episode = run.episode("discovery", source, goal=goal)
     record = episode.run(Context(tree=run.tree))
     return record, ResearchReport.from_result(source.build_result(record), record, run)

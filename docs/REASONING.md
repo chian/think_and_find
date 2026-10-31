@@ -1,8 +1,9 @@
 # Reasoning within Episodes
 
-The scientific episode repeatedly asks what its evidence supports, what remains
-uncertain and which available work could change the answer. Reasoning can
-identify an information need; returned evidence can revise that reasoning.
+Each scientific attempt repeatedly asks what its evidence supports, what remains
+uncertain and which available work could change the answer. The discovery root
+selects a new starting question after an attempt yields or ends in failure.
+Reasoning can identify an information need; returned evidence can revise that reasoning.
 These choices belong to the ongoing investigation.
 
 Each decision needs the episode's complete task instructions: its actual job,
@@ -50,7 +51,7 @@ measured contribution and controller outcome. A later choice should be
 understandable from those records. This trace is how episode behavior and scoring
 are examined together with the user.
 
-The scientific parent directly commissions Search Strategy and Reasoning.
+The scientific attempt directly commissions Search Strategy and Reasoning.
 Search Strategy supplies findings with provenance, bearing on the assigned
 question and explicit open logical questions. The parent turns these into a
 bounded Reasoning assignment, selecting the needed evidence, G, expected

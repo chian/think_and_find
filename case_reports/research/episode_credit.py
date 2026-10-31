@@ -112,3 +112,17 @@ def reasoning_credit(result, baseline, commission):
         quality_resolution=min(projection["resolution"], coverage.quality_resolution or 1.0),
         qualities=tuple(("reasoning_scientific_gain", key, value) for key, value in projection["values"].items()) +
                   tuple(("assigned_calculation_coverage", key, value) for _, key, value in coverage.qualities))
+
+
+def scientific_attempt_credit(result, baseline):
+    """Project only new global scientific points earned during this attempt."""
+    score = compile_support(Ledger(result).causal_sheet)
+    before = compile_support(Ledger(baseline).causal_sheet)["points"]
+    points = {key: max(Fraction(0), Fraction(value) - Fraction(before.get(key, "0")))
+              for key, value in score["points"].items()}
+    projection = controller_projection(points, score["resolution"])
+    if not projection["supported"]:
+        return Credit(evaluated=False)
+    return Credit(evaluated=result.evaluated, quality_resolution=projection["resolution"],
+                  qualities=tuple(("attempt_scientific_gain", key, value)
+                                  for key, value in sorted(projection["values"].items())))

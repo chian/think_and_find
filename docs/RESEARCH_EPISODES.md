@@ -5,18 +5,24 @@ credit projection and message contract belong to that responsibility. There is
 no generic Investigation episode, search-enabled flag, or parent/child role flag.
 
 ```text
-Scientific parent: which scientific uncertainty deserves work next? ↻
-├── Search Strategy: which query/approach should address this information need? ↻
-│   └── Search: which source from ONE query should be examined next? ↻
-│       └── Page: where/how should this source be examined next? ↻
-│           ├── Report: what does the next document-order window establish? ↻
-│           ├── Lexical reading: what does the next ranked passage establish? ↻
-│           └── Table: which row query should resolve the remaining question? ↻
-└── Reasoning: which derivation, comparison, countermodel or check resolves this question? ↻
+Discovery root: which fresh scientific attempt should run next? ↻
+└── Scientific attempt: which scientific uncertainty deserves work next? ↻
+    ├── Search Strategy: which query/approach should address this information need? ↻
+    │   └── Search: which source from ONE query should be examined next? ↻
+    │       └── Page: where/how should this source be examined next? ↻
+    │           ├── Report: what does the next document-order window establish? ↻
+    │           ├── Lexical reading: what does the next ranked passage establish? ↻
+    │           └── Table: which row query should resolve the remaining question? ↻
+    └── Reasoning: which derivation, comparison, countermodel or check resolves this question? ↻
 ```
 
-Edges declare allowed commissions, not a sequence. The scientific parent may
-repeatedly choose either branch. Reasoning has fixed sheet operations: record,
+Edges declare allowed commissions, not a sequence. The discovery root retains
+the shared scientific sheet and starts another attempt after one yields. Each
+attempt has its own estimator and may repeatedly choose either scientific branch.
+The root's own threshold may be zero so it remains open across attempts; this
+does not disable an attempt's estimator. An attempt's starting question is a
+seed for the generic objective, not a separate task mode or a prescribed case.
+Reasoning has fixed sheet operations: record,
 inspect, calculate and evaluate. First-principles deductions, repair arguments
 and critiques are logical assignments with those same decisions;
 no assignment enables search or changes the episode's action set. Calculators
@@ -38,8 +44,11 @@ bounded findings, coverage and failures relevant to its parent's next decision.
 The commissioned G and expected generalizability bounds travel as explicitly
 selected records or historical snapshots, not copied parent context.
 
-The scientific parent retains the executed support-for-G and scoped
-proportional-change score. Reasoning observes changes in that scientific credit
+The discovery root deduplicates executed global points across attempts. A
+scientific attempt projects only the global point changes since its starting
+sheet. A repeated result earns no new point in either projection. The shared
+sheet retains the executed support-for-G and scoped proportional-change score.
+Reasoning observes changes in that scientific credit
 and coverage of explicitly assigned importance, bounds, support or repair
 calculations. A resolved negative result can complete an assigned calculation.
 The calculators establish consequences within the supplied formal models and

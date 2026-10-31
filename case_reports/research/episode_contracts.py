@@ -14,6 +14,43 @@ COMMON_RETURN = {
 
 
 @dataclass(frozen=True)
+class ScientificAttemptCommission:
+    """One independent start at the shared scientific objective."""
+
+    question: str
+    inputs: tuple[str, ...]
+    snapshots: tuple[dict, ...] = ()
+
+    def __post_init__(self):
+        if not isinstance(self.question, str) or not self.question.strip():
+            raise ValueError("A scientific attempt needs a starting question")
+        if not isinstance(self.inputs, (list, tuple)) or len(self.inputs) > 8 or any(
+                not isinstance(key, str) for key in self.inputs):
+            raise ValueError("Select at most eight scientific starting inputs")
+        if not isinstance(self.snapshots, (list, tuple)) or len(self.snapshots) > 8 or any(
+                not isinstance(ref, dict) or set(ref) != {"key", "version"} for ref in self.snapshots):
+            raise ValueError("Select at most eight exact historical starting records")
+        object.__setattr__(self, "inputs", tuple(dict.fromkeys(self.inputs)))
+        object.__setattr__(self, "snapshots", tuple(dict(ref) for ref in self.snapshots))
+
+    def as_record(self):
+        return {"question": self.question, "inputs": list(self.inputs),
+                "snapshots": list(self.snapshots)}
+
+    def request(self, sheet):
+        return {"question": self.question, "inputs": sheet.view(self.inputs),
+                "historical_inputs": sheet.snapshot_view(self.snapshots)}
+
+    def report_contract(self):
+        return ReportContract(decision=self.question,
+            measurements={"scope": self.as_record()},
+            information={**COMMON_RETURN,
+                "starting_question": "The starting question of this attempt, retained to avoid repeating the same unproductive start.",
+                "scientific_changes": "Kinds and keys of changed scientific records, excluding source evidence; counts remain visible.",
+                "score_change": "Executed change in shared scientific points relative to this attempt's starting sheet."})
+
+
+@dataclass(frozen=True)
 class LiteratureCommission:
     question: str
     inputs: tuple[str, ...]
