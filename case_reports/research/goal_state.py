@@ -1,7 +1,8 @@
-"""Shared support ledger and proportional change credit for existing Episodes."""
+"""Shared investigation progress and executed support for existing Episodes."""
 from fractions import Fraction
 
-from ...credit_assignment.causal_support import compile_support, controller_projection
+from ...credit_assignment.causal_progress import combine_episode_points, compile_episode_points
+from ...credit_assignment.causal_support import controller_projection
 from .records import Credit, Ledger, ResearchResult
 
 GLOBAL_GOAL_PROGRESS = "global_goal_progress"
@@ -16,8 +17,8 @@ class ScientificGoalState:
         return self.preview()
 
     def credit(self, result):
-        """Scientific parent's support and proportional-change stock."""
-        score = compile_support(Ledger(result).causal_sheet)
+        """Scientific parent's investigation and executed-support stock."""
+        score = compile_episode_points(Ledger(result).causal_sheet)
         points = {key: Fraction(value) for key, value in score["points"].items()}
         projection = controller_projection(points, score["resolution"])
         if not projection["supported"]:
@@ -28,10 +29,12 @@ class ScientificGoalState:
 
     def preview(self):
         calculation = self.ledger.causal_sheet.calculate()
-        score = calculation["support_credit"]
+        score = combine_episode_points(calculation["support_credit"], calculation["investigation_progress"])
         projection = controller_projection(score["points"], score["resolution"])
         return {"scientific_calculations": calculation,
-                "investigation_score": float(Fraction(score["total"])),
-                "root_progress_binding": score["policy"] if projection["supported"] else "unsupported_controller_precision",
+                "investigation_score": float(Fraction(score["support"]["total"]) + Fraction(score["progress"]["total"])),
+                "investigation_progress_score": float(Fraction(score["progress"]["total"])),
+                "support_score": float(Fraction(score["support"]["total"])),
+                "root_progress_binding": "investigation_progress_plus_executed_support" if projection["supported"] else "unsupported_controller_precision",
                 "controller_limitation": None if projection["supported"] else projection["reason"],
-                "meaning": score["meaning"]}
+                "meaning": score["progress"]["meaning"] + " " + score["support"]["meaning"]}

@@ -44,13 +44,18 @@ bounded findings, coverage and failures relevant to its parent's next decision.
 The commissioned G and expected generalizability bounds travel as explicitly
 selected records or historical snapshots, not copied parent context.
 
-The discovery root deduplicates executed global points across attempts. A
-scientific attempt projects only the global point changes since its starting
-sheet. A repeated result earns no new point in either projection. The shared
-sheet retains the executed support-for-G and scoped proportional-change score.
-Reasoning observes changes in that scientific credit
-and coverage of explicitly assigned importance, bounds, support or repair
-calculations. A resolved negative result can complete an assigned calculation.
+The discovery root deduplicates global points across attempts. A scientific
+attempt projects only point changes since its starting sheet. The shared sheet
+shows investigation progress separately from executed support-for-G and scoped
+proportional-change credit. Investigation registration counts a candidate G,
+its expected generalizability bounds, each mapped theory/context relationship,
+and an explicit support argument once per exact structural identity. These
+registrations are work products, not support or scientific merit grades.
+Calculation progress is the resolved fraction of declared importance, expected
+bounds, support or repair operands, including negative results. Reasoning also
+observes coverage of explicitly assigned calculations; an assigned calculation
+is excluded from its other progress column so the same work is not counted twice.
+A repeated result earns no new point in either projection.
 The calculators establish consequences within the supplied formal models and
 source mappings; model verdicts have no numerical effect.
 

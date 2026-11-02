@@ -20,6 +20,7 @@ CRITERION_KINDS = {"importance": "importance", "expected_bounds": "expectation_t
 def compile_sheet(sheet):
     from ..case_reports.research.importance import score_importance
     from .causal_support import compile_support
+    from .causal_progress import compile_progress
     assessments = {key: score_importance(sheet, key) for key, _ in sheet.of_kind("importance")}
     inferences = {}
     for key, value in assessments.items():
@@ -27,10 +28,11 @@ def compile_sheet(sheet):
         inferences.setdefault(application["inference"], {})[key] = value
     from ..case_reports.research.grading import GRADING_FIELDS, grade_record
     subsheets = {kind: {key: grade_record(sheet, key) for key, _ in sheet.of_kind(kind)} for kind in GRADING_FIELDS}
-    return {"calculation": "causal-support-and-change-v3", "assessments": assessments, "subsheets": subsheets,
-            "support_credit": compile_support(sheet),
+    return {"calculation": "causal-support-and-change-v4", "assessments": assessments, "subsheets": subsheets,
+            "support_credit": compile_support(sheet), "investigation_progress": compile_progress(sheet),
             "inferences": inferences,
             "meaning": "Each fraction measures G's influence for its recorded application, contrast, question and measure. "
+                       "Investigation registration and calculation coverage are separate from support for G. "
                        "Support and proportional change credit are compiled from explicit identified contributions; "
                        "importance fractions retain their measurement scopes."}
 

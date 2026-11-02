@@ -1,14 +1,22 @@
 """Episode-scoped projections of executed scientific contributions.
 
-Scientific points have one global identity. Source scopes select contributions
-through scientific provenance; activity, passage length and source count are not
-rewards. Completed calculation coverage is a separate Reasoning measurement.
+Scientific points have one global identity. Source scopes select executed
+support through scientific provenance; activity, passage length and source count
+are not rewards. Investigation registration and resolved calculation mass are
+separate from support for a conclusion. Assigned calculation coverage is a
+separate Reasoning measurement.
 """
 from fractions import Fraction
 
 from .records import Credit, Ledger
-from ...credit_assignment.causal_sheet import investigation_credit
+from ...credit_assignment.causal_sheet import investigation_credit, _calculation_coverage
+from ...credit_assignment.causal_progress import compile_episode_points
 from ...credit_assignment.causal_support import compile_support, controller_projection
+
+
+def _positive_delta(points, before):
+    return {key: max(Fraction(0), Fraction(value) - Fraction(before.get(key, "0")))
+            for key, value in points.items()}
 
 
 def _source_evidence(sheet, predicate):
@@ -100,10 +108,14 @@ def table_credit(result, baseline, document, table):
 
 def reasoning_credit(result, baseline, commission):
     sheet = Ledger(result).causal_sheet
-    score = compile_support(sheet)
-    before = compile_support(Ledger(baseline).causal_sheet)["points"]
-    points = {key: max(Fraction(0), Fraction(value) - Fraction(before.get(key, "0")))
-              for key, value in score["points"].items()}
+    score = compile_episode_points(sheet)
+    before = compile_episode_points(Ledger(baseline).causal_sheet)["points"]
+    points = _positive_delta(score["points"], before)
+    # An assigned calculation already has its own coverage column below.
+    for subject, criterion in commission.assignments:
+        _, _, ident = _calculation_coverage(sheet, subject, criterion,
+                                            sheet.calculation_pins(commission.calculation_context))
+        points.pop("progress:calculation:" + criterion + ":" + ident, None)
     projection = controller_projection(points, score["resolution"])
     coverage = investigation_credit(sheet, commission.assignments, context=commission.calculation_context)
     if not projection["supported"] or not coverage.evaluated:
@@ -116,10 +128,9 @@ def reasoning_credit(result, baseline, commission):
 
 def scientific_attempt_credit(result, baseline):
     """Project only new global scientific points earned during this attempt."""
-    score = compile_support(Ledger(result).causal_sheet)
-    before = compile_support(Ledger(baseline).causal_sheet)["points"]
-    points = {key: max(Fraction(0), Fraction(value) - Fraction(before.get(key, "0")))
-              for key, value in score["points"].items()}
+    score = compile_episode_points(Ledger(result).causal_sheet)
+    before = compile_episode_points(Ledger(baseline).causal_sheet)["points"]
+    points = _positive_delta(score["points"], before)
     projection = controller_projection(points, score["resolution"])
     if not projection["supported"]:
         return Credit(evaluated=False)

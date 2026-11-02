@@ -323,15 +323,19 @@ class ScientificSource(ResearchSource):
 
     def parent_report(self, result, completion=None, request=None):
         from .episode_contracts import literature_report
+        from ...credit_assignment.causal_progress import compile_episode_points
         report = literature_report(self, result, completion)
         delta = changed_records(result, self.initial)
         changed = [row for row in delta.causal_sheet_updates if row["kind"] != "evidence"]
-        after = compile_support(CausalSheet(tuple(result.causal_sheet_updates)))
-        before = compile_support(CausalSheet(tuple(self.initial.causal_sheet_updates)))
+        after = compile_episode_points(CausalSheet(tuple(result.causal_sheet_updates)))
+        before = compile_episode_points(CausalSheet(tuple(self.initial.causal_sheet_updates)))
+        support_change = Fraction(after["support"]["total"]) - Fraction(before["support"]["total"])
+        progress_change = Fraction(after["progress"]["total"]) - Fraction(before["progress"]["total"])
         report.update(starting_question=self.commission.question,
             scientific_changes={"items": [{"key": row["key"], "kind": row["kind"]}
                                           for row in changed[:8]], "total": len(changed)},
-            score_change=str(Fraction(after["total"]) - Fraction(before["total"])))
+            score_change=str(support_change + progress_change),
+            investigation_progress_change=str(progress_change), support_change=str(support_change))
         return report
 
     def propose(self, view):
