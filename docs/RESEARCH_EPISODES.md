@@ -58,7 +58,7 @@ also earns 0 points. Both remain evidence inputs for scientific assessments. The
 registrations are work products, not support or scientific merit grades.
 Calculation progress is a number from 0 to 1: resolved declared operand mass
 divided by total declared operand mass, including negative results. Executed
-support adds 1 per qualifying hypothesis group and 1 per aligned identified
+support adds 0.1 per qualifying hypothesis group and 0.1 per aligned identified
 observation. A qualifying change adds support for the original G multiplied
 by qualifying restored original-scope mass divided by original-scope mass.
 The global numeric score is the sum of these progress, support and change

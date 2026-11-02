@@ -170,13 +170,17 @@ def _current_operands(sheet, key, pins):
     return True, "recorded_operands_current"
 
 
+SUPPORT_UNIT_CREDIT = Fraction(1, 10)
+
+
 SUPPORT_POLICY = {
-    "name": "executed-support-equal-component-units-v2",
+    "name": "executed-support-tenth-point-units-v3",
     "hypothesis_unit": "One canonical theory/hypothesis group with executed G dependence and an aligned same-method source formalization inside its expected bounds; contexts and parameterizations do not multiply it",
     "observation_unit": "One identified source observation aligned with a computed prediction in a dependent application inside expected bounds",
-    "aggregation": "hypothesis_count + observation_count",
+    "unit_credit": float(SUPPORT_UNIT_CREDIT),
+    "aggregation": "0.1 * (hypothesis_count + observation_count)",
     "change_factor": "qualifying restored original-scope circumstance mass / original-scope mass",
-    "origin": "Explicit implementation convention for component aggregation and restored-mass scaling; not user-specified relative scientific weights",
+    "origin": "User-specified 0.1 points per support unit; restored-mass scaling remains the existing implementation convention",
     "meaning": "Counts are support for G as represented, not certainty, empirical probabilities, verified source transcription or statistical independence",
 }
 
@@ -252,7 +256,7 @@ def compile_support(sheet):
             entry[kind].setdefault(identity, {**detail, "contributions": []})["contributions"].append(key)
             bound[kind].setdefault(identity, {**detail, "contributions": []})["contributions"].append(key)
             point = "support:" + _id([cid, kind, identity])
-            points[point] = "1"
+            points[point] = str(SUPPORT_UNIT_CREDIT)
             point_dependencies.setdefault(point, set()).update(dependencies)
     # Same canonical theory across contexts is one hypothesis unit. A repeated
     # formal realization under another name also cannot create another unit.
@@ -292,7 +296,7 @@ def compile_support(sheet):
             expectations[bid]["hypotheses"][identity] = {**detail,
                 "contributions": sorted({unit[2] for unit in units if unit[1] == bid})}
         point = "support:" + _id([cid, "hypotheses", identity])
-        points[point] = "1"
+        points[point] = str(SUPPORT_UNIT_CREDIT)
         point_dependencies[point] = set().union(*(unit[5] for unit in units))
         for unit in units:
             local_hypotheses.setdefault(unit[2], set()).add(identity)
@@ -303,13 +307,15 @@ def compile_support(sheet):
     for group in (claims, expectations):
         for entry in group.values():
             entry["hypothesis_count"], entry["observation_count"] = len(entry["hypotheses"]), len(entry["facts"])
-            entry["support"] = entry["hypothesis_count"] + entry["observation_count"]
+            support = SUPPORT_UNIT_CREDIT * (entry["hypothesis_count"] + entry["observation_count"])
+            entry["support"] = float(support)
+            entry["support_exact"] = str(support)
 
-    changes, resolutions = {}, [Fraction(1)]
+    changes, resolutions = {}, [SUPPORT_UNIT_CREDIT]
     for key, row in sheet.of_kind("causal_change"):
         data = row["data"]
         cid = claim_id(claim_of(sheet, data["source"]))
-        support = claims.get(cid, {}).get("support", 0)
+        support = Fraction(claims.get(cid, {}).get("support_exact", "0"))
         current, _ = _current_operands(sheet, key, context_pins(sheet, "causal_change", data))
         assessment = data.get("assessment")
         repair = grade_repair(sheet, assessment) if current and assessment else None
@@ -320,7 +326,7 @@ def compile_support(sheet):
                   "scoped_change_demonstrated" if Fraction(factor["lower"]) > 0 else
                   "scoped_change_unresolved" if factor["value"] is None else "no_qualifying_change_in_declared_comparison")
         changes[key] = {"break": data["break"], "source": data["source"], "target": data["target"],
-            "source_claim": cid, "support": support, "importance": data["importance"],
+            "source_claim": cid, "support": float(support), "support_exact": str(support), "importance": data["importance"],
             "assessment": assessment, "status": status, "factor": factor,
             "lower": str(lower), "upper": str(upper),
             "value": str(lower) if factor["value"] is not None else None,
@@ -342,7 +348,7 @@ def compile_support(sheet):
                     dependencies.update(result_key(protocol, case["case_id"]) for protocol in protocols)
             denominator = Fraction(repair["masses"]["original_in_scope"])
             if denominator:
-                resolutions.append(min(Fraction(case["weight"]) for case in repair["cases"]) / denominator)
+                resolutions.append(SUPPORT_UNIT_CREDIT * min(Fraction(case["weight"]) for case in repair["cases"]) / denominator)
         # Later support for old G revalues this same change and receives that gain.
         for kind in ("hypotheses", "facts"):
             for identity in claims.get(cid, {}).get(kind, {}):
@@ -357,7 +363,7 @@ def compile_support(sheet):
         "point_dependencies": {key: sorted(values) for key, values in point_dependencies.items()},
         "meaning": "Hypothesis support requires executed dependence and an aligned same-method source formalization; fact support requires executed dependence and computed agreement with source observations in expected generalizability bounds. "
             "Change credit uses restored targets not rescued by compared G-preserving alternatives, within the declared comparison only. "
-            "Later support revalues original G after a break. Counts and scaling follow the exposed implementation convention, not certainty or statistical independence. "
+            "Later support revalues original G after a break. Each support unit earns the user-specified 0.1 points; these scores are not certainty or statistical independence. "
             "Unexecuted, unrepresentable, stale and text-only operands remain explicit pending entries; model verdicts never supply numerical credit."}
 
 
