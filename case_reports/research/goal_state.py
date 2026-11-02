@@ -31,10 +31,16 @@ class ScientificGoalState:
         calculation = self.ledger.causal_sheet.calculate()
         score = combine_episode_points(calculation["support_credit"], calculation["investigation_progress"])
         projection = controller_projection(score["points"], score["resolution"])
+        progress = Fraction(score["progress"]["total"])
+        support = sum((Fraction(value) for key, value in score["support"]["points"].items()
+                       if key.startswith("support:")), Fraction())
+        change = sum((Fraction(value) for key, value in score["support"]["points"].items()
+                      if key.startswith("change:")), Fraction())
         return {"scientific_calculations": calculation,
-                "investigation_score": float(Fraction(score["support"]["total"]) + Fraction(score["progress"]["total"])),
-                "investigation_progress_score": float(Fraction(score["progress"]["total"])),
-                "support_score": float(Fraction(score["support"]["total"])),
-                "root_progress_binding": "investigation_progress_plus_executed_support" if projection["supported"] else "unsupported_controller_precision",
+                "investigation_score": float(progress + support + change),
+                "investigation_progress_score": float(progress),
+                "support_for_G_score": float(support),
+                "change_score": float(change),
+                "root_progress_binding": "progress_plus_support_for_G_plus_change_credit" if projection["supported"] else "unsupported_controller_precision",
                 "controller_limitation": None if projection["supported"] else projection["reason"],
                 "meaning": score["progress"]["meaning"] + " " + score["support"]["meaning"]}

@@ -27,16 +27,12 @@ def claim_id(reference):
 
 
 def controller_projection(points, resolution):
-    """Do not silently turn exact scientific fractions into zero-yield grades.
-
-    The existing controller uses floats and rounds its total to ten places.
-    Scientific calculations remain available when that projection is unsupported.
-    """
+    """Project exact scientific fractions only when floats retain positive values."""
     try:
         step = float(Fraction(resolution))
         values = {key: float(Fraction(value)) for key, value in points.items()}
-        if not math.isfinite(step) or step <= 0 or round(step, 10) == 0 or any(
-                not math.isfinite(value) or (Fraction(points[key]) > 0 and round(value, 10) == 0)
+        if not math.isfinite(step) or step <= 0 or any(
+                not math.isfinite(value) or (Fraction(points[key]) > 0 and value == 0)
                 for key, value in values.items()):
             raise ValueError("unrepresentable resolution")
     except (OverflowError, ValueError):

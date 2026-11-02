@@ -5,6 +5,7 @@ from .documents import Span
 from .records import Ledger, ResearchResult, identity
 from .engine import selected_choice
 from .support_observations import observation_identity, observations_schema
+from .source_claims import claim_identity, claims_schema
 from ...task_executors._http import ProviderError
 
 
@@ -25,8 +26,9 @@ def read_source_window(reader, spans, question):
             "span": {"enum": list(allowed)},
             "study_id": {"type": "string", "minLength": 1, "maxLength": 160},
             "finding": {"type": "string", "minLength": 1, "maxLength": 1600},
-            "measurements": {"type": "object", "required": ["observations"],
-                "properties": {"observations": observations_schema()}, "additionalProperties": True},
+            "measurements": {"type": "object", "required": ["observations", "claims"],
+                "properties": {"observations": observations_schema(), "claims": claims_schema()},
+                "additionalProperties": True},
             "relevance_basis": {"type": "string", "minLength": 1, "maxLength": 800},
             "reasoning_question": {"type": "string", "maxLength": 800}}}
     memory_schema = {"type": "object", "additionalProperties": False,
@@ -61,6 +63,18 @@ def read_source_window(reader, spans, question):
                 "number or general study citation alone cannot distinguish multiple measurements. Units, confidence "
                 "limits and sample-size metadata describe an observation; do not list them as additional supporting "
                 "observations. Do not split one measurement into multiple facts by renaming fields. "
+                "Also supply measurements.claims as a map of source-grounded equation, causal_relation or "
+                "boundary_condition statements; use {} when no substantive structured statement is established. "
+                "Each claim needs kind, source_id (empty if absent), a precise native locator, left, relation, right, "
+                "conditions, and symbols. Use the relation code from the response contract; preserve its source wording "
+                "in finding. For equations, relation is = and symbols maps each equation "
+                "symbol to its source-defined meaning. For other claims use symbols={}. Left and right identify "
+                "the named quantities, entities or rules linked by the relation; conditions state the population, "
+                "system or assumptions under which the source states it. Preserve the source's actual relation, "
+                "including a negative or conditional result, without inferring a causal link from correlation. "
+                "A claim is one source-native relation or equation; do not split it into quote fragments, metadata, "
+                "bibliography, or multiple paraphrases. Do not put access notes or citations in claims. "
+                "The host registers these as investigation progress only, not as validated truth or support for G. "
                 "Use an established study/experiment identifier, "
                 "or this source URL if its independent studies cannot be distinguished; paraphrases and copies of the same "
                 "study do not create independent evidence. Explain concretely how the finding bears on the question; "
@@ -86,17 +100,43 @@ def read_source_window(reader, spans, question):
                 if not isinstance(item.get("reasoning_question"), str) or len(item["reasoning_question"]) > 800:
                     raise ValueError("A finding needs a bounded reasoning_question; use empty string when none")
                 key = "evidence:" + identity([reader.document.source, reader.document.sha256, span.start, quote, item["study_id"], item["finding"]])[:24]
+                native = dict(item["measurements"])
                 data = {
                     "source": reader.document.source, "locator": f"characters {span.start}:{span.end}",
                     "study_id": item["study_id"], "finding": item["finding"],
-                    "measurements": {"native": item["measurements"], "quote": quote,
+                    "measurements": {"native": native, "quote": quote,
                         "source_version": reader.document.sha256, "question": question,
                         "relevance_basis": item["relevance_basis"], "reasoning_question": item["reasoning_question"]}}
-                observations = item["measurements"].get("observations")
-                if not isinstance(observations, dict) or len(observations) > 16:
-                    raise ValueError("Reading needs at most sixteen typed observations; use {} when none is identifiable")
-                for observation in observations:
-                    observation_identity(data, observation)
+                observations = native.get("observations")
+                if not isinstance(observations, dict):
+                    diagnostics.append({"stage": "source_observation", "category": "invalid_candidate",
+                        "status": "rejected", "source": reader.document.source,
+                        "why": "Typed observations must be a named map; retained the source finding"})
+                    observations = {}
+                native["observations"] = dict(observations)
+                for observation in list(native["observations"]):
+                    try:
+                        observation_identity(data, observation)
+                    except (ValueError, TypeError, KeyError) as exc:
+                        del native["observations"][observation]
+                        diagnostics.append({"stage": "source_observation", "category": "invalid_candidate",
+                            "status": "rejected", "source": reader.document.source,
+                            "selector": observation, "why": str(exc)})
+                claims = native.get("claims")
+                if not isinstance(claims, dict):
+                    diagnostics.append({"stage": "source_claim", "category": "invalid_candidate",
+                        "status": "rejected", "source": reader.document.source,
+                        "why": "Typed source claims must be a named map; retained the source finding"})
+                    claims = {}
+                native["claims"] = dict(claims)
+                for claim in list(native["claims"]):
+                    try:
+                        claim_identity(data, claim)
+                    except (ValueError, TypeError, KeyError) as exc:
+                        del native["claims"][claim]
+                        diagnostics.append({"stage": "source_claim", "category": "invalid_candidate",
+                            "status": "rejected", "source": reader.document.source,
+                            "selector": claim, "why": str(exc)})
                 updates.append(working.causal_sheet.put(key, "evidence", data))
             except (ValueError, TypeError, KeyError, AttributeError) as exc:
                 diagnostics.extend(reader.failure_result(exc, "source_finding").diagnostics)

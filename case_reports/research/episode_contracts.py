@@ -160,4 +160,6 @@ def reasoning_report(source, result, completion):
                 calculation_context=source.commission.calculation_context),
             "reasoning_results": {"items": arguments[:8], "total": len(arguments)},
             "unresolved_premises": {"items": unresolved[:8], "total": len(unresolved)},
+            "work_outcomes": {"items": source.own_action_outcomes,
+                              "total": source.own_action_count},
             "operations": operation_fields(delta)}

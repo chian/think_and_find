@@ -114,7 +114,8 @@ class ResearchController:
 
     def _score(self):
         if self.point_scores:
-            return round(sum(sum(values.values()) for values in self.qualities.values()), 10)
+            return math.fsum(quality for values in self.qualities.values()
+                             for quality in values.values())
         if self.sum_qualities:
             return self._weighted({c: sum(self.qualities[c].values()) for c in self.columns})
         values = {c: max(min(self.capacity, len(self.seen[c])) / self.capacity,

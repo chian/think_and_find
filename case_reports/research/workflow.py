@@ -409,8 +409,8 @@ class ReasoningSource(ResearchSource):
     commission_type = SheetCommission
     instructions = ("Resolve the commissioned logical question through repeated choices of derivation, "
         "countermodel, comparison, repair analysis, independent argument checking, or formal calculation. "
-        "The selected inputs and historical snapshots in this call already contain their complete records. "
-        "Inspect only to select additional scoped records that this call has not supplied. "
+        "Selected inputs and historical snapshots in this call contain their complete records. "
+        "Recent own-action outcomes identify what prior inspections exposed, what records were admitted, and the credit change. "
         "Use the supplied source findings and explicit premises. Distinguish conclusions conditional on "
         "premises from empirically supported claims. Return public steps, conclusion, limitations and "
         "unresolved premises so the scientific parent can commission further evidence. Reconsider the "
@@ -426,18 +426,7 @@ class ReasoningSource(ResearchSource):
 
     def propose(self, view):
         schema, visible = _sheet_tool_contract(self, self.record_kinds)
-        selected = set(self.commission.inputs) | set(self.selected_keys)
-        selected.update(subject for subject, _ in self.commission.assignments)
-        if self.commission.calculation_context:
-            selected.add(self.commission.calculation_context)
-        selected.update(self.ledger.causal_sheet.inferences_for(selected))
-        unseen = any(key not in selected for key, _ in self.catalog_rows())
-        actions = ["record"]
-        if unseen:
-            actions.append("inspect")
-        if any(self.ledger.causal_sheet.rows[key]["kind"] in {"importance", *GRADING_FIELDS}
-               for key in selected):
-            actions.append("calculate")
+        actions = ["record", "inspect", "calculate"]
         if schema["properties"]["assessment"] is not False:
             actions.append("evaluate")
         schema["properties"]["action"] = {"enum": actions}

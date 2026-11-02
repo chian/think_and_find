@@ -28,9 +28,8 @@ and critiques are logical assignments with those same decisions;
 no assignment enables search or changes the episode's action set. Calculators
 remain tools. The common `method_loop` owns iteration and numerical continuation.
 The scoped input and historical snapshot records are already supplied in each
-Reasoning decision. Inspect is offered only while another scoped record remains
-unseen, so rereading the same supplied records cannot consume an own unit.
-Calculate is offered when a selected executable assessment exists.
+Reasoning decision. The episode retains every tool choice; feedback from its
+completed actions tells it whether inspection exposed anything new.
 
 Search Strategy returns source findings, exact source/record references, their
 bearing on the assigned question, unresolved reasoning questions, searches and
@@ -53,10 +52,17 @@ attempt projects only point changes since its starting sheet. The shared sheet
 shows investigation progress separately from executed support-for-G and scoped
 proportional-change credit. Investigation registration counts a candidate G,
 its expected generalizability bounds, each mapped theory/context relationship,
-and an explicit support argument once per exact structural identity. These
+an explicit support argument, and each typed source claim or observation once
+per exact structural identity. Each registration is 1 point. These
 registrations are work products, not support or scientific merit grades.
-Calculation progress is the resolved fraction of declared importance, expected
-bounds, support or repair operands, including negative results. Reasoning also
+Calculation progress is a number from 0 to 1: resolved declared operand mass
+divided by total declared operand mass, including negative results. Executed
+support adds 1 per qualifying hypothesis group and 1 per aligned identified
+observation. A qualifying change adds support for the original G multiplied
+by qualifying restored original-scope mass divided by original-scope mass.
+The global numeric score is the sum of these progress, support and change
+points; each episode receives its attributable before/after difference.
+Reasoning also
 observes coverage of explicitly assigned calculations; an assigned calculation
 is excluded from its other progress column so the same work is not counted twice.
 A repeated result earns no new point in either projection.

@@ -1,8 +1,8 @@
 """Episode-scoped projections of executed scientific contributions.
 
-Scientific points have one global identity. Source scopes select executed
-support through scientific provenance; activity, passage length and source count
-are not rewards. Investigation registration and resolved calculation mass are
+Scientific points have one global identity. Source scopes select typed
+investigation registrations and executed support through provenance; activity,
+passage length and source count are not rewards. Investigation progress is
 separate from support for a conclusion. Assigned calculation coverage is a
 separate Reasoning measurement.
 """
@@ -11,7 +11,7 @@ from fractions import Fraction
 from .records import Credit, Ledger
 from ...credit_assignment.causal_sheet import investigation_credit, _calculation_coverage
 from ...credit_assignment.causal_progress import compile_episode_points
-from ...credit_assignment.causal_support import compile_support, controller_projection
+from ...credit_assignment.causal_support import controller_projection
 
 
 def _positive_delta(points, before):
@@ -38,14 +38,16 @@ def _touches_evidence(sheet, references, evidence):
 
 def _scientific_gain(result, baseline, column, evidence):
     sheet = Ledger(result).causal_sheet
-    score = compile_support(sheet)
-    before = compile_support(Ledger(baseline).causal_sheet)["points"]
+    score = compile_episode_points(sheet)
+    before = compile_episode_points(Ledger(baseline).causal_sheet)["points"]
     points = {}
     for key, value in score["points"].items():
         # Subtract the whole inherited point before provenance filtering. Adding
         # another source for an existing atom cannot earn that atom again.
         gain = max(Fraction(0), Fraction(value) - Fraction(before.get(key, "0")))
-        if gain and _touches_evidence(sheet, score["point_dependencies"].get(key, ()), evidence):
+        dependencies = (score["progress"]["point_dependencies"].get(key, ()) if key.startswith("progress:")
+                        else score["support"]["point_dependencies"].get(key, ()))
+        if gain and _touches_evidence(sheet, dependencies, evidence):
             points[key] = gain
     projection = controller_projection(points, score["resolution"])
     if not projection["supported"]:

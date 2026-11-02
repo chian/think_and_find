@@ -293,6 +293,12 @@ class ResearchSource:
         self.selected_snapshots = []
         self.catalog_offset = 0
         self.last_calculation = None
+        self.last_own_action = None
+        self.own_action_outcomes = []
+        self.own_action_count = 0
+        self._prompt_selected_keys = set()
+        self._prompt_historical_refs = set()
+        self._prompt_catalog_offset = 0
 
     def scoped_snapshots(self):
         refs = [*(self.commission.snapshots if self.commission else ()), *self.selected_snapshots]
@@ -318,8 +324,34 @@ class ResearchSource:
                 gain=view.controller_step.gain, score=view.controller_step.score,
                 stop=view.controller_step.stop, model_calls=self.run.model_calls,
                 global_goal_score=status["investigation_score"], scientific_calculations=status["scientific_calculations"],
+                global_progress_score=status["investigation_progress_score"],
+                global_support_for_G_score=status["support_for_G_score"],
+                global_change_score=status["change_score"],
                 root_progress_binding=status["root_progress_binding"],
                 diagnostics=list(self.pending.diagnostics[-3:]))
+            proposal = self.last_proposal if isinstance(self.last_proposal, Mapping) else {}
+            newly_selected = sorted(set(self.selected_keys) - self._prompt_selected_keys)
+            newly_selected_snapshots = [dict(ref) for ref in self.scoped_snapshots()
+                if (ref["key"], ref["version"]) not in self._prompt_historical_refs]
+            self.last_own_action = {
+                "unit": unit.label, "choice": proposal.get("action", unit.label),
+                "operation_status": event["operation_status"],
+                "selected_keys": list(self.selected_keys),
+                "newly_exposed_keys": newly_selected,
+                "newly_exposed_snapshots": newly_selected_snapshots[:8],
+                "catalog_offset_before": self._prompt_catalog_offset,
+                "catalog_offset_after": self.catalog_offset,
+                "admitted_records": [{"key": row["key"], "kind": row["kind"]}
+                                     for row in changes.causal_sheet_updates[:8]],
+                "admitted_record_count": len(changes.causal_sheet_updates),
+                "credit_gain": view.controller_step.gain,
+                "scope_score": view.controller_step.score,
+                "diagnostics": [{name: row.get(name) for name in ("stage", "category", "status", "why")}
+                                for row in event["diagnostics"]],
+            }
+            self.own_action_count += 1
+            self.own_action_outcomes.append(self.last_own_action)
+            self.own_action_outcomes = self.own_action_outcomes[-self.run.limits.yield_window:]
             self.run.emit_trace("credit_verdict", episode_id=self.goal.goal_id,
                 episode_type=type(self).__name__, question=str(self.goal.objective),
                 contract=self.parent_contract.as_record() if self.parent_contract else None, **event)
@@ -402,9 +434,11 @@ class ResearchSource:
             "scores": {"selected_calculations": selected_calculations,
                        "assessment_count": len(status["scientific_calculations"]["assessments"]),
                        "root_progress_binding": status["root_progress_binding"],
+                       "current_score": view.controller_state.score,
                        "global_credit": status["investigation_score"],
                        "investigation_progress": status["investigation_progress_score"],
-                       "executed_support": status["support_score"],
+                       "support_for_G": status["support_for_G_score"],
+                       "change_credit": status["change_score"],
                        "policy_details": status["scientific_calculations"]["support_credit"]["policy_details"],
                        "controller_limitation": status["controller_limitation"],
                        "meaning": status["meaning"]},
@@ -414,7 +448,18 @@ class ResearchSource:
 
     def bounded_inputs(self, view, declared):
         # Only the latest direct-child report is steering.
-        inputs = view.model_inputs(declared, reports=view.child_reports[-1:])
+        steering = dict(declared)
+        own_results = steering.get("own_results")
+        if self.own_action_outcomes and not (isinstance(own_results, Mapping) and "work_outcomes" in own_results):
+            steering["own_action_outcomes"] = {
+                "recent": self.own_action_outcomes,
+                "total": self.own_action_count,
+            }
+        inputs = view.model_inputs(steering, reports=view.child_reports[-1:])
+        self._prompt_selected_keys = {row["key"] for row in inputs.get("selected_sheet_inputs", ())}
+        self._prompt_historical_refs = {(row["key"], row["version"])
+                                        for row in inputs.get("historical_sheet_inputs", ())}
+        self._prompt_catalog_offset = inputs.get("catalog_page", {}).get("offset", self.catalog_offset)
         return inputs
 
     def build_result(self, record):

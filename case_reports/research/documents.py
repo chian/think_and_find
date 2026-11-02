@@ -78,8 +78,6 @@ class Document:
     text: str
     window_size: int
     processed: set[str] = field(default_factory=set)
-    attempted_tables: set[str] = field(default_factory=set)
-    report_attempted: bool = False
     examined_ranges: list = field(default_factory=list)
 
     def __post_init__(self):

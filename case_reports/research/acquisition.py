@@ -3,7 +3,6 @@
 from datetime import datetime, timezone
 from dataclasses import replace
 import asyncio
-import json
 
 from ...method_loop.episode_binding.web_search_binding import SearchPageProposer
 from ...task_executors._http import ProviderError
@@ -246,26 +245,9 @@ class PageSource(LiteratureSource):
             *(pair for attempt in attempts
               if attempt["status"] != "not_started" for pair in attempt["ranges"])])
         unread = document.remaining()
-        reviewed = merged_ranges(pair for attempt in attempts if attempt["status"] == "completed"
-                                 for pair in attempt["ranges"])
-        fully_reviewed = all(any(start <= span.start and end >= span.end for start, end in reviewed)
-                             for span in document.spans)
-        task_attempts = [attempt for attempt in attempts if attempt.get("page_task") == page_task]
-        task_reviewed = merged_ranges(pair for attempt in task_attempts if attempt["status"] == "completed"
-                                      for pair in attempt["ranges"])
-        task_failures = [pair for attempt in task_attempts if attempt["status"] in {"failed", "partial"}
-                         for pair in attempt["ranges"] if not any(
-                             start <= pair[0] and end >= pair[1] for start, end in task_reviewed)]
-        if not unread and fully_reviewed and task_reviewed and not task_failures:
-            # A missing answer is not new source material. Return the completed
-            # task; a caller may revisit the source with a different task.
-            self.cooperative_return_reason = "source_task_examined"
-            return None
-        reexamination = {span.key: span for span in document.spans
-                        if unread or fully_reviewed or not any(
-                            start <= span.start and end >= span.end for start, end in reviewed)}
+        reexamination = {span.key: span for span in document.spans}
         reading_scopes = ("unexamined", "reexamine") if unread else ("reexamine",)
-        tables = {t.key: t for t in document.tables if t.key not in document.attempted_tables}
+        tables = {t.key: t for t in document.tables}
         offset = self.page_inventory_offset
         table_page = dict(list(tables.items())[offset:offset + 8])
         span_page = dict(list(reexamination.items())[offset:offset + 16])
@@ -279,10 +261,9 @@ class PageSource(LiteratureSource):
                                     "span_count": len(reexamination), "table_count": len(tables),
                                     "heading_count": len(headings)}
         if document.remaining("reexamine"):
-            if unread and not document.report_attempted:
-                options["report"] = {"episode": "report", "meaning":
-                    "Sequential reading with cross-window context; unexamined scope skips previously examined ranges. "
-                    "A section name in question does not move the cursor; reaching later sections requires successive windows."}
+            options["report"] = {"episode": "report", "meaning":
+                "Sequential reading with cross-window context in the chosen scope. Unexamined skips prior coverage; "
+                "reexamine rereads in document order. A section name in question does not move the cursor."}
             options["lexical_probe"] = {"episode": "lexical_probe", "meaning": "Rank source-local chunks by a literal query within the chosen reading scope; unexamined scope excludes previously supplied text from ranking and extraction."}
         if not options:
             return None
@@ -291,22 +272,24 @@ class PageSource(LiteratureSource):
                 "characters": len(document.text), "chunks": len(document.spans),
                 "opening": document.text[:500], "outline": headings[offset:offset+8],
                 "inventory_offset": offset, "table_count": len(tables),
-                "prior_reading": compact_reading_coverage(
-                    a for a in self.ledger.reading_attempts.values() if a["source"] == document.source)},
+                "prior_reading": compact_reading_coverage(attempts),
+                "recent_reading_attempts": [{"question": a["question"][:500], "status": a["status"],
+                    "ranges": a["ranges"][:8], "same_page_task": a.get("page_task") == page_task}
+                    for a in attempts[-8:]], "earlier_attempt_count": max(0, len(attempts) - 8)},
             reexamination_spans={key: {"start": span.start, "end": span.end,
                                       "opening": span.text[:240]} for key, span in span_page.items()},
             available_children=options,
             instruction=("Choose among the actual available reading scopes using the delegated information need and prior coverage. "
                 "The inventory is paged: choose inventory with inventory_offset to inspect more spans, headings or tables. "
                 "A lexical query searches the whole selected reading scope even when its spans are absent from this preview. "
-                "report reads sequentially from the next unprocessed span; it cannot jump to a named section in question. "
+                "report reads sequentially in the chosen scope; it cannot jump to a named section in question. "
                 "lexical_probe ranks source-local chunks for a targeted query, including material beyond the opening windows. "
                 "source_table examines a detected table. For report or lexical_probe, choose reading_scope: "
                 "unexamined reads text not previously supplied to extraction in this source version, including "
                 "coverage from table rows and earlier visits; reexamine permits deliberate rereading for a new "
-                "question, failed extraction, or missing context. For reexamine use lexical_probe and select "
-                "explicit reexamine_spans totaling at most one reading window; state the specific changed "
-                "question or failed passage in question. It does not start another full-document reader. "
+                "question, failed extraction, or missing context. Report can reread in document order; "
+                "lexical_probe can search all earlier text or focus on explicit reexamine_spans. "
+                "State the changed question or failed passage when rereading. "
                 "Previously examined glossary rows are not unexamined equation discussion merely because "
                 "a new query ranks the same terms. Source versions with changed text have separate coverage. "
                 "Earlier reading under a different question does not rule out a useful reread. "
@@ -324,16 +307,15 @@ class PageSource(LiteratureSource):
                                       "description": "For report/lexical_probe: seek unexamined text or deliberately reread; tables retain row-query selection."},
                     "reexamine_spans": {"type": "array", "minItems": 1, "uniqueItems": True,
                         "items": {"type": "string", "enum": list(span_page)},
-                        "description": "Exact source chunks for a focused reexamination, within one reading window."},
+                        "description": "Optional exact source chunks for a focused lexical reexamination, within one reading window."},
                     "query": {"type": "string", "minLength": 1, "description": "Literal query for lexical_probe"}},
                 "allOf": [{"if": {"properties": {"option": {"const": "lexical_probe"}}},
                            "then": {"required": ["query"]}},
                           {"if": {"properties": {"option": {"enum": ["report", "lexical_probe"]}}},
                            "then": {"required": ["reading_scope"]}},
-                          {"if": {"required": ["reading_scope"], "properties": {"reading_scope": {"const": "reexamine"}}},
-                           "then": {"required": ["reexamine_spans"], "properties": {"option": {"const": "lexical_probe"}}}},
-                          {"if": {"properties": {"option": {"const": "report"}}},
-                           "then": {"properties": {"reading_scope": {"const": "unexamined"}}}}]}))
+                          {"if": {"required": ["reexamine_spans"]},
+                           "then": {"properties": {"option": {"const": "lexical_probe"},
+                                                   "reading_scope": {"const": "reexamine"}}}}]}))
         self.last_proposal = proposal
         option = selected_choice(proposal.get("option"), options, "option")
         question = required_text(proposal.get("question"), "question")
@@ -348,22 +330,23 @@ class PageSource(LiteratureSource):
             source = SourceTableSource(self.run, inherited, document=document, table=tables[option])
             grain = "source_table"
         elif option == "report":
-            scope = selected_choice(proposal.get("reading_scope", "unexamined"),
-                                    ("unexamined",), "reading_scope")
+            scope = selected_choice(proposal.get("reading_scope", reading_scopes[0]),
+                                    reading_scopes, "reading_scope")
             source = ReportSource(self.run, inherited, document=document, reading_scope=scope)
             grain = "report"
         else:
-            scope = selected_choice(proposal.get("reading_scope", "unexamined"),
+            scope = selected_choice(proposal.get("reading_scope", reading_scopes[0]),
                                     reading_scopes, "reading_scope")
             selected_spans = None
             if scope == "reexamine":
                 selected_spans = proposal.get("reexamine_spans")
-                known = reexamination
-                if (not isinstance(selected_spans, list) or not selected_spans
-                        or any(key not in known for key in selected_spans)
-                        or len(set(selected_spans)) != len(selected_spans)
-                        or sum(len(known[key].text) for key in selected_spans) > self.run.limits.text_window_chars):
-                    raise ValueError("Focused reexamination requires exact source chunks within one reading window")
+                if selected_spans is not None:
+                    known = reexamination
+                    if (not isinstance(selected_spans, list) or not selected_spans
+                            or any(key not in known for key in selected_spans)
+                            or len(set(selected_spans)) != len(selected_spans)
+                            or sum(len(known[key].text) for key in selected_spans) > self.run.limits.text_window_chars):
+                        raise ValueError("Focused reexamination requires exact source chunks within one reading window")
             source = LexicalProbeSource(self.run, inherited, document=document,
                 query=required_text(proposal.get("query"), "query"), reading_scope=scope,
                 selected_spans=selected_spans)
@@ -371,10 +354,6 @@ class PageSource(LiteratureSource):
         source.page_task = page_task
         child = self.run.child(view, source, grain, question, proposal=proposal,
             contract=self.child_contract(source.commission_type, f"Establish source-grounded evidence for {question}"))
-        if option in tables:
-            document.attempted_tables.add(option)
-        elif option == "report":
-            document.report_attempted = True
         return self.edge(child)
 
 
@@ -396,10 +375,8 @@ class ReadingSource(LiteratureSource):
     def validate_memory(self, memory, allowed):
         if not isinstance(memory, dict) or set(memory) != {"summary", "unresolved_links", "anchors"}:
             raise ValueError("Reading memory requires summary, unresolved_links, and source anchors")
-        if len(json.dumps(memory)) > self.run.limits.text_window_chars:
-            raise ValueError("Reading memory exceeds its declared context capacity")
-        if not isinstance(memory["summary"], str) or len(memory["summary"]) > self.run.limits.text_window_chars:
-            raise ValueError("Reading summary exceeds its declared context capacity")
+        if not isinstance(memory["summary"], str):
+            raise ValueError("Reading summary must be text")
         if not isinstance(memory["unresolved_links"], list) or any(not isinstance(v, str) for v in memory["unresolved_links"]):
             raise ValueError("Reading unresolved links must be text")
         if not isinstance(memory["anchors"], list):
@@ -517,8 +494,10 @@ class SourceTableSource(ReadingSource):
         report = super().parent_report(result, completion, request)
         report["table_queries"] = {"table": self.table.key,
             "queries": [{"query": q["query"], "column": q["column"], "matches": q["matches"],
-                         "selected_rows": q["selected_rows"][:8]} for q in self.queries[-8:]],
-            "queried_rows": sorted(self.queried)[:8], "remaining_rows": len(self.table.rows) - len(self.queried)}
+                         "question": q["question"][:500], "selected_rows": q["selected_rows"][:8],
+                         "outcome": q.get("outcome")} for q in self.queries[-8:]],
+            "queried_rows": sorted(self.queried)[:8], "remaining_rows": len(self.table.rows) - len(self.queried),
+            "revisitable_rows": len(self.queried)}
         return report
 
     extraction_tier = TABLE_PAGE_EXTRACTION_TIER
@@ -527,11 +506,11 @@ class SourceTableSource(ReadingSource):
         super().__init__(*args, **kwargs)
         self.table, self.queried = table, set()
         self.queries = []
+        self.pending_query = None
 
     def propose(self, view):
-        remaining = {s.key: (s, values) for s, values in zip(self.table.rows, self.table.cells)
-                     if s.key not in self.queried}
-        if not remaining:
+        available = {s.key: (s, values) for s, values in zip(self.table.rows, self.table.cells)}
+        if not available:
             return None
         question_schema = {"type": "string", "minLength": 1,
                            "description": "Claim to examine using selected rows and the exact header"}
@@ -540,24 +519,27 @@ class SourceTableSource(ReadingSource):
              "properties": {
                  "rows": {"type": "array", "minItems": 1, "uniqueItems": True,
                           "items": {"type": "string", "pattern": rf"^{self.table.key}:row:[1-9][0-9]*$"},
-                          "description": "Exact unqueried row keys, not row numbers or row contents"},
+                          "description": "Exact table row keys, including previously read rows when the question changes"},
                  "question": question_schema}},
             {"type": "object", "additionalProperties": False, "required": ["query", "question"],
              "properties": {
-                 "query": {"type": "string", "description": "Literal text; empty string scans remaining rows"},
+                 "query": {"type": "string", "description": "Literal text; empty string scans all rows"},
                  "column": {"type": ["string", "null"], "enum": [*self.table.columns, None]},
                  "question": question_schema}},
         ]}
         proposal = self.run.agent(self.inputs(view, operation="propose_table_query",
             table=self.table.summary(),
-            available_rows={k: {"cells": list(values), "raw": s.text} for k, (s, values) in list(remaining.items())[:8]},
-            remaining_row_count=len(remaining), previous_queries=[
+            available_rows={k: {"cells": list(values), "raw": s.text, "previously_read": k in self.queried}
+                for k, (s, values) in list(available.items())[:8]},
+            unqueried_row_count=len(available) - len(self.queried), previous_queries=[
                 {"query": row["query"], "column": row["column"], "matches": row["matches"],
-                 "selected_row_count": len(row["selected_rows"])} for row in self.queries[-8:]],
+                 "question": row["question"][:500], "selected_rows": row["selected_rows"][:8],
+                 "selected_row_count": len(row["selected_rows"]), "outcome": row.get("outcome")}
+                for row in self.queries[-8:]],
             earlier_query_count=max(0, len(self.queries) - 8),
             row_addressing={"format": f"{self.table.key}:row:NUMBER", "first": 1, "last": len(self.table.rows)},
             response_contract=response_contract,
-            instruction="Return an instance of one JSON Schema alternative: rows plus question, OR query plus question and an optional column. Omit rows entirely for a text query; do not send rows: []. The preview is not the whole table: a text query searches all remaining rows and returns one bounded execution window. Subsequent queries can examine the remaining matches. Execution returns exact spans, not inferred cells."))
+            instruction="Return an instance of one JSON Schema alternative: rows plus question, OR query plus question and an optional column. Omit rows entirely for a text query; do not send rows: []. The preview is not the whole table: a text query searches all rows and returns one execution window. Use prior questions, selected rows and outcomes to choose what information remains useful. Previously read rows remain available for a changed question. Execution returns exact spans, not inferred cells."))
         self.last_proposal = proposal
         if ("rows" in proposal) == ("query" in proposal):
             raise ValueError("Choose exactly one table selection: 'rows' with nonempty exact row keys OR "
@@ -570,7 +552,7 @@ class SourceTableSource(ReadingSource):
             if not isinstance(query, str) or (column is not None and column not in self.table.columns):
                 raise ValueError("Table query needs literal text and an existing optional column")
             rows, size, matches = [], len(self.table.header.text), 0
-            for key, (span, values) in remaining.items():
+            for key, (span, values) in available.items():
                 searched = values if column is None else (values[self.table.columns.index(column)],)
                 if not any(query.casefold() in cell.casefold() for cell in searched):
                     continue
@@ -578,30 +560,45 @@ class SourceTableSource(ReadingSource):
                 if size + len(span.text) <= self.run.limits.text_window_chars:
                     rows.append(key)
                     size += len(span.text)
-            self.queries.append({"query": query, "column": column, "matches": matches, "selected_rows": rows})
+            self.pending_query = {"query": query, "column": column, "matches": matches,
+                                  "selected_rows": rows, "question": question}
+            self.queries.append(self.pending_query)
             if not rows:
                 if matches:
                     raise ValueError("A matching table row exceeds the execution window")
                 return self.leaf(lambda: self.no_matches(query), f"table_query:{view.units_consumed + 1}")
-        if not isinstance(rows, list) or not rows or any(not isinstance(k, str) or k not in remaining for k in rows):
-            invalid = [k for k in rows if not isinstance(k, str) or k not in remaining] if isinstance(rows, list) else rows
-            raise ValueError("'rows' must be a nonempty list of exact unqueried row keys, not row numbers. "
+        if not isinstance(rows, list) or not rows or any(not isinstance(k, str) or k not in available for k in rows):
+            invalid = [k for k in rows if not isinstance(k, str) or k not in available] if isinstance(rows, list) else rows
+            raise ValueError("'rows' must be a nonempty list of exact table row keys, not row numbers. "
                              f"Unavailable or invalid selection: {invalid!r}. "
-                             f"Available key preview: {list(remaining)[:8]!r}. No rows were queried.")
+                             f"Available key preview: {list(available)[:8]!r}. No rows were queried.")
         if len(set(rows)) != len(rows):
             raise ValueError("'rows' must contain unique row keys; no rows were queried")
         spans = (self.table.header, *(s for s in self.table.rows if s.key in rows))
         if sum(len(s.text) for s in spans) > self.run.limits.text_window_chars:
             raise ValueError("Table query exceeds one execution window; select fewer rows")
         if "rows" in proposal:
-            self.queries.append({"query": None, "column": None, "matches": len(rows), "selected_rows": list(rows)})
+            self.pending_query = {"query": None, "column": None, "matches": len(rows),
+                                  "selected_rows": list(rows), "question": question}
+            self.queries.append(self.pending_query)
         return self.leaf(lambda: self.read(spans, question), f"table_query:{view.units_consumed + 1}")
 
     def after_verdict(self, unit, contribution, view):
+        if self.pending_query is not None and self.pending is not None:
+            delta = changed_records(self.pending, self.ledger.result())
+            self.pending_query["outcome"] = {
+                "evaluated": self.pending.evaluated,
+                "admitted_records": len(delta.causal_sheet_updates),
+                "reading_statuses": [attempt["status"] for attempt in delta.reading_attempts],
+                "credit_gain": view.controller_step.gain,
+                "diagnostics": [{k: diagnostic.get(k) for k in ("stage", "category", "status", "why")}
+                                for diagnostic in delta.diagnostics[-3:]],
+            }
         if self.pending is not None and self.pending.evaluated:
             self.queried.update(s.key for s in self.pending_spans if s.key != self.table.header.key)
         super().after_verdict(unit, contribution, view)
+        self.pending_query = None
 
     @staticmethod
     def no_matches(query):
-        return ResearchResult(findings=(f"No remaining table rows match literal query {query!r}; this is not a scientific refutation.",))
+        return ResearchResult(findings=(f"No table rows match literal query {query!r}; this is not a scientific refutation.",))

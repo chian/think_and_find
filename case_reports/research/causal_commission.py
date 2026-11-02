@@ -155,6 +155,7 @@ class SheetCommission:
                     "Full evidence and public derivations are retained in the sheet, not repeated in the return.",
                 "reasoning_results": "At most eight public arguments: premises, conclusion, limitations, and calculation results; full steps remain addressable by key.",
                 "unresolved_premises": "Referenced premises without source grounding or independent validation; these are requests for parent assessment, not refutations.",
+                "work_outcomes": "Recent completed own decisions with selected information, admitted records, diagnostics and credit; no recursive transcript.",
                 "operations": "At most three recent failures or limitations relevant to the next decision."})
 
     def request(self, sheet):

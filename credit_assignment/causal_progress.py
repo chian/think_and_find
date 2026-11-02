@@ -10,6 +10,8 @@ from hashlib import sha256
 import json
 
 from .causal_sheet import CRITERION_KINDS, _calculation_coverage
+from ..case_reports.research.source_claims import claim_identity, source_anchor
+from ..case_reports.research.support_observations import observation_identity
 
 
 def _identity(value):
@@ -38,7 +40,7 @@ def compile_progress(sheet):
     Reworded records and revisions
     of the same object do not manufacture a second registration unit.
     """
-    registrations, calculations = {}, {}
+    registrations, calculations, point_dependencies = {}, {}, {}
     inference_ids = {key: _inference_identity(row) for key, row in sheet.of_kind("inference")}
     for ident in inference_ids.values():
         registrations["progress:inference:" + ident] = Fraction(1)
@@ -58,6 +60,37 @@ def compile_progress(sheet):
                            data["expectation"]])
         registrations["progress:support_argument:" + ident] = Fraction(1)
 
+    # Source-grounded scientific operands are investigation registrations, not
+    # votes for G. A passage, search hit, citation or access note has no operand.
+    # The exact source span is retained by extraction; these validators require
+    # complete source-native relation/measurement fields and stable identities.
+    for evidence_key, row in sheet.of_kind("evidence"):
+        data = row["data"]
+        measurements = data.get("measurements")
+        native = measurements.get("native") if isinstance(measurements, dict) else None
+        if not isinstance(native, dict):
+            continue
+        try:
+            source_anchor(data)
+        except (ValueError, TypeError, KeyError):
+            continue
+        for collection, prefix, identity_fn in (
+                ("claims", "progress:source_claim:", claim_identity),
+                ("observations", "progress:source_observation:", observation_identity)):
+            candidates = native.get(collection)
+            if not isinstance(candidates, dict):
+                continue
+            for selector in candidates:
+                try:
+                    ident, _ = identity_fn(data, selector)
+                except (ValueError, TypeError, KeyError):
+                    # Historical records may predate the typed extraction
+                    # contract. Incomplete content earns no progress.
+                    continue
+                point = prefix + ident
+                registrations[point] = Fraction(1)
+                point_dependencies.setdefault(point, set()).add(evidence_key)
+
     resolutions = [Fraction(1)]
     for criterion, kind in CRITERION_KINDS.items():
         for subject, _ in sheet.of_kind(kind):
@@ -67,12 +100,14 @@ def compile_progress(sheet):
             resolutions.append(resolution)
     points = {**registrations, **calculations}
     return {"points": {key: str(value) for key, value in sorted(points.items())},
+            "point_dependencies": {key: sorted(value) for key, value in sorted(point_dependencies.items())},
             "registration_points": {key: str(value) for key, value in sorted(registrations.items())},
             "calculation_points": {key: str(value) for key, value in sorted(calculations.items())},
             "total": str(sum(points.values(), Fraction())),
             "resolution": str(min(resolutions)),
             "meaning": "Registration counts candidate G, its articulated expected generalizability bounds, "
-                       "mapped theory/context relationships and an explicit support argument once per exact structural identity. "
+                       "mapped theory/context relationships, an explicit support argument and typed source claims or observations "
+                       "once per exact structural identity. Source registration does not establish validity or support for G. "
                        "Calculation progress is resolved declared operand mass, including negative results. "
                        "These are investigation units, not support for G or scientific merit grades. "
                        "Exact structural identity does not establish semantic equivalence of differently worded claims."}

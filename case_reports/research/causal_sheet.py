@@ -14,6 +14,8 @@ from .grading import GRADING_FIELDS, module_for, grade_record, compact_calculati
 from .importance import (PROTOCOL_FIELDS, RESULT_FIELDS, validate_protocol, validate_result,
                          result_key, score_importance, protocol_identity)
 from . import source_formalization
+from . import source_claims
+from .support_observations import observation_identity
 
 
 # Deliberately closed records. References below are scientific object identities,
@@ -349,6 +351,14 @@ class CausalSheet:
                     _text(value, name, empty=name in {"same_as", "reasoning", "counterexample"})
                 if name in ENUMS and value not in ENUMS[name]:
                     raise ValueError(f"Invalid {name}: {value!r}")
+            if kind == "evidence":
+                native = data["measurements"].get("native")
+                claims = native.get("claims") if isinstance(native, dict) else None
+                if claims is not None:
+                    if not isinstance(claims, dict):
+                        raise ValueError("Evidence source claims must be a named map")
+                    for selector in claims:
+                        source_claims.claim_identity(data, selector)
         prior = self.rows.get(key)
         if update["previous"] != (prior["version"] if prior else None):
             raise ValueError(f"Stale update for {key}; reconsider against the current sheet")
@@ -588,11 +598,42 @@ class CausalSheet:
                     detail.update(legacy_model_opinion=data["verdict"], verification_established=False, scoring_effect="none")
                 if row["kind"] == "evidence":
                     measurements = data["measurements"]
+                    native = measurements.get("native")
+                    claims = native.get("claims", {}) if isinstance(native, dict) else {}
+                    observations = native.get("observations", {}) if isinstance(native, dict) else {}
+                    claim_items = []
+                    if isinstance(claims, dict):
+                        for selector in list(claims)[:2]:
+                            try:
+                                ident, claim = source_claims.claim_identity(data, selector)
+                            except (ValueError, TypeError, KeyError):
+                                continue
+                            structure = claim["structure"]
+                            claim_items.append({"id": ident, "kind": structure["kind"],
+                                "left": structure["left"][:160], "relation": structure["relation"][:80],
+                                "right": structure["right"][:160], "conditions": structure["conditions"][:160]})
+                    observation_items = []
+                    if isinstance(observations, dict):
+                        for selector in list(observations)[:2]:
+                            try:
+                                ident, observation = observation_identity(data, selector)
+                            except (ValueError, TypeError, KeyError):
+                                continue
+                            measurement = observation["measurement"]
+                            observation_items.append({"id": ident,
+                                "quantity": measurement["quantity"][:160],
+                                "value": str(measurement["value"])[:120],
+                                "units": measurement["units"][:80],
+                                "conditions": str(measurement["conditions"])[:160]})
                     detail.update(source=data["source"][:500], locator=data["locator"][:240],
                                   study_id=data["study_id"][:160],
                                   source_version=measurements.get("source_version"),
                                   bearing=measurements.get("relevance_basis", "")[:800],
-                                  reasoning_question=measurements.get("reasoning_question", "")[:800])
+                                  reasoning_question=measurements.get("reasoning_question", "")[:800],
+                                  source_claims={"items": claim_items,
+                                                 "total": len(claims) if isinstance(claims, dict) else 0},
+                                  source_observations={"items": observation_items,
+                                                       "total": len(observations) if isinstance(observations, dict) else 0})
                 elif row["kind"] == "source_formalization":
                     detail.update(evidence=data["evidence"], assessment=data["assessment"],
                                   method=data["method"], quantity=data["quantity"], units=data["units"])
