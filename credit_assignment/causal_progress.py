@@ -64,6 +64,8 @@ def compile_progress(sheet):
     # votes for G. A passage, search hit, citation or access note has no operand.
     # The exact source span is retained by extraction; these validators require
     # complete source-native relation/measurement fields and stable identities.
+    # A source-claim unit is one closed relation code per exact source fragment;
+    # prose paraphrases of that fragment cannot multiply its point.
     for evidence_key, row in sheet.of_kind("evidence"):
         data = row["data"]
         measurements = data.get("measurements")
@@ -107,10 +109,11 @@ def compile_progress(sheet):
             "resolution": str(min(resolutions)),
             "meaning": "Registration counts candidate G, its articulated expected generalizability bounds, "
                        "mapped theory/context relationships, an explicit support argument and typed source claims or observations "
-                       "once per exact structural identity. Source registration does not establish validity or support for G. "
+                       "once per scored identity. Source claims count one relation code per exact source fragment; "
+                       "multiple same-code claims in a fragment collapse. Source registration does not establish validity or support for G. "
                        "Calculation progress is resolved declared operand mass, including negative results. "
                        "These are investigation units, not support for G or scientific merit grades. "
-                       "Exact structural identity does not establish semantic equivalence of differently worded claims."}
+                       "Source-location identity does not establish semantic equivalence of claims at different locations."}
 
 
 def combine_episode_points(support, progress):

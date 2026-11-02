@@ -67,11 +67,13 @@ def source_anchor(evidence_data):
 
 
 def claim_identity(evidence_data, claim_id):
-    """Return a stable content identity and source detail for one typed claim.
+    """Return a conservative, source-anchored relation identity and detail.
 
-    The extraction map key and source location are provenance, not new scientific
-    identities. Identical structured propositions from copied passages collapse.
-    An independently measured outcome uses observation_identity instead.
+    One exact source fragment can register each declared relation kind once.
+    Rewording left, right or conditions on a reread of that same fragment cannot
+    create more points. Multiple same-kind relations in one fragment collapse;
+    the point is an investigation unit, not a count of every scientific claim.
+    Independent measured outcomes use observation_identity instead.
     """
     _text(claim_id, "selector")
     if not isinstance(evidence_data, dict):
@@ -108,7 +110,13 @@ def claim_identity(evidence_data, claim_id):
             raise ValueError("Equation claim needs equality and defined symbols")
     elif symbols:
         raise ValueError("Symbol definitions belong to equation claims")
-    canonical = json.dumps(structural, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    # These model-authored fields may be paraphrased differently on a reread.
+    # Only the exact host-retained source anchor and closed relation code form
+    # the scored identity. Keep the full structure for the scientific sheet.
+    scored_unit = {"source": evidence_data["source"], "source_version": version,
+                   "evidence_locator": evidence_data["locator"],
+                   "kind": structural["kind"], "relation": structural["relation"]}
+    canonical = json.dumps(scored_unit, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     ident = sha256(canonical.encode()).hexdigest()[:32]
     detail = {"claim": claim_id, "source_id": source_id, "native_locator": locator,
               "source": evidence_data["source"], "source_version": version,
