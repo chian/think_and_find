@@ -538,6 +538,7 @@ class ResearchResult(ClosedRecord):
     source_target_relationships: tuple[Mapping[str, Any], ...] = ()
     scenario_parameter_relations: tuple[Mapping[str, Any], ...] = ()
     causal_sheet_updates: tuple[Mapping[str, Any], ...] = ()
+    grading_actions: tuple[Mapping[str, Any], ...] = ()
 
     def as_record(self):
         return {"facts": [f.as_record() for f in self.facts],
@@ -550,7 +551,8 @@ class ResearchResult(ClosedRecord):
                 "source_event_types": list(self.source_event_types),
                 "source_target_relationships": list(self.source_target_relationships),
                 "scenario_parameter_relations": list(self.scenario_parameter_relations),
-                "causal_sheet_updates": list(self.causal_sheet_updates)}
+                "causal_sheet_updates": list(self.causal_sheet_updates),
+                "grading_actions": list(self.grading_actions)}
 
     def audit_identifiers(self):
         return tuple(f.key for f in self.facts)
@@ -590,6 +592,7 @@ class Ledger:
         self.diagnostics = []
         self.calculations = {}
         self.reading_attempts = {}
+        self.grading_actions = {}
         self.source_event_types = {}
         self.source_target_relationships = {}
         self.scenario_parameter_relations = {}
@@ -641,6 +644,7 @@ class Ledger:
         self.diagnostics.extend(d for d in result.diagnostics if d not in self.diagnostics)
         self.calculations.update((c["version"], c) for c in result.calculations)
         self.reading_attempts.update((identity(a), a) for a in result.reading_attempts)
+        self.grading_actions.update((a["id"], a) for a in result.grading_actions)
         self.source_event_types.update((row["type_id"], row) for row in result.source_event_types)
         self.source_target_relationships.update(
             ((row["source"], row["source_subject"], row["target_subject"], row["parameter"]), row)
@@ -671,6 +675,7 @@ class Ledger:
                               assumptions=tuple(self.assumptions.values()), scenarios=tuple(self.scenarios.values()),
                               diagnostics=tuple(self.diagnostics), calculations=tuple(self.calculations.values()),
                               reading_attempts=tuple(self.reading_attempts.values()),
+                              grading_actions=tuple(self.grading_actions.values()),
                               source_event_types=tuple(self.source_event_types.values()),
                               source_target_relationships=tuple(self.source_target_relationships.values()),
                               scenario_parameter_relations=tuple(self.scenario_parameter_relations.values()),

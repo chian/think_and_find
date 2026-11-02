@@ -6,6 +6,7 @@ from .records import Ledger, ResearchResult, identity
 from .engine import selected_choice
 from .support_observations import observation_identity, observations_schema
 from .source_claims import claim_identity, claims_schema
+from .grading_handoff import GRADING_NEED_SCHEMA, validate_needs
 from ...task_executors._http import ProviderError
 
 
@@ -21,7 +22,7 @@ def read_source_window(reader, spans, question):
     allowed.update({anchor["span"]: reader.seen_spans[anchor["span"]] for anchor in reader.memory["anchors"]})
     first_call = reader.run.model_calls + 1
     record_schema = {"type": "object", "additionalProperties": False,
-        "required": ["span", "study_id", "finding", "measurements", "relevance_basis", "reasoning_question"],
+        "required": ["span", "study_id", "finding", "measurements", "relevance_basis", "reasoning_question", "grading_needs"],
         "properties": {
             "span": {"enum": list(allowed)},
             "study_id": {"type": "string", "minLength": 1, "maxLength": 160},
@@ -30,7 +31,8 @@ def read_source_window(reader, spans, question):
                 "properties": {"observations": observations_schema(), "claims": claims_schema()},
                 "additionalProperties": True},
             "relevance_basis": {"type": "string", "minLength": 1, "maxLength": 800},
-            "reasoning_question": {"type": "string", "maxLength": 800}}}
+            "reasoning_question": {"type": "string", "maxLength": 800},
+            "grading_needs": {"type": "array", "items": GRADING_NEED_SCHEMA}}}
     memory_schema = {"type": "object", "additionalProperties": False,
         "required": ["summary", "unresolved_links", "anchors"], "properties": {
             "summary": {"type": "string", "maxLength": 1600},
@@ -81,6 +83,13 @@ def read_source_window(reader, spans, question):
                 "do not assign relevance, confidence, or scientific-quality grades. In reasoning_question state an unresolved "
                 "logical, comparison or repair question raised by this finding, or empty string if none. "
                 "Keep this proposed question distinct from what the source establishes. "
+                "Flag a potential scientific assessment in grading_needs when the finding could inform G registration, "
+                "expected generalizability bounds, a theory/context application, support, or causal change. "
+                "State the precise assessment question and qualifications or missing operands; sheet_keys names only "
+                "supplied scientific inputs, or [] for a new candidate. Use [] for grading_needs when none is raised. "
+                "Return these needs to Page. Page decides whether to register scientific operands or invoke a grader "
+                "in its next iteration. You extract and flag; you cannot invoke graders, register G/bounds/applications, "
+                "assign points, or declare the assessment valid. A potential reversal remains a question. "
                 "Memory is concise working context, not evidence. Return an empty findings list if no relevant finding exists.",
             "response_contract": {"type": "object", "additionalProperties": False,
                 "required": ["findings", "reading_memory"], "properties": {
@@ -101,12 +110,19 @@ def read_source_window(reader, spans, question):
                     raise ValueError("A finding needs a bounded reasoning_question; use empty string when none")
                 key = "evidence:" + identity([reader.document.source, reader.document.sha256, span.start, quote, item["study_id"], item["finding"]])[:24]
                 native = dict(item["measurements"])
+                needs = []
+                try:
+                    needs = validate_needs(item.get("grading_needs", []), reader.commission.inputs)
+                except (ValueError, TypeError, KeyError) as exc:
+                    diagnostics.append({"stage": "grading_need", "category": "invalid_candidate",
+                        "status": "rejected", "why": str(exc), "evidence": key})
                 data = {
                     "source": reader.document.source, "locator": f"characters {span.start}:{span.end}",
                     "study_id": item["study_id"], "finding": item["finding"],
                     "measurements": {"native": native, "quote": quote,
                         "source_version": reader.document.sha256, "question": question,
-                        "relevance_basis": item["relevance_basis"], "reasoning_question": item["reasoning_question"]}}
+                        "relevance_basis": item["relevance_basis"], "reasoning_question": item["reasoning_question"],
+                        "grading_needs": needs}}
                 observations = native.get("observations")
                 if not isinstance(observations, dict):
                     diagnostics.append({"stage": "source_observation", "category": "invalid_candidate",
@@ -164,4 +180,7 @@ def read_source_window(reader, spans, question):
         "first_model_call": first_call, "question": question, "page_task": getattr(reader, "page_task", None),
         "ranges": [[s.start, s.end] for s in spans],
         "status": ("partial" if result.diagnostics else "completed") if result.evaluated else "failed"}
+    memory = reader.pending_memory or reader.memory
+    attempt["reading_summary"] = memory["summary"]
+    attempt["unresolved_links"] = memory["unresolved_links"]
     return replace(result, reading_attempts=(attempt,))

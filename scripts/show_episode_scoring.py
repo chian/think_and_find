@@ -85,7 +85,8 @@ def main():
            for name, value in component_change.items()):
         raise RuntimeError({'unexpected_component_change': component_change})
 
-    # A commissioned fixed template lets a source's actual observation be graded now.
+    # Reading returns evidence only. Page selects the fixed comparison tool.
+    from episodic_workflow.case_reports.research.observation_admission import compare_observations
     baseline = ResearchResult(causal_sheet_updates=tuple(sheet.history))
     evidence_sheet = CausalSheet(sheet.history)
     evidence = dict(source='synthetic://new-study',locator='Table 1 row 1',study_id='synthetic-new-study',
@@ -101,10 +102,16 @@ def main():
     reader.commission = SearchStrategyCommission('Find y at a declared circumstance',('check_one',))
     reader.selected_keys = ['check_one']
     controller = ResearchController(reader.credit_columns, point_scores=True, initial=reader.credit(baseline))
-    first = controller.observe('returned source observation',reader.project(ResearchResult(causal_sheet_updates=(update,))),is_root=False)
+    extraction = controller.observe('returned source observation', reader.project(ResearchResult(causal_sheet_updates=(update,))), is_root=False)
+    if extraction.gain != 0:
+        raise RuntimeError('Source extraction invoked a grader automatically')
     reader.ledger.merge(reader.pending)
     observation_run.global_goal.commit(reader.pending_global)
-    repeat = controller.observe('same source observation repeated',reader.project(ResearchResult(causal_sheet_updates=(update,))),is_root=False)
+    compared = compare_observations(reader.ledger.causal_sheet, ['check_one'], ['new_source_evidence'])
+    first = controller.observe('Page-selected source comparison', reader.project(compared), is_root=False)
+    reader.ledger.merge(reader.pending)
+    observation_run.global_goal.commit(reader.pending_global)
+    repeat = controller.observe('same source observation repeated',reader.project(compare_observations(reader.ledger.causal_sheet, ['check_one'], ['new_source_evidence'])),is_root=False)
     if abs(first.gain - 0.1) > 1e-12 or repeat.gain != 0:
         raise RuntimeError('Immediate source credit or duplicate suppression failed')
     reader.ledger.merge(reader.pending)
@@ -115,8 +122,10 @@ def main():
     copied['measurements']['native']['observations'] = {'renamed_y': copied['measurements']['native']['observations']['y']}
     copy_sheet = CausalSheet(reader.ledger.causal_sheet.history)
     copy_update = copy_sheet.put('copied_source_evidence', 'evidence', copied)
+    reader.ledger.merge(ResearchResult(causal_sheet_updates=(copy_update,)))
+    observation_run.global_goal.commit(ResearchResult(causal_sheet_updates=(copy_update,)))
     alias = controller.observe('same observation under another extraction key',
-        reader.project(ResearchResult(causal_sheet_updates=(copy_update,))), is_root=False)
+        reader.project(compare_observations(reader.ledger.causal_sheet, ['check_one'], ['copied_source_evidence'])), is_root=False)
     if alias.gain != 0:
         raise RuntimeError('A copied observation or selector alias earned scientific credit')
     inherited = reader.ledger.result()
@@ -125,15 +134,16 @@ def main():
     malformed_sheet = CausalSheet(reader.ledger.causal_sheet.history)
     malformed = malformed_sheet.put('malformed_native_source','evidence',
         {**evidence, 'measurements': {'native': {'observations': []}}})
-    retained = reader.assess(ResearchResult(causal_sheet_updates=(malformed,)))
-    if not retained.evaluated or retained.causal_sheet_updates != (malformed,) or not retained.diagnostics:
+    reader.ledger.merge(ResearchResult(causal_sheet_updates=(malformed,)))
+    retained = compare_observations(reader.ledger.causal_sheet, ['check_one'], ['malformed_native_source'])
+    if not retained.evaluated or retained.causal_sheet_updates or not retained.diagnostics:
         raise RuntimeError('An unscorable native observation lost otherwise valid source evidence')
     report = reader.parent_report(reader.pending)
     print(json.dumps(dict(example='SYNTHETIC real binding with scripted decisions and calculators',
         operations=counts,diagnostics=list(diagnostics),calculation_result_credit=earned,
         credit_gain_by_scope={role: sum(gains) for role,gains in scope_gains.items()},
         global_score_component_change=component_change,
-        immediate_source_scientific_gain=first.gain,repeated_source_gain=repeat.gain,copied_observation_gain=alias.gain,inherited_evidence_rescored=False,
+        page_selected_observation_gain=first.gain,repeated_source_gain=repeat.gain,copied_observation_gain=alias.gain,inherited_evidence_rescored=False,
         malformed_operand_preserved_unscored=True,
         scoped_source_report_bytes=len(json.dumps(report).encode()),
         maximum_model_input_bytes=max(len(json.dumps(request).encode()) for request in requests),

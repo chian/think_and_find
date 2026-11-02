@@ -23,21 +23,25 @@ def _referenced_inference_identity(sheet, key, version):
 
 def compile_progress(sheet):
     """Count the three user-confirmed registration rewards, once per identity."""
-    registrations = {}
+    registrations, dependencies = {}, {}
+
+    def register(point, record):
+        registrations[point] = Fraction(1)
+        dependencies.setdefault(point, []).append(record)
     inference_ids = {key: _inference_identity(row) for key, row in sheet.of_kind("inference")}
-    for ident in inference_ids.values():
-        registrations["progress:inference:" + ident] = Fraction(1)
-    for _, row in sheet.of_kind("expectation"):
+    for key, ident in inference_ids.items():
+        register("progress:inference:" + ident, key)
+    for record, row in sheet.of_kind("expectation"):
         key = row["data"]["inference"]
         ident = _referenced_inference_identity(sheet, key, row["dependencies"][key])
-        registrations["progress:expected_bounds:" + ident] = Fraction(1)
-    for _, row in sheet.of_kind("application"):
+        register("progress:expected_bounds:" + ident, record)
+    for record, row in sheet.of_kind("application"):
         data = row["data"]
         ident = _identity([_referenced_inference_identity(sheet, data["inference"], data["inference_version"]),
                            sheet.canonical_theory(data["theory"]), data["context_key"]])
-        registrations["progress:application:" + ident] = Fraction(1)
+        register("progress:application:" + ident, record)
     return {"points": {key: str(value) for key, value in sorted(registrations.items())},
-            "point_dependencies": {},
+            "point_dependencies": dependencies,
             "total": str(sum(registrations.values(), Fraction())),
             "resolution": "1",
             "meaning": "One point for registering G, one for its expected generalizability bounds, "

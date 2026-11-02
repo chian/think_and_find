@@ -9,7 +9,7 @@ Discovery root: which fresh scientific attempt should run next? ↻
 └── Scientific attempt: which scientific uncertainty deserves work next? ↻
     ├── Search Strategy: which query/approach should address this information need? ↻
     │   └── Search: which source from ONE query should be examined next? ↻
-    │       └── Page: where/how should this source be examined next? ↻
+    │       └── Page: what should be read or scientifically assessed in this source next? ↻
     │           ├── Report: what does the next document-order window establish? ↻
     │           ├── Lexical reading: what does the next ranked passage establish? ↻
     │           └── Table: which row query should resolve the remaining question? ↻
@@ -38,6 +38,16 @@ commission. Reasoning returns public arguments, premises, conclusions,
 limitations, critiques, calculated sheet changes and unresolved
 premises. Full derivations remain addressable by record key and version.
 Neither return contains a recursive transcript or invokes a report composer.
+
+Readers return explicit source-linked grading needs and a concise synthesis to Page.
+Page can select record, inspect, evaluate, calculate or a fixed observation comparison
+in its existing loop, alongside further reading. Report, Lexical reading and Table
+cannot invoke graders or register scientific operands. Grading flags earn zero points
+and neither require an action order nor certify a finding. Page tool outcomes record
+actual calculated results, exact evidence/record references, score-component changes
+and unresolved diagnostics. Search and Search Strategy receive these needs and outcomes
+separately from the generic findings preview. Their next decisions can use the result
+without waiting for the scientific parent. Repeated actions remain available.
 
 Search returns its literal query and examined sources. Page returns its source
 version and remaining source coverage. Report returns document position and
@@ -89,10 +99,11 @@ Each subtracts inherited scientific points before attributing new gain. Query
 activity, source count, passage count, characters and row count earn no points.
 Reading coverage remains available to guide further choices. For a fixed
 observation need, the parent can commission a support_assessment template.
-Readers match returned source-native quantity, units and numeric conditions,
-execute the matching fixed case and compile actual support during acquisition.
-This is deterministic calculation, with no hidden agent or numerical grade.
-Broad findings without a commissioned formalization await the parent's assessment. Later assessments can revalue the global ledger; closed child
+Page can select that template and source evidence to match native quantity, units
+and numeric conditions, execute the fixed case and compile actual support. Readers
+only extract and flag; no automatic reader assessment remains. Page can also record
+a new source-grounded G, expected generalizability bounds or application and formal
+comparison operands. Questions it cannot settle return upward with the actual outcomes. Later assessments can revalue the global ledger; closed child
 controllers are not retroactively reopened. No separate learning or retrospective
 credit redistribution algorithm is implemented.
 

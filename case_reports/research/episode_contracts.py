@@ -12,6 +12,15 @@ COMMON_RETURN = {
     "operations": "At most three failures or limitations; failed retrieval is not negative scientific evidence.",
 }
 
+GRADING_RETURN = {
+    "score_component_changes": "Numerical changes to all five scientific score components since this episode began; repeated calculations earn zero.",
+    "source_findings": "Latest reader synthesis per source and reading episode, with unresolved questions; source records retain exact evidence.",
+    "grading_needs": "Source-linked assessment questions and qualifications, including needs outside the generic findings preview. Outcomes link actual Page actions; they do not certify resolution.",
+    "grading_outcomes": "Latest actual Page sheet/grader outcomes per need and operation, with provenance, computed results, numerical score changes and diagnostics.",
+    "grading_action_count": "Number of recorded Page tool actions; execution itself earns zero.",
+    "grading_status_meaning": "Interpretation of needs and factual outcomes; no model verdict gates credit.",
+}
+
 
 @dataclass(frozen=True)
 class ScientificAttemptCommission:
@@ -44,7 +53,7 @@ class ScientificAttemptCommission:
     def report_contract(self):
         return ReportContract(decision=self.question,
             measurements={"scope": self.as_record()},
-            information={**COMMON_RETURN,
+            information={**COMMON_RETURN, **GRADING_RETURN,
                 "starting_question": "The starting question of this attempt, retained to avoid repeating the same unproductive start.",
                 "scientific_changes": "Kinds and keys of changed scientific records, excluding source evidence; counts remain visible.",
                 "score_change": "Numeric sum of the five score-component changes relative to this attempt's starting sheet.",
@@ -77,7 +86,7 @@ class LiteratureCommission:
 
     def report_contract(self):
         return ReportContract(decision=self.question, measurements={"scope": self.as_record()},
-                              information={**COMMON_RETURN, **self.return_fields})
+                              information={**COMMON_RETURN, **GRADING_RETURN, **self.return_fields})
 
 
 class SearchStrategyCommission(LiteratureCommission):
@@ -96,15 +105,18 @@ class PageCommission(LiteratureCommission):
 
 
 class ReportCommission(LiteratureCommission):
-    return_fields = {"document_position": "Document-order cursor and remaining windows; cross-window context stays with the reader."}
+    return_fields = {"reading_findings": "Reader's concise synthesis and unresolved links, with exact source anchors.",
+                     "document_position": "Document-order cursor and remaining windows; cross-window context stays with the reader."}
 
 
 class LexicalCommission(LiteratureCommission):
-    return_fields = {"passage_selection": "Literal source-local query, number of ranked passages considered and remaining."}
+    return_fields = {"reading_findings": "Reader's concise synthesis and unresolved links, with exact source anchors.",
+                     "passage_selection": "Literal source-local query, number of ranked passages considered and remaining."}
 
 
 class TableCommission(LiteratureCommission):
-    return_fields = {"table_queries": "Last eight row queries, selected row keys and remaining row count; findings retain headers and exact row anchors."}
+    return_fields = {"reading_findings": "Reader's concise synthesis and unresolved links, with exact source anchors.",
+                     "table_queries": "Last eight row queries, selected row keys and remaining row count; findings retain headers and exact row anchors."}
 
 
 def changed_sheet(source, result):
@@ -125,8 +137,22 @@ def operation_fields(delta):
 
 
 def literature_report(source, result, completion):
+    from .grading_handoff import grading_report
+    from ...credit_assignment.causal_progress import compile_episode_points
+    from fractions import Fraction
     delta, sheet = changed_sheet(source, result)
+    before = compile_episode_points(Ledger(source.initial).causal_sheet)["components"]
+    after = compile_episode_points(sheet)["components"]
+    summaries = {}
+    for attempt in delta.reading_attempts:
+        if attempt.get("reading_summary"):
+            summaries[(attempt["source"], attempt["source_version"], attempt["episode_id"])] = {
+                name: attempt[name] for name in ("source", "source_version", "question", "reading_summary", "unresolved_links")}
     return {"completion": completion_fields(result, completion),
+            **grading_report(delta, sheet),
+            "score_component_changes": {name: float(Fraction(value) - Fraction(before[name]))
+                                        for name, value in after.items()},
+            "source_findings": list(summaries.values()),
             "causal_sheet_changes": sheet.return_page(delta.causal_sheet_updates),
             "reading_coverage": compact_reading_coverage(delta.reading_attempts),
             "operations": operation_fields(delta)}

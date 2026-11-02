@@ -10,21 +10,16 @@ from .records import ResearchResult, identity
 from .support_observations import observation_identity
 
 
-def assess_returned_observations(source, result):
-    templates = [key for key in source.commission.inputs
-                 if source.ledger.causal_sheet.rows[key]["kind"] == "support_assessment"]
-    # Child results may carry their inherited host ledger. Only their actual
-    # evidence changes may trigger this commissioned source calculation.
-    incoming = {row["key"]: row for row in result.causal_sheet_updates if row["kind"] == "evidence"}
-    previous = source.ledger.causal_sheet.rows
-    evidence_keys = [key for key, row in incoming.items()
-                     if key not in previous or previous[key]["version"] != row["version"]]
-    if not templates or not evidence_keys or not result.evaluated:
-        return result
-    staged = CausalSheet(source.ledger.causal_sheet.history)
-    staged.merge(result.causal_sheet_updates)
+def compare_observations(sheet, templates, evidence_keys):
+    """Page-selected fixed observation comparison; never called by readers."""
+    for key in templates:
+        sheet._require_kind(key, "support_assessment")
+    for key in evidence_keys:
+        sheet._require_kind(key, "evidence")
+    staged = CausalSheet(sheet.history)
     start = len(staged.history)
     diagnostics = []
+    matched = 0
     for template_key in templates:
         template = staged.rows[template_key]["data"]
         support = staged.rows[template["support"]]["data"]
@@ -58,6 +53,7 @@ def assess_returned_observations(source, result):
                                for name, value in case["inputs"].items())]
                 if not matches:
                     continue
+                matched += 1
                 token = identity([support["inference"], support["expectation"], template["application"],
                                   template["importance"], observation_id,
                                   template_key, staged.rows[template_key]["version"],
@@ -85,6 +81,8 @@ def assess_returned_observations(source, result):
                     "support": support_key, "applications": [],
                     "facts": [{"evidence": evidence_key, "observation": observation_key}],
                     "argument": argument_key, "checks": [check_key]})
-    from dataclasses import replace
-    return replace(result, causal_sheet_updates=(*result.causal_sheet_updates, *staged.history[start:]),
-                   diagnostics=(*result.diagnostics, *diagnostics))
+    if not matched and not diagnostics:
+        diagnostics.append({"stage": "observation_calculation", "status": "unresolved",
+            "category": "no_matching_observation",
+            "why": "No usable template matched source-native quantity, units and exact numeric circumstances"})
+    return ResearchResult(causal_sheet_updates=tuple(staged.history[start:]), diagnostics=tuple(diagnostics))

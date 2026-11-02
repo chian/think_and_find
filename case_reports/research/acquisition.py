@@ -19,6 +19,9 @@ from .records import Ledger, ResearchResult, identity
 from .episode_contracts import (SearchStrategyCommission, SearchCommission, PageCommission,
     ReportCommission, LexicalCommission, TableCommission, literature_report)
 from . import episode_credit
+from .sheet_tools import SCIENTIFIC_KINDS, SHEET_TOOLS, _sheet_tool_contract, _execute_sheet_tool
+from .causal_commission import SheetCommission, read_sheet_result
+from .grading_handoff import page_action_outcome
 
 
 SOURCE_ASSESSMENT_BATCH_SIZE = 3
@@ -29,10 +32,6 @@ SOURCE_ASSESSMENT_BATCH_SIZE = 3
 
 class LiteratureSource(ResearchSource):
     """Transport primitives only; concrete episodes own all scientific decisions."""
-    def assess(self, result):
-        from .observation_admission import assess_returned_observations
-        return assess_returned_observations(self, result)
-
     def inputs(self, view, **kwargs):
         declared = {"task": self.instructions, "objective": str(view.goal.objective),
             "commission": self.commission.as_record(), **self.context(),
@@ -94,7 +93,7 @@ class SearchStrategySource(LiteratureSource):
             },
             instruction=(
                 "Choose a literal search-engine query for the delegated scientific question. "
-                "Use returned causal_sheet_changes, reading_coverage and operations to revise your approach. "
+                "Use returned source_findings, grading_needs, grading_outcomes, causal_sheet_changes, reading_coverage and operations to revise your approach. "
                 "Seek source evidence about theory mechanisms, meaningful uses of the focal inference, "
                 "expected generalizability bounds, incompatible causal commitments or proposed repairs, as commissioned. "
                 "Query is search text; objective states the specific reading question and necessary context. "
@@ -157,7 +156,7 @@ class SearchSource(LiteratureSource):
                     "objective": {"type": "string", "minLength": 1,
                                   "description": "Evidence to seek in the selected source"},
                     "rationale": {"type": "string", "minLength": 1}}},
-            instruction="Select for the still-unresolved delegated question using returned causal_sheet_changes, reading_coverage and operations. Give the source child a specific question and necessary context. A missing returned value and a failed reading do not establish absence of evidence. Return an instance of the JSON Schema: the source choice belongs in option_id. Numerical yield controls continuation."))
+            instruction="Select for the still-unresolved delegated question using returned source_findings, grading_needs, grading_outcomes, causal_sheet_changes, reading_coverage and operations. Grader outcomes contain actual results and score changes; unresolved needs can guide source selection. The generic findings preview is not the whole return. Give the source child a specific question and necessary context. A missing returned value and a failed reading do not establish absence of evidence. Return an instance of the JSON Schema: the source choice belongs in option_id. Numerical yield controls continuation."))
         self.last_proposal = proposal
         return proposal
 
@@ -184,14 +183,66 @@ class SearchSource(LiteratureSource):
 
 class PageSource(LiteratureSource):
     commission_type = PageCommission
-    instructions = ("Own repeated choices of where and how to examine ONE retrieved source. "
+    instructions = ("Own repeated choices of where and how to examine ONE retrieved source and assess what it establishes. "
         "Use its outline, tables, remaining text and reader returns to choose ordered reading, "
         "lexical reading or a table query episode. Revisit a passage only for a specific unresolved "
-        "question. Local credit follows executed scientific contributions attributable to this source.")
+        "question. Readers return grading_needs with evidence and qualifications. Use these in your next decision: "
+        "you can register source-grounded G, expected generalizability bounds and theory/context applications, "
+        "formalize source statements, or select the relevant executable grader here before returning to Search. "
+        "Flagged needs are questions, not an action order or a requirement to earn points. You can also identify "
+        "an assessment from an unflagged finding. Preserve unresolved operands and questions for Search. "
+        "Do not turn correlation, a citation or a possible reversal into an established causal claim. "
+        "Link scientific records through dependencies to the evidence actually grounding them. "
+        "Local credit follows scientific contributions attributable to this source; the numerical controller owns continuation.")
+    record_kinds = list(SCIENTIFIC_KINDS)
     credit_columns = ("page_scientific_evidence_gain",)
 
     def credit(self, result):
         return episode_credit.page_credit(result, self.initial, source_locator(self.candidate))
+
+    def inputs(self, view, **kwargs):
+        # Page needs selected scientific operands and calculated outcomes in
+        # addition to source coverage. Reading children retain literature inputs.
+        return ResearchSource.inputs(self, view, **kwargs)
+
+    def assess(self, result):
+        return page_action_outcome(self, result)
+
+    def catalog_rows(self):
+        sheet = self.ledger.causal_sheet
+        initial_keys = {row["key"] for row in self.initial.causal_sheet_updates}
+        keys = set(self.commission.inputs) | (sheet.rows.keys() - initial_keys)
+        keys.update(key for key, row in sheet.of_kind("evidence")
+                    if row["data"]["source"] == source_locator(self.candidate))
+        todo = list(keys)
+        while todo:
+            for dependency in sheet.rows[todo.pop()]["dependencies"]:
+                if dependency not in keys:
+                    keys.add(dependency)
+                    todo.append(dependency)
+        return sorted(((key, sheet.rows[key]) for key in keys),
+                      key=lambda item: (item[1]["kind"] == "evidence", item[0]))
+
+    def authorize_inspection(self, keys):
+        if not set(keys) <= {key for key, _ in self.catalog_rows()}:
+            raise ValueError("Page sheet inputs must belong to its source or commission")
+
+    def authorize_snapshots(self, snapshots):
+        allowed = {(ref["key"], ref["version"]) for ref in self.scoped_snapshots()}
+        allowed.update((key, row["version"]) for key, row in self.catalog_rows())
+        if any((ref["key"], ref["version"]) not in allowed for ref in snapshots):
+            raise ValueError("Page needs a source-local or commissioned historical snapshot")
+
+    def authorize_evaluation(self, assessment):
+        self.authorize_inspection([assessment])
+
+    def record_results(self, records):
+        commission = SheetCommission(self.commission.question,
+            tuple(dict.fromkeys([*self.commission.inputs, *self.selected_keys])),
+            snapshots=tuple(self.scoped_snapshots()))
+        initial_keys = {row["key"] for row in self.initial.causal_sheet_updates}
+        return read_sheet_result(self.ledger.causal_sheet, commission, records,
+            actor=self.actor, owned_subjects=self.ledger.causal_sheet.rows.keys() - initial_keys)
 
     def parent_report(self, result, completion=None, request=None):
         report = super().parent_report(result, completion, request)
@@ -265,8 +316,16 @@ class PageSource(LiteratureSource):
                 "Sequential reading with cross-window context in the chosen scope. Unexamined skips prior coverage; "
                 "reexamine rereads in document order. A section name in question does not move the cursor."}
             options["lexical_probe"] = {"episode": "lexical_probe", "meaning": "Rank source-local chunks by a literal query within the chosen reading scope; unexamined scope excludes previously supplied text from ranking and extraction."}
-        if not options:
-            return None
+        sheet_schema, visible = _sheet_tool_contract(self, self.record_kinds)
+        sheet_schema["properties"]["grading_needs"] = {"type": "array", "uniqueItems": True,
+            "items": {"type": "string"},
+            "description": "IDs of reader grading needs this action addresses; optional, not a prerequisite for assessment."}
+        observation_schema = {"type": "object", "additionalProperties": False,
+            "required": ["action", "rationale", "templates", "evidence"], "properties": {
+                "action": {"const": "compare_observations"}, "rationale": {"type": "string"},
+                "templates": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+                "evidence": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+                "grading_needs": sheet_schema["properties"]["grading_needs"]}}
         proposal = self.run.agent(self.inputs(view, operation="propose_page_child",
             source_summary={"source": document.source, "title": document.title,
                 "characters": len(document.text), "chunks": len(document.spans),
@@ -279,7 +338,15 @@ class PageSource(LiteratureSource):
             reexamination_spans={key: {"start": span.start, "end": span.end,
                                       "opening": span.text[:240]} for key, span in span_page.items()},
             available_children=options,
-            instruction=("Choose among the actual available reading scopes using the delegated information need and prior coverage. "
+            instruction=(SHEET_TOOLS + " Choose a sheet operation or action=read with one of the available reading options. "
+                "Use grading_needs and grading_outcomes in own_results and the latest reader return to decide what to assess "
+                "now, which operands to inspect or formalize, and what further reading could resolve. "
+                "Record dependencies on the source evidence for G registration and other source-grounded scientific operands. "
+                "compare_observations takes selected support_assessment templates and evidence keys; it matches native "
+                "quantity/units/circumstances and executes the fixed comparisons. It is useful only when those formal operands exist. "
+                "With no preexisting G, you can register the source-grounded candidate and expected generalizability bounds "
+                "using record. Neither that registration nor a reader flag establishes support or a reversal. "
+                "Choose among the actual available reading scopes using the delegated information need and prior coverage. "
                 "The inventory is paged: choose inventory with inventory_offset to inspect more spans, headings or tables. "
                 "A lexical query searches the whole selected reading scope even when its spans are absent from this preview. "
                 "report reads sequentially in the chosen scope; it cannot jump to a named section in question. "
@@ -296,10 +363,12 @@ class PageSource(LiteratureSource):
                 "Distinguish unread material from examined material that did not answer "
                 "the question. Give the reader that specific question and necessary context; "
                 "its JSON return supplies causal_sheet_changes, reading_coverage, "
-                "operations and completion for your next reading choice. No fixed reading order, "
+                "grading_needs, reading_findings, operations and completion for your next Page decision. No fixed reading order, "
                 "no mandatory reading choice. You do not decide continuation."),
-            response_contract={"type": "object", "additionalProperties": False,
-                "required": ["option", "question"], "properties": {
+            response_contract={"oneOf": [sheet_schema, observation_schema,
+                {"type": "object", "additionalProperties": False,
+                "required": ["action", "option", "question"], "properties": {
+                    "action": {"const": "read"},
                     "option": {"type": "string", "enum": list(options)},
                     "question": {"type": "string", "minLength": 1, "description": "Child information need"},
                     "inventory_offset": {"type": "integer", "minimum": 0, "maximum": max(0, inventory_size - 1)},
@@ -315,8 +384,15 @@ class PageSource(LiteratureSource):
                            "then": {"required": ["reading_scope"]}},
                           {"if": {"required": ["reexamine_spans"]},
                            "then": {"properties": {"option": {"const": "lexical_probe"},
-                                                   "reading_scope": {"const": "reexamine"}}}}]}))
+                                                   "reading_scope": {"const": "reexamine"}}}}]}]}))
         self.last_proposal = proposal
+        if proposal.get("action") == "compare_observations":
+            from .observation_admission import compare_observations
+            self.authorize_inspection([*proposal["templates"], *proposal["evidence"]])
+            return self.leaf(lambda: compare_observations(self.ledger.causal_sheet,
+                proposal["templates"], proposal["evidence"]), "compare_source_observations")
+        if proposal.get("action") != "read":
+            return _execute_sheet_tool(self, proposal, visible)
         option = selected_choice(proposal.get("option"), options, "option")
         question = required_text(proposal.get("question"), "question")
         if option == "inventory":
@@ -370,6 +446,13 @@ class ReadingSource(LiteratureSource):
     def read(self, spans, question):
         from .causal_reading import read_source_window
         return read_source_window(self, spans, question)
+
+    def parent_report(self, result, completion=None, request=None):
+        report = super().parent_report(result, completion, request)
+        report["reading_findings"] = {"summary": self.memory["summary"],
+            "unresolved_links": self.memory["unresolved_links"],
+            "anchors": [{"span": anchor["span"]} for anchor in self.memory["anchors"]]}
+        return report
 
 
     def validate_memory(self, memory, allowed):
