@@ -27,6 +27,10 @@ inspect, calculate and evaluate. First-principles deductions, repair arguments
 and critiques are logical assignments with those same decisions;
 no assignment enables search or changes the episode's action set. Calculators
 remain tools. The common `method_loop` owns iteration and numerical continuation.
+The scoped input and historical snapshot records are already supplied in each
+Reasoning decision. Inspect is offered only while another scoped record remains
+unseen, so rereading the same supplied records cannot consume an own unit.
+Calculate is offered when a selected executable assessment exists.
 
 Search Strategy returns source findings, exact source/record references, their
 bearing on the assigned question, unresolved reasoning questions, searches and
