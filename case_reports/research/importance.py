@@ -246,15 +246,6 @@ def evaluate_cases(sheet, assessment, case_ids, *, context=None):
     cases = {case["id"]: case for case in protocol["domain"]["cases"]}
     if not set(case_ids) <= cases.keys():
         raise ValueError("Only predeclared circumstances may be evaluated")
-    repeated = []
-    for case_id in case_ids:
-        row = sheet.rows.get(result_key(assessment, case_id))
-        if row is not None and row["dependencies"].get(assessment) == sheet.rows[assessment]["version"]:
-            repeated.append((case_id, row["data"]["error"]))
-    if repeated:
-        detail = "; ".join(f"{case_id}: {error or 'already resolved'}" for case_id, error in repeated)
-        raise ValueError(f"These cases already have receipts for immutable protocol {assessment}: {detail}. "
-                         "Inspect the result; if its expression failed, record a corrected protocol under a new key")
     staged = type(sheet)(sheet.history)
     updates = []
     for case_id in case_ids:

@@ -1,15 +1,8 @@
-"""Observable investigation progress, separate from support for a conclusion.
-
-Registration units identify scientific objects, not their truth or merit. A
-calculation unit is the resolved mass of its declared operands. Neither is a
-model-authored numerical grade.
-"""
+"""Credit for registered G, expected generalizability bounds and applications."""
 
 from fractions import Fraction
 from hashlib import sha256
 import json
-
-from .causal_sheet import CRITERION_KINDS, _calculation_coverage
 
 
 def _identity(value):
@@ -29,16 +22,8 @@ def _referenced_inference_identity(sheet, key, version):
 
 
 def compile_progress(sheet):
-    """Return deduplicated, inspectable progress operands for the shared sheet.
-
-    A registered candidate, an articulated expectation for it, each mapped
-    theory/context relationship, and an explicit support argument are distinct
-    work products. They earn no support-for-G. Executable calculations earn
-    their resolved fraction even when their scientific answer is negative.
-    Reworded records and revisions
-    of the same object do not manufacture a second registration unit.
-    """
-    registrations, calculations = {}, {}
+    """Count the three user-confirmed registration rewards, once per identity."""
+    registrations = {}
     inference_ids = {key: _inference_identity(row) for key, row in sheet.of_kind("inference")}
     for ident in inference_ids.values():
         registrations["progress:inference:" + ident] = Fraction(1)
@@ -51,43 +36,28 @@ def compile_progress(sheet):
         ident = _identity([_referenced_inference_identity(sheet, data["inference"], data["inference_version"]),
                            sheet.canonical_theory(data["theory"]), data["context_key"]])
         registrations["progress:application:" + ident] = Fraction(1)
-    for _, row in sheet.of_kind("expectation_support"):
-        data = row["data"]
-        ident = _identity([_referenced_inference_identity(sheet, data["inference"]["key"],
-                                                         data["inference"]["version"]),
-                           data["expectation"]])
-        registrations["progress:support_argument:" + ident] = Fraction(1)
-
-    # Extraction alone earns no credit. Source claims and observations remain
-    # evidence operands for the explicit scientific assessments.
-
-    resolutions = [Fraction(1)]
-    for criterion, kind in CRITERION_KINDS.items():
-        for subject, _ in sheet.of_kind(kind):
-            coverage, resolution, ident = _calculation_coverage(sheet, subject, criterion, {})
-            key = "progress:calculation:" + criterion + ":" + ident
-            calculations[key] = max(calculations.get(key, Fraction()), coverage)
-            resolutions.append(resolution)
-    points = {**registrations, **calculations}
-    return {"points": {key: str(value) for key, value in sorted(points.items())},
+    return {"points": {key: str(value) for key, value in sorted(registrations.items())},
             "point_dependencies": {},
-            "registration_points": {key: str(value) for key, value in sorted(registrations.items())},
-            "calculation_points": {key: str(value) for key, value in sorted(calculations.items())},
-            "total": str(sum(points.values(), Fraction())),
-            "resolution": str(min(resolutions)),
-            "meaning": "Registration counts candidate G, its articulated expected generalizability bounds, "
-                       "mapped theory/context relationships and an explicit support argument once per scored identity. "
-                       "Extracting source claims or observations earns zero points. "
-                       "Calculation progress is resolved declared operand mass, including negative results. "
-                       "These are investigation units, not support for G or scientific merit grades. "
-                       "Exact structural identity does not establish semantic equivalence of differently worded claims."}
+            "total": str(sum(registrations.values(), Fraction())),
+            "resolution": "1",
+            "meaning": "One point for registering G, one for its expected generalizability bounds, "
+                       "and one per registered theory/context application. Extraction, writing a support argument "
+                       "and completing calculations earn zero points. Repeated scored identities earn zero new points."}
 
 
-def combine_episode_points(support, progress):
-    """Expose the two meanings while supplying one controller point map."""
-    return {"support": support, "progress": progress,
-            "points": {**progress["points"], **support["points"]},
-            "resolution": str(min(Fraction(support["resolution"]), Fraction(progress["resolution"])))}
+def combine_episode_points(support, registrations):
+    """Expose every scored component and the exact points summed by controllers."""
+    points = {**registrations["points"], **support["points"]}
+    prefixes = {"G_registration": "progress:inference:",
+                "expected_generalizability_bounds_registration": "progress:expected_bounds:",
+                "theory_context_application_registration": "progress:application:",
+                "support_for_G": "support:", "causal_change": "change:"}
+    components = {name: str(sum((Fraction(value) for key, value in points.items()
+                                if key.startswith(prefix)), Fraction()))
+                  for name, prefix in prefixes.items()}
+    return {"support": support, "registrations": registrations, "points": points,
+            "components": components, "total": str(sum(map(Fraction, components.values()), Fraction())),
+            "resolution": str(min(Fraction(support["resolution"]), Fraction(registrations["resolution"])))}
 
 
 def compile_episode_points(sheet):

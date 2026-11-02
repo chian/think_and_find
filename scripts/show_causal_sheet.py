@@ -20,7 +20,7 @@ def main():
     from episodic_workflow.case_reports.research.importance import evaluate_cases
     from episodic_workflow.case_reports.research.records import Ledger, ResearchResult
     from episodic_workflow.case_reports.research.goal_state import ScientificGoalState
-    from episodic_workflow.credit_assignment.causal_sheet import investigation_credit
+    from episodic_workflow.case_reports.research.episode_credit import reasoning_credit
     from episodic_workflow.credit_assignment.research import ResearchController
 
     sheet = CausalSheet()
@@ -67,19 +67,21 @@ def main():
     commission = SheetCommission("Calculate the explicitly assigned equation comparison", inputs=("A",),
                                  assignments=(("equations", "importance"),))
     request = commission.request(sheet)
-    assignments = commission.assignments
-    controller = ResearchController(("causal_assessment",), point_scores=True,
-                                    initial=investigation_credit(sheet, assignments))
+    baseline = ResearchResult(causal_sheet_updates=tuple(sheet.history))
+    def projected_credit():
+        return reasoning_credit(ResearchResult(causal_sheet_updates=tuple(sheet.history)), baseline, commission)
+    controller = ResearchController(("reasoning_scientific_gain",), point_scores=True,
+                                    initial=projected_credit())
     partial_updates = evaluate_cases(sheet, "equations", ["negative"])
     sheet.merge(partial_updates)
     partial = sheet.calculation_view(["equations"])
-    partial_step = controller.observe("paired negative input", investigation_credit(sheet, assignments), is_root=False)
+    partial_step = controller.observe("paired negative input", projected_credit(), is_root=False)
     sheet.merge(evaluate_cases(sheet, "equations", ["zero", "positive"]))
-    completed_step = controller.observe("remaining inputs", investigation_credit(sheet, assignments), is_root=False)
+    completed_step = controller.observe("remaining inputs", projected_credit(), is_root=False)
     count = len(sheet.history)
     repeated = evaluate_cases(sheet, "equations", ["negative", "zero", "positive"])
     sheet.merge(repeated)
-    duplicate_step = controller.observe("repeat same paired answers", investigation_credit(sheet, assignments), is_root=False)
+    duplicate_step = controller.observe("repeat same paired answers", projected_credit(), is_root=False)
     no_op = {"new_rows": len(sheet.history) - count, "controller_gain": duplicate_step.gain}
     for key in ("scm", "simulation", "sample", "error"):
         sheet.merge(evaluate_cases(sheet, key, ["negative", "zero", "positive"]))
@@ -93,11 +95,9 @@ def main():
         sheet.put("duplicate", "importance", duplicate_protocol)
     except ValueError as exc:
         duplicate_rejection = str(exc)
-    try:
-        read_sheet_result(sheet, commission, [{"key": repeated[0]["key"], "kind": "importance_result",
-            "dependencies": [], "data": repeated[0]["data"]}], actor="toy-author")
-    except ValueError as exc:
-        fabricated_rejection = str(exc)
+    fabricated = read_sheet_result(sheet, commission, [{"key": repeated[0]["key"], "kind": "importance_result",
+        "dependencies": [], "data": repeated[0]["data"]}], actor="toy-author")
+    fabricated_rejection = list(fabricated.diagnostics)
     try:
         changed = protocol("equations")
         changed["domain"] = {**changed["domain"], "cases": cases[1:]}
@@ -119,20 +119,22 @@ def main():
     calculation_return = sheet.return_page(partial_updates)
     sheet.put("P", "premise", {**sheet.rows["P"]["data"], "statement": "The coupling definition now needs reconsideration"})
     stale = sheet.calculation_view(["equations"])
-    stale_step = controller.observe("upstream definition revised", investigation_credit(sheet, assignments), is_root=False)
+    stale_step = controller.observe("upstream definition revised", projected_credit(), is_root=False)
+    if any(step.gain != 0 for step in (partial_step, completed_step, duplicate_step, stale_step)):
+        raise RuntimeError("Calculation execution earned credit independently of a support or change finding")
     global_state = ScientificGoalState(ResearchResult(causal_sheet_updates=tuple(sheet.history))).preview()
     print(json.dumps({
         "example": "SYNTHETIC arithmetic, not scientific evidence or a continuous-space proof",
         "commissioned_input_keys": [r["key"] for r in request["inputs"]],
         "partial": partial, "completed": completed,
-        "local_coverage": {"partial_gain": partial_step.gain, "completion_gain": completed_step.gain,
+        "execution_credit": {"partial_gain": partial_step.gain, "completion_gain": completed_step.gain,
                            "duplicate": no_op, "stale_score": stale_step.score},
         "duplicate_protocol_rejected": duplicate_rejection,
         "fabricated_receipt_rejected": fabricated_rejection,
         "denominator_revision_rejected": denominator_rejection,
         "scoped_calculation_return": calculation_return, "scoped_critique_return": critique_return,
         "after_dependency_revision": stale,
-        "root_progress_binding": global_state["root_progress_binding"],
+        "score_binding": global_state["score_binding"],
         "root_limitation": global_state["meaning"]}, indent=2))
 
 

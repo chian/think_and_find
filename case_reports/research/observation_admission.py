@@ -70,18 +70,19 @@ def assess_returned_observations(source, result):
                     "argument": "Compare this source observation within the explicitly commissioned G/B_G realization",
                     "limitations": "Source extraction and the supplied model/quantity mapping remain explicit scientific inputs"})
                 staged.put(argument_key, "reasoning", {
-                    "author": "host:observation-comparison", "premises": [template["application"], evidence_key, template["importance"],
-                        *([template["source_formalization"]] if template.get("source_formalization") else [])],
+                    "author": "host:observation-comparison", "premises": [template["application"], evidence_key, template["importance"]],
                     "steps": ["Match source-native quantity, units and numeric conditions to the commissioned prediction and fixed circumstances",
                               "Execute the declared paired model comparison; derive alignment and G dependence with the support calculator"],
                     "conclusion": "The attached assessment reports computed alignment, dependence or unresolved operands",
                     "limitations": "This public calculation description is not a model verdict or a proof of empirical adequacy"})
-                data = {**template, "support": support_key,
+                # This new contribution assesses the returned observation. A
+                # theoretical claim in the template retains its own assessment.
+                data = {**template, "support": support_key, "source_formalization": "",
                         "facts": [{"evidence": evidence_key, "observation": observation_key, "case_id": matches[0]}]}
                 staged.put(check_key, "support_assessment", data)
                 staged.merge(evaluate_cases(staged, template["importance"], [matches[0]], context=check_key))
                 staged.put(contribution_key, "support_contribution", {
-                    "support": support_key, "applications": [template["application"]],
+                    "support": support_key, "applications": [],
                     "facts": [{"evidence": evidence_key, "observation": observation_key}],
                     "argument": argument_key, "checks": [check_key]})
     from dataclasses import replace

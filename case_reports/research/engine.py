@@ -143,7 +143,7 @@ class ResearchRun:
         return controller
 
     def root_credit_projection(self, status=None):
-        return (status or self.global_goal.preview())["investigation_score"]
+        return (status or self.global_goal.preview())["total_score"]
 
     def refresh_controllers(self, source, status):
         current_path = next((path for path in self.live_controllers if path[-1][1] == source.controller_key), None)
@@ -323,11 +323,9 @@ class ResearchSource:
                                   "rejected": rejected_records},
                 gain=view.controller_step.gain, score=view.controller_step.score,
                 stop=view.controller_step.stop, model_calls=self.run.model_calls,
-                global_goal_score=status["investigation_score"], scientific_calculations=status["scientific_calculations"],
-                global_progress_score=status["investigation_progress_score"],
-                global_support_for_G_score=status["support_for_G_score"],
-                global_change_score=status["change_score"],
-                root_progress_binding=status["root_progress_binding"],
+                global_goal_score=status["total_score"], scientific_calculations=status["scientific_calculations"],
+                global_score_components=status["score_components"],
+                score_binding=status["score_binding"],
                 diagnostics=list(self.pending.diagnostics[-3:]))
             proposal = self.last_proposal if isinstance(self.last_proposal, Mapping) else {}
             newly_selected = sorted(set(self.selected_keys) - self._prompt_selected_keys)
@@ -433,12 +431,10 @@ class ResearchSource:
             "catalog_page": {"offset": self.catalog_offset, "total": len(rows)},
             "scores": {"selected_calculations": selected_calculations,
                        "assessment_count": len(status["scientific_calculations"]["assessments"]),
-                       "root_progress_binding": status["root_progress_binding"],
+                       "score_binding": status["score_binding"],
                        "current_score": view.controller_state.score,
-                       "global_credit": status["investigation_score"],
-                       "investigation_progress": status["investigation_progress_score"],
-                       "support_for_G": status["support_for_G_score"],
-                       "change_credit": status["change_score"],
+                       "global_credit": status["total_score"],
+                       "components": status["score_components"],
                        "policy_details": status["scientific_calculations"]["support_credit"]["policy_details"],
                        "controller_limitation": status["controller_limitation"],
                        "meaning": status["meaning"]},

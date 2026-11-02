@@ -47,9 +47,8 @@ class ScientificAttemptCommission:
             information={**COMMON_RETURN,
                 "starting_question": "The starting question of this attempt, retained to avoid repeating the same unproductive start.",
                 "scientific_changes": "Kinds and keys of changed scientific records, excluding source evidence; counts remain visible.",
-                "score_change": "Investigation progress plus executed support change relative to this attempt's starting sheet.",
-                "investigation_progress_change": "New deduplicated registration and resolved-calculation progress.",
-                "support_change": "New executed support-for-G and proportional-change points."})
+                "score_change": "Numeric sum of the five score-component changes relative to this attempt's starting sheet.",
+                "score_component_changes": "Numeric changes for G registration, expected generalizability bounds registration, theory/context application registration, support for G and causal change."})
 
 
 @dataclass(frozen=True)

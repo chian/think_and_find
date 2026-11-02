@@ -66,6 +66,16 @@ def main():
                     units='toy',uncertainty=source_uncertainty)}}}))
             grounds.append(evidence)
             facts=[dict(evidence=evidence,observation='y',case_id='1')]
+        theory_evidence = 'TE_'+name
+        sheet.put(theory_evidence, 'evidence', dict(source='synthetic://theory/'+name,
+            locator='Declared equation', study_id='theory-'+name,
+            finding='Stipulated theoretical source equation for this offline arithmetic example', measurements={}))
+        formalization = 'F_'+name
+        sheet.put(formalization, 'source_formalization', dict(evidence=theory_evidence,
+            assessment=assessment, method='equations', model=sheet.rows[assessment]['data']['model'],
+            quantity='y', units='toy', derivation='Synthetic theoretical source explicitly supplies this equation',
+            limitations='Stipulated formal source; no empirical or source-transcription validation'))
+        grounds.append(formalization)
         argument='arg_'+name
         sheet.put(argument,'reasoning',dict(author='synthetic-author',premises=grounds,steps=['Formal operands are explicitly supplied'],
             conclusion='Calculate dependence and source agreement',limitations='Not empirical evidence'))
@@ -76,7 +86,7 @@ def main():
         bound_test(test,assessment,before_bounds,0,100)
         check='check_'+name
         sheet.put(check,'support_assessment',dict(support=support,application=application,importance=assessment,
-            bounds_test=test,prediction=dict(quantity='y',units='toy'),facts=facts,limitations='Source-model correspondence is explicitly stipulated'))
+            bounds_test=test,source_formalization=formalization,prediction=dict(quantity='y',units='toy'),facts=facts,limitations='Source-model correspondence is explicitly stipulated'))
         sheet.put('C_'+name,'support_contribution',dict(support=support,applications=[application],
             facts=[{k:v for k,v in fact.items() if k!='case_id'} for fact in facts],argument=argument,checks=[check]))
         before = compile_support(sheet)
@@ -143,13 +153,11 @@ def main():
         if compile_support(archived)['points'] != after_fact['points']:
             raise RuntimeError('Model verdict changed executable credit')
         opinion_effects[verdict]='no effect'
-    try:
-        read_sheet_result(sheet,SheetCommission('Critique the argument',inputs=('change_argument',)),
-            [dict(key='new_verdict',kind='verification',dependencies=[],data=dict(reasoning='change_argument',reviewer='model',verdict='valid',checks=['opinion'],counterexample=''))],actor='model')
-    except ValueError as exc:
-        model_verdict_rejection=str(exc)
-    else:
+    rejected = read_sheet_result(sheet,SheetCommission('Critique the argument',inputs=('change_argument',)),
+        [dict(key='new_verdict',kind='verification',dependencies=[],data=dict(reasoning='change_argument',reviewer='model',verdict='valid',checks=['opinion'],counterexample=''))],actor='model')
+    if rejected.causal_sheet_updates or not rejected.diagnostics:
         raise RuntimeError('Model-authored verification was admitted')
+    model_verdict_rejection = list(rejected.diagnostics)
 
     # A real preserving repair defeats scoped necessity even though candidate still fits.
     successful_alternative=theory_application('successful_preserving_alternative')
@@ -160,7 +168,7 @@ def main():
     sheet.merge(evaluate_cases(sheet,'D_successful_alternative',['0','1','2'],context='change'))
     defeated=compile_support(sheet)
     actual=[before_execution['total'],before_break['total'],initial['total'],later['total'],after_fact['total'],defeated['total']]
-    expected=['0','2','10/3','5','20/3','4']
+    expected=['0','1/5','1/3','1/2','2/3','2/5']
     if actual!=expected:
         raise RuntimeError({'actual':actual,'expected':expected})
     if pending_alternative['changes']['change']['value'] is not None or pending_alternative['changes']['change']['lower']!='0':

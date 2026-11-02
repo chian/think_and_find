@@ -12,8 +12,7 @@ from .engine import ResearchLimits, ResearchProviders, ResearchRun, ResearchSour
 from .records import ResearchResult
 from .report import ResearchReport
 from ...credit_assignment.causal_sheet import CRITERIA, CRITERION_KINDS
-from ...credit_assignment.causal_support import compile_support
-from .importance import evaluate_cases, result_key
+from .importance import evaluate_cases
 from .grading import GRADING_FIELDS
 from .task import RESEARCH_OBJECTIVE
 
@@ -22,7 +21,8 @@ DISCOVERY_TASK = ("Launch repeated independent attempts at the generic scientifi
     "Use the shared scientific sheet and the latest attempt's returned changes to avoid restarting an unchanged, "
     "unproductive question. A previous attempt's yield is not scientific completion. "
     "Do not research or grade at this level; each scientific attempt owns those decisions. "
-    "Only new deduplicated investigation progress and executed support points count at the root.")
+    "The shared score counts G registration, expected generalizability bounds registration, "
+    "theory/context application registration, support for G and causal change. Repeated scored identities add zero.")
 
 SCIENTIFIC_TASK = RESEARCH_OBJECTIVE + """
 Own one scientific attempt, starting from the commissioned question, while pursuing the
@@ -35,8 +35,8 @@ Choose a Search Strategy child for source evidence or a Reasoning child for a sp
 Use returned source findings, their bearing on G and expected generalizability bounds,
 and unresolved questions to formulate the Reasoning commission. Supply selected record keys
 and exact historical snapshots; the child receives its own assignment, not your transcript.
-When an executable result reports an error, inspect the receipt and its protocol. Do not
-repeat that evaluation: the receipt is deterministic for an immutable protocol. Correct
+When an executable result reports an error, inspect the receipt and its protocol.
+Repeating an unchanged immutable protocol returns the same receipt and earns no new credit. Correct
 the formal expression in a newly keyed protocol, then reconnect any source formalization
 and scoring operands that depended on the old protocol. If you commission Reasoning for
 the repair, include the protocol and the source formalization or other expression-bearing
@@ -97,9 +97,7 @@ def _sheet_tool_contract(source, kinds):
     """Schemas of primitive sheet operations; these do not define child roles."""
     sheet = source.ledger.causal_sheet
     visible = _visible_keys(source)
-    gradable = [key for key in visible if sheet.rows[key]["kind"] == "importance" and
-                any(result_key(key, case["id"]) not in sheet.rows
-                    for case in sheet.rows[key]["data"]["domain"]["cases"])]
+    gradable = [key for key in visible if sheet.rows[key]["kind"] == "importance"]
     contexts = ["", *(key for key in visible if sheet.rows[key]["kind"] in
                      {"expectation_support", "support_contribution", "causal_change", *GRADING_FIELDS})]
     return {"type": "object", "additionalProperties": False,
@@ -137,6 +135,12 @@ def _reasoning_commission_schema(source, visible):
 
 
 SHEET_TOOLS = ("Use the following scientific sheet tools within your assigned responsibility. "
+        "Registering G earns 1 point, recording its expected generalizability bounds earns 1 point, "
+        "and registering a theory/context application earns 1 point, each once per scored identity. "
+        "Support earns 0.1 per qualifying unit. Executing calculations, extracting source claims or observations, "
+        "and writing support arguments earn zero points themselves. Calculation findings earn credit through "
+        "support or causal change, whose formula is specified below. Repeating a calculation remains available "
+        "and adds no credit for the same finding. "
         "Reference only commissioned inputs, selected sheet inputs, your own admitted records, or records "
         "created earlier in the same batch. The catalog is an index; inspect another catalog key before using it. "
         "Put scientific instructions in question. "
@@ -197,7 +201,7 @@ SHEET_TOOLS = ("Use the following scientific sheet tools within your assigned re
         "The component aggregation and restoration scaling convention is exposed in policy_details; do not enter numerical merit grades. "
         "Later support for original G increases that existing change's value; never rediscover its break to claim the gain. "
         "A result receipt, including one with an execution error, is final for that immutable protocol and case. "
-        "Inspect an error receipt and record a corrected protocol under a new key; do not evaluate the same case again. "
+        "Repeating the same case returns that receipt. A changed expression requires a corrected protocol under a new key. "
         "Use calculate for summary results; calculation_offset and calculation_limit retrieve bounded detail pages. "
         "Do not revise G merely to rephrase it or revise its expected bounds; use expectation/support revisions for those changes. "
         "Define scientific operands rather than assigning grades, importance results, or a global merit score.")
@@ -267,7 +271,7 @@ class DiscoverySource(ResearchSource):
     credit_columns = ("global_goal_progress",)
 
     def __init__(self, run):
-        super().__init__(run)
+        super().__init__(run, run.initial)
         self.starting_questions = []
 
     def credit(self, result):
@@ -329,13 +333,13 @@ class ScientificSource(ResearchSource):
         changed = [row for row in delta.causal_sheet_updates if row["kind"] != "evidence"]
         after = compile_episode_points(CausalSheet(tuple(result.causal_sheet_updates)))
         before = compile_episode_points(CausalSheet(tuple(self.initial.causal_sheet_updates)))
-        support_change = Fraction(after["support"]["total"]) - Fraction(before["support"]["total"])
-        progress_change = Fraction(after["progress"]["total"]) - Fraction(before["progress"]["total"])
+        component_changes = {name: Fraction(value) - Fraction(before["components"][name])
+                             for name, value in after["components"].items()}
         report.update(starting_question=self.commission.question,
             scientific_changes={"items": [{"key": row["key"], "kind": row["kind"]}
                                           for row in changed[:8]], "total": len(changed)},
-            score_change=str(support_change + progress_change),
-            investigation_progress_change=str(progress_change), support_change=str(support_change))
+            score_change=float(sum(component_changes.values(), Fraction())),
+            score_component_changes={name: float(value) for name, value in component_changes.items()})
         return report
 
     def propose(self, view):
@@ -418,7 +422,7 @@ class ReasoningSource(ResearchSource):
         "children. Model critiques are reasoning claims, never verification receipts or credit gates. "
         "An invalid argument or countermodel can be useful; do not force a positive result.")
     record_kinds = list(SCIENTIFIC_KINDS)
-    credit_columns = ("reasoning_scientific_gain", "assigned_calculation_coverage")
+    credit_columns = ("reasoning_scientific_gain",)
 
     def credit(self, result):
         from .episode_credit import reasoning_credit

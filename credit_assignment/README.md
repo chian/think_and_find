@@ -28,8 +28,9 @@ are not current instructions. Resolve the scientific scoring requirements from
 the user's original messages and inspect the actual episode trace with them.
 
 `causal_sheet.py` compiles importance from changed circumstance mass divided by
-declared total mass, with unresolved bounds and a separate explicitly commissioned
-resolved-mass projection. Ordinal grades and their numerical anchors are removed.
+declared total mass, retaining unresolved results. Calculation completion earns
+0 points; outcomes inform support and causal-change assessments. Ordinal grades
+and their numerical anchors are removed.
 The operands and current limitations are documented in
 [`CAUSAL_SCORING_SHEET.md`](../docs/CAUSAL_SCORING_SHEET.md). These are sheet
 calculations for the existing Episodes, not a new binding or controller.

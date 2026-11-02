@@ -176,7 +176,7 @@ def firecrawl_argo_research_providers(config: WorkflowProviderConfig, *, progres
         if showing_progress():
             print(f"Research verdict: {item['unit']} gain={item['gain']:.6g} stop={item['stop']} "
                   f"evaluated={item['evaluated']} calls={item['model_calls']} "
-                  f"investigation={item.get('global_goal_score', 0):.4f}", file=sys.stderr, flush=True)
+                  f"score={item.get('global_goal_score', 0):.4f}", file=sys.stderr, flush=True)
 
     def search(query, limit):
         def invoke():

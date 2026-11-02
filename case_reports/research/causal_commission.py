@@ -6,7 +6,7 @@ inspect public arguments and calculate their consequences. Literature has separa
 
 from dataclasses import dataclass
 
-from ...credit_assignment.causal_sheet import CRITERIA, investigation_credit
+from ...credit_assignment.causal_sheet import CRITERIA, validate_assignments
 from ...credit_assignment import causal_support
 from .causal_sheet import (CausalSheet, FIELDS, LIST_FIELDS, ENUMS, BOUND_BASES,
                            BOUND_CHANGES, REPAIR_KINDS)
@@ -163,7 +163,7 @@ class SheetCommission:
             raise ValueError("A commission needs a substantive scientific question")
         if not isinstance(self.calculation_context, str):
             raise ValueError("Calculation context must be an explicit record key or empty")
-        investigation_credit(sheet, self.assignments, context=self.calculation_context)  # Validate assigned numerical operands.
+        validate_assignments(sheet, self.assignments, context=self.calculation_context)
         keys = set(self.inputs) | {subject for subject, _ in self.assignments}
         for key in self.inputs:
             if sheet.rows[key]["kind"] == "importance_result":

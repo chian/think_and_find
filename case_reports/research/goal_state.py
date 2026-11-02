@@ -1,4 +1,4 @@
-"""Shared investigation progress and executed support for existing Episodes."""
+"""Five explicit scientific credit components shared by existing Episodes."""
 from fractions import Fraction
 
 from ...credit_assignment.causal_progress import combine_episode_points, compile_episode_points
@@ -29,18 +29,11 @@ class ScientificGoalState:
 
     def preview(self):
         calculation = self.ledger.causal_sheet.calculate()
-        score = combine_episode_points(calculation["support_credit"], calculation["investigation_progress"])
+        score = combine_episode_points(calculation["support_credit"], calculation["registrations"])
         projection = controller_projection(score["points"], score["resolution"])
-        progress = Fraction(score["progress"]["total"])
-        support = sum((Fraction(value) for key, value in score["support"]["points"].items()
-                       if key.startswith("support:")), Fraction())
-        change = sum((Fraction(value) for key, value in score["support"]["points"].items()
-                      if key.startswith("change:")), Fraction())
         return {"scientific_calculations": calculation,
-                "investigation_score": float(progress + support + change),
-                "investigation_progress_score": float(progress),
-                "support_for_G_score": float(support),
-                "change_score": float(change),
-                "root_progress_binding": "progress_plus_support_for_G_plus_change_credit" if projection["supported"] else "unsupported_controller_precision",
+                "total_score": float(Fraction(score["total"])),
+                "score_components": {name: float(Fraction(value)) for name, value in score["components"].items()},
+                "score_binding": "sum_of_five_scientific_components" if projection["supported"] else "unsupported_controller_precision",
                 "controller_limitation": None if projection["supported"] else projection["reason"],
-                "meaning": score["progress"]["meaning"] + " " + score["support"]["meaning"]}
+                "meaning": score["registrations"]["meaning"] + " " + score["support"]["meaning"]}

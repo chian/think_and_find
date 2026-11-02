@@ -129,9 +129,9 @@ contribution while leaving independent support for original G intact.
 ## Episode and message integration
 
 Scientific parent and Reasoning can record these operands and select existing
-calculators. Assigned calculation coverage includes importance, bounds, support
-and repair sheets; resolved negative results can complete an assigned calculation.
-Coverage is progress on a specified job, not additional global scientific merit.
+calculators for importance, expected generalizability bounds, support and repair
+comparisons. Executing a calculation earns 0 points. Its findings enter the
+support or causal-change score through the corresponding scientific assessment.
 Literature roles project scientific contributions through evidence provenance.
 Character counts, passages, rows, source counts and model opinions earn no points.
 For a fixed observation need the parent can commission an existing

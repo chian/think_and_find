@@ -48,25 +48,16 @@ The commissioned G and expected generalizability bounds travel as explicitly
 selected records or historical snapshots, not copied parent context.
 
 The discovery root deduplicates global points across attempts. A scientific
-attempt projects only point changes since its starting sheet. The shared sheet
-shows investigation progress separately from executed support-for-G and scoped
-proportional-change credit. Investigation registration counts a candidate G,
-its expected generalizability bounds, each mapped theory/context relationship,
-and an explicit support argument once per scored identity. Each registration is
-1 point. Extracting a source claim earns 0 points; extracting a source observation
-also earns 0 points. Both remain evidence inputs for scientific assessments. These
-registrations are work products, not support or scientific merit grades.
-Calculation progress is a number from 0 to 1: resolved declared operand mass
-divided by total declared operand mass, including negative results. Executed
-support adds 0.1 per qualifying hypothesis group and 0.1 per aligned identified
-observation. A qualifying change adds support for the original G multiplied
-by qualifying restored original-scope mass divided by original-scope mass.
-The global numeric score is the sum of these progress, support and change
-points; each episode receives its attributable before/after difference.
-Reasoning also
-observes coverage of explicitly assigned calculations; an assigned calculation
-is excluded from its other progress column so the same work is not counted twice.
-A repeated result earns no new point in either projection.
+attempt projects only point changes since its starting sheet. The five numeric
+score components are G registration (+1), expected generalizability bounds
+registration (+1), theory/context application registration (+1), support for G
+(+0.1 per qualifying support unit), and causal change (support for original G
+multiplied by the qualifying restored original-scope fraction). Every component
+is shown separately; the total is their sum. Repeated scored identities add 0.
+Extracting a source claim or observation, writing a support argument, and
+executing calculations each earn 0 points. Calculation results are scientific
+inputs to support and change assessments; neither the shared score nor a
+Reasoning episode rewards the fraction of calculations completed.
 The calculators establish consequences within the supplied formal models and
 source mappings; model verdicts have no numerical effect.
 

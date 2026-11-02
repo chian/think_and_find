@@ -3,13 +3,11 @@
 Scientific points have one global identity. Source scopes select typed
 investigation registrations and executed support through provenance; activity,
 passage length and source count are not rewards. Investigation progress is
-separate from support for a conclusion. Assigned calculation coverage is a
-separate Reasoning measurement.
+separate from support for a conclusion. Calculation execution earns no separate reward.
 """
 from fractions import Fraction
 
 from .records import Credit, Ledger
-from ...credit_assignment.causal_sheet import investigation_credit, _calculation_coverage
 from ...credit_assignment.causal_progress import compile_episode_points
 from ...credit_assignment.causal_support import controller_projection
 
@@ -45,7 +43,7 @@ def _scientific_gain(result, baseline, column, evidence):
         # Subtract the whole inherited point before provenance filtering. Adding
         # another source for an existing atom cannot earn that atom again.
         gain = max(Fraction(0), Fraction(value) - Fraction(before.get(key, "0")))
-        dependencies = (score["progress"]["point_dependencies"].get(key, ()) if key.startswith("progress:")
+        dependencies = (score["registrations"]["point_dependencies"].get(key, ()) if key.startswith("progress:")
                         else score["support"]["point_dependencies"].get(key, ()))
         if gain and _touches_evidence(sheet, dependencies, evidence):
             points[key] = gain
@@ -113,19 +111,12 @@ def reasoning_credit(result, baseline, commission):
     score = compile_episode_points(sheet)
     before = compile_episode_points(Ledger(baseline).causal_sheet)["points"]
     points = _positive_delta(score["points"], before)
-    # An assigned calculation already has its own coverage column below.
-    for subject, criterion in commission.assignments:
-        _, _, ident = _calculation_coverage(sheet, subject, criterion,
-                                            sheet.calculation_pins(commission.calculation_context))
-        points.pop("progress:calculation:" + criterion + ":" + ident, None)
     projection = controller_projection(points, score["resolution"])
-    coverage = investigation_credit(sheet, commission.assignments, context=commission.calculation_context)
-    if not projection["supported"] or not coverage.evaluated:
+    if not projection["supported"]:
         return Credit(evaluated=False)
-    return Credit(evaluated=result.evaluated,
-        quality_resolution=min(projection["resolution"], coverage.quality_resolution or 1.0),
-        qualities=tuple(("reasoning_scientific_gain", key, value) for key, value in projection["values"].items()) +
-                  tuple(("assigned_calculation_coverage", key, value) for _, key, value in coverage.qualities))
+    return Credit(evaluated=result.evaluated, quality_resolution=projection["resolution"],
+        qualities=tuple(("reasoning_scientific_gain", key, value)
+                        for key, value in projection["values"].items()))
 
 
 def scientific_attempt_credit(result, baseline):
