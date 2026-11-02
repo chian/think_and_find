@@ -52,10 +52,9 @@ attempt projects only point changes since its starting sheet. The shared sheet
 shows investigation progress separately from executed support-for-G and scoped
 proportional-change credit. Investigation registration counts a candidate G,
 its expected generalizability bounds, each mapped theory/context relationship,
-an explicit support argument, and each typed source claim or observation once
-per scored identity. A source-claim identity is the exact source fragment plus
-its closed relation code; repeated paraphrases of that fragment earn no new
-point. Each registration is 1 point. These
+and an explicit support argument once per scored identity. Each registration is
+1 point. Extracting a source claim earns 0 points; extracting a source observation
+also earns 0 points. Both remain evidence inputs for scientific assessments. These
 registrations are work products, not support or scientific merit grades.
 Calculation progress is a number from 0 to 1: resolved declared operand mass
 divided by total declared operand mass, including negative results. Executed

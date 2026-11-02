@@ -74,7 +74,7 @@ def read_source_window(reader, spans, question):
                 "including a negative or conditional result, without inferring a causal link from correlation. "
                 "A claim is one source-native relation or equation; do not split it into quote fragments, metadata, "
                 "bibliography, or multiple paraphrases. Do not put access notes or citations in claims. "
-                "The host registers these as investigation progress only, not as validated truth or support for G. "
+                "Extraction of source claims and observations earns zero points. These are inputs for scientific assessment. "
                 "Use an established study/experiment identifier, "
                 "or this source URL if its independent studies cannot be distinguished; paraphrases and copies of the same "
                 "study do not create independent evidence. Explain concretely how the finding bears on the question; "

@@ -1,4 +1,4 @@
-"""Source-anchored scientific statement operands for investigation progress.
+"""Source-anchored scientific statement operands; extraction earns zero credit.
 
 These are registrations of what a source appears to state. Structural checks do
 not establish source fidelity, causal truth, or support for a candidate G.
@@ -67,14 +67,7 @@ def source_anchor(evidence_data):
 
 
 def claim_identity(evidence_data, claim_id):
-    """Return a conservative, source-anchored relation identity and detail.
-
-    One exact source fragment can register each declared relation kind once.
-    Rewording left, right or conditions on a reread of that same fragment cannot
-    create more points. Multiple same-kind relations in one fragment collapse;
-    the point is an investigation unit, not a count of every scientific claim.
-    Independent measured outcomes use observation_identity instead.
-    """
+    """Identify a recorded source claim for inspection, without assigning credit."""
     _text(claim_id, "selector")
     if not isinstance(evidence_data, dict):
         raise ValueError("Source claim needs an evidence record")
@@ -110,13 +103,9 @@ def claim_identity(evidence_data, claim_id):
             raise ValueError("Equation claim needs equality and defined symbols")
     elif symbols:
         raise ValueError("Symbol definitions belong to equation claims")
-    # These model-authored fields may be paraphrased differently on a reread.
-    # Only the exact host-retained source anchor and closed relation code form
-    # the scored identity. Keep the full structure for the scientific sheet.
-    scored_unit = {"source": evidence_data["source"], "source_version": version,
-                   "evidence_locator": evidence_data["locator"],
-                   "kind": structural["kind"], "relation": structural["relation"]}
-    canonical = json.dumps(scored_unit, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    provenance = {"source": evidence_data["source"], "source_version": version,
+                  "evidence_locator": evidence_data["locator"], "structure": structural}
+    canonical = json.dumps(provenance, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     ident = sha256(canonical.encode()).hexdigest()[:32]
     detail = {"claim": claim_id, "source_id": source_id, "native_locator": locator,
               "source": evidence_data["source"], "source_version": version,
