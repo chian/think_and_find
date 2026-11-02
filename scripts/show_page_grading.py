@@ -112,7 +112,7 @@ def main(mode="report"):
     episode = run.episode("page", page, goal=goal, contract=commission.report_contract())
     page_tree = EpisodeTree(run.grains["page"], {
         run.grains["page"]: tuple(run.grains[name] for name in ("report", "lexical_probe", "source_table"))})
-    episode.run(Context(tree=page_tree))
+    page_record = episode.run(Context(tree=page_tree))
     result = run.global_goal.ledger.result()
     if result.diagnostics:
         raise RuntimeError(result.diagnostics)
@@ -135,9 +135,15 @@ def main(mode="report"):
     search.selected_sources.add(url)
     strategy = SearchStrategySource(run, ResearchResult(), approach="Synthetic")
     strategy.commission = SearchStrategyCommission("Find a useful source", ())
+    # Use the real child-return admission, including the actual child's audit
+    # identities. Checking only the field schema misses identity leakage.
+    acquired = search.edge(episode)._finish(page_record)
+    acquired.contribution.episode_update.report.validate_model_inputs(
+        {"returned_page": acquired.contribution.episode_update.report.as_record()})
     reports = [owner.parent_report(result) for owner in (page, search, strategy)]
     for owner, report in zip((page, search, strategy), reports):
-        owner.commission.report_contract().admit(report, audit_identifiers=result.audit_identifiers())
+        owner.commission.report_contract().admit(report,
+            audit_identifiers=(page_record.episode_id, page_record.goal.goal_id, *result.audit_identifiers()))
         if not report["grading_needs"] or not report["grading_outcomes"]:
             raise RuntimeError("Upward return lost grading information")
         if not any(Fraction(outcome["score_component_changes"]["support_for_G"]) == Fraction(1, 10)

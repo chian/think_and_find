@@ -73,7 +73,8 @@ def grading_report(delta, sheet):
     for need in needs:
         need["outcomes"] = [action["id"] for action in retained.values() if need["id"] in action["needs"]]
     return {"grading_needs": needs,
-            "grading_outcomes": list(retained.values()),
+            "grading_outcomes": [{name: value for name, value in action.items() if name != "episode"}
+                                 for action in retained.values()],
             "grading_action_count": len(actions),
             "grading_status_meaning": "Needs remain questions; outcomes are actual tools and computed results, not model validity verdicts."}
 
