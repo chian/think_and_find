@@ -10,6 +10,7 @@ from .records import Ledger, identity
 
 
 RETURN_FIELDS = {
+    "job": "The commissioned question and this episode's responsibility; permits interpreting the answer without recovering a prior prompt.",
     "completion": "Actual execution status; yielding does not establish scientific completion.",
     "assessment": "This episode's current answer to its commissioned job, qualifications and unresolved questions; not a transcript or a validity verdict.",
     "selected_results": "Exact scientific references and actual grading receipts selected to substantiate that answer.",
@@ -220,7 +221,8 @@ def job_report(source, result, completion=None):
     if source.completion_diagnostic:
         ended["failure"] = {key: source.completion_diagnostic.get(key)
                             for key in ("stage", "category", "status", "why")}
-    return {"completion": ended,
+    return {"job": {"question": index["question"], "responsibility": type(source).__name__},
+        "completion": ended,
         "assessment": deepcopy(source.working_assessment),
         "selected_results": selected_results(source, result),
         "unreviewed_results": deepcopy([*source.unreviewed_children, *source.unreviewed_results]),
