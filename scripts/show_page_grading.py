@@ -31,11 +31,12 @@ def main(mode="report"):
         text += "\n\n| Input | Response |\n| --- | --- |\n| x | y=x; ablated y=0 |\n"
     calls, events, requests = {}, [], []
     pending_records = []
+    remembered_needs, remembered_receipts, remembered_refs = {}, {}, {}
 
     def record(key, kind, data, dependencies=()):
         return dict(key=key, kind=kind, data=data, dependencies=list(dependencies))
 
-    def scripted(request):
+    def choose(request):
         requests.append(request)
         op = request["operation"]
         calls[op] = calls.get(op, 0) + 1
@@ -51,7 +52,7 @@ def main(mode="report"):
                     qualifications="Synthetic model only", sheet_keys=[]),
                     dict(kind="support", question="Does this source relation support G under the declared alteration?",
                     qualifications="Requires executable source and G formalisms", sheet_keys=[])])],
-                reading_memory=dict(summary=text, unresolved_links=["No empirical generalization claimed"], anchors=[dict(span=span)]))
+                reading_memory=dict(summary=text, unresolved_links=["No empirical generalization claimed"], anchors=[dict(span=span)], retained_evidence=[]))
         if op != "propose_page_child":
             raise RuntimeError("Unexpected operation " + op)
         n = calls[op]
@@ -63,7 +64,7 @@ def main(mode="report"):
                 choice["option"] = next(key for key, value in request["available_children"].items() if value.get("episode") == "source_table")
                 del choice["reading_scope"]
             return choice
-        needs = request["own_results"]["grading_needs"]
+        needs = list(remembered_needs.values())
         if not needs:
             raise RuntimeError("Reader flags did not reach Page before the next decision")
         evidence = needs[0]["evidence"]
@@ -104,6 +105,34 @@ def main(mode="report"):
             return dict(action="evaluate", rationale="Execute fixed circumstances", assessment="D", case_ids=["0", "1", "2"], evaluation_context="check")
         return dict(action="calculate", rationale="Inspect actual support outcome", keys=["check", "C"])
 
+    def collect(value):
+        if isinstance(value, dict):
+            for need in value.get("grading_needs", ()):
+                if isinstance(need, dict) and "id" in need:
+                    remembered_needs[need["id"]] = need
+            for outcome in value.get("grading_outcomes", ()):
+                remembered_receipts[outcome["id"]] = outcome
+            if isinstance(value.get("key"), str) and isinstance(value.get("version"), str):
+                remembered_refs[value["key"], value["version"]] = {"key": value["key"], "version": value["version"]}
+            for child in value.values():
+                collect(child)
+        elif isinstance(value, (list, tuple)):
+            for child in value:
+                collect(child)
+
+    def scripted(request):
+        collect(request)
+        result = choose(request)
+        if "working_assessment" in request:
+            assessment = dict(request["working_assessment"])
+            assessment["record_refs"] = list(remembered_refs.values())
+            assessment["receipt_refs"] = list(remembered_receipts)
+            # Each role keeps its own answer; this fixture uses no model grading.
+            for key in assessment.keys() - {"record_refs", "receipt_refs", "detail_refs"}:
+                assessment[key] = "Synthetic job answer; inspect exact source and computed outcomes."
+            result["working_assessment"] = assessment
+        return result
+
     run = ResearchRun(ResearchProviders(scripted, lambda *_: [], lambda _: text, trace_event=events.append),
         ResearchLimits(yield_window=2, root_yield_window=2, root_yield_threshold=None), "SYNTHETIC Page grading demonstration")
     page = PageSource(run, ResearchResult(), candidate={"url": url, "title": "Synthetic source"})
@@ -120,7 +149,7 @@ def main(mode="report"):
     expected = dict(G_registration="1", expected_generalizability_bounds_registration="1",
                     theory_context_application_registration="1", support_for_G="1/10", causal_change="0")
     if scores["components"] != expected:
-        raise RuntimeError(scores["components"])
+        raise RuntimeError({"components": scores["components"], "page_failure": page.failure, "events": [e for e in events if e.get("event") != "run_started"][-3:], "calls": calls})
     gains = [e["gain"] for e in events if e.get("event") == "credit_verdict" and e["episode_type"] == "PageSource"]
     if len(gains) < 4 or any(abs(a-b) > 1e-12 for a, b in zip(gains[:4], [0, 3, 0, 0.1])) or any(gains[4:]):
         raise RuntimeError({"page_gains": gains})
@@ -140,38 +169,74 @@ def main(mode="report"):
     acquired = search.edge(episode)._finish(page_record)
     acquired.contribution.episode_update.report.validate_model_inputs(
         {"returned_page": acquired.contribution.episode_update.report.as_record()})
-    reports = [owner.parent_report(result) for owner in (page, search, strategy)]
+    from episodic_workflow.case_reports.research.episode_memory import flatten_child, learn_references, accept_assessment
+    page_report = acquired.contribution.episode_update.report.as_record()
+    search.ledger.merge(result)
+    search.unreviewed_children = flatten_child(page_report)
+    search.detail_refs.append(page_report["details_ref"])
+    search_report = search.parent_report(result)
+    strategy.ledger.merge(result)
+    strategy.unreviewed_children = flatten_child(search_report)
+    strategy.detail_refs.append(search_report["details_ref"])
+    reports = [page_report, search_report, strategy.parent_report(result)]
     for owner, report in zip((page, search, strategy), reports):
         owner.commission.report_contract().admit(report,
             audit_identifiers=(page_record.episode_id, page_record.goal.goal_id, *result.audit_identifiers()))
-        if not report["grading_needs"] or not report["grading_outcomes"]:
+        remembered_needs.clear()
+        remembered_receipts.clear()
+        collect(report)
+        if not remembered_needs or not remembered_receipts:
             raise RuntimeError("Upward return lost grading information")
         if not any(Fraction(outcome["score_component_changes"]["support_for_G"]) == Fraction(1, 10)
-                   for outcome in report["grading_outcomes"]):
+                   for outcome in remembered_receipts.values()):
             raise RuntimeError("Upward return lost the numerical grader outcome")
-        if not any(outcome["calculation"] for outcome in report["grading_outcomes"]):
+        if not any(outcome["calculation"] for outcome in remembered_receipts.values()):
             raise RuntimeError("Upward return lost computed scientific results")
+        if any("unreviewed_results" in packet for packet in report["unreviewed_results"]):
+            raise RuntimeError("Final unreviewed child outcome recursively nested its history")
     for owner in (search, strategy):
         if abs(sum(value for _, _, value in owner.credit(result).qualities) - 3.1) > 1e-10:
             raise RuntimeError("Source branch lost registration provenance")
-    # Ensure an actionable flag after eight unrelated findings remains visible.
+    # A valid assessment acknowledges the result once; it is not replayed in
+    # later decision inputs. Full receipt/record lookup remains available.
+    learn_references(search, page_report)
+    state = dict(search.working_assessment, query_answer="Synthetic relation found",
+                 detail_refs=[page_report["details_ref"]])
+    accept_assessment(search, state, 1)
+    if search.unreviewed_children or search.assessment_error:
+        raise RuntimeError("Completed assessment failed to incorporate its child result")
+    recalled = search.recall(dict(references=[dict(kind="detail", key=page_report["details_ref"])]))
+    recalled.extract(None)
+    if not search.recalled_details[0]["value"]["record_refs"]:
+        raise RuntimeError("Job references were not retrievable")
+    # Historical, irrelevant evidence changes the detail index, not the answer
+    # or the selected/pending packet size. No first-N filtering is involved.
     overflow = CausalSheet()
-    evidence = next(row for row in result.causal_sheet_updates if row["kind"] == "evidence")
-    for i in range(9):
+    for i in range(100):
         overflow.put("earlier:" + str(i), "evidence", dict(source=url, locator=str(i), study_id="earlier",
-            finding="Earlier bibliography finding", measurements={}))
+            finding="Earlier unrelated finding " + "x" * 1000, measurements={}))
     overflow.merge(result.causal_sheet_updates)
     large_result = ResearchResult(causal_sheet_updates=tuple(overflow.history), grading_actions=result.grading_actions)
-    returned = search.parent_report(large_result)
-    if not returned["grading_needs"] or not returned["grading_outcomes"]:
-        raise RuntimeError("First-eight preview swallowed grading handoff")
+    small_report, large_report = search.parent_report(result), search.parent_report(large_result)
+    small_report.pop("details_ref")
+    large_report.pop("details_ref")
+    if small_report != large_report:
+        raise RuntimeError("Unselected historical findings leaked into the handoff")
+    # The final primitive must survive yield even with no next decision call.
+    if not page_report["unreviewed_results"]:
+        raise RuntimeError("Final completed Page action was lost at yield")
+    page_requests = [request for request in requests if request["operation"] == "propose_page_child"]
+    if len(page_requests[1]["child_reports"]) != 1 or any(r["child_reports"] for r in page_requests[2:]):
+        raise RuntimeError("Reader result was not delivered exactly once to Page")
+    if any("own_results" in request for request in requests):
+        raise RuntimeError("Accumulated ledger report still enters decision prompts")
     restored = Ledger(result).result()
     if restored.grading_actions != result.grading_actions:
         raise RuntimeError("Ledger round trip lost grader outcomes")
     print(json.dumps(dict(example="SYNTHETIC empty-sheet Page loop", reader=reader_role, page_unit_gains=gains,
         score_components=scores["components"], global_total=scores["total"], reader_gain=0,
         upward_returns=[type(owner).__name__ for owner in (page, search, strategy)],
-        later_flag_preserved=True, grader_results_preserved=True, diagnostics=[]), indent=2))
+        history_excluded=True, final_result_preserved=True, delivered_once=True, grader_results_preserved=True, diagnostics=[]), indent=2))
 
 
 if __name__ == "__main__":

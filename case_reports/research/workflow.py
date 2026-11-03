@@ -86,6 +86,9 @@ class DiscoverySource(ResearchSource):
     """Keep the shared ledger and select a new start after each completed attempt."""
 
     instructions = DISCOVERY_TASK
+    assessment_fields = {
+        "attempt_landscape": "What completed attempts establish about promising fresh starting questions; retain duplication concerns.",
+        "open_directions": "Unresolved natural-phenomenon directions worth exploring and why."}
     credit_columns = ("global_goal_progress",)
 
     def __init__(self, run):
@@ -113,7 +116,7 @@ class DiscoverySource(ResearchSource):
                     "items": {"enum": keys} if keys else False},
                 "snapshots": {"type": "array", "maxItems": 8, "items": SNAPSHOT_SCHEMA},
                 "rationale": {"type": "string", "minLength": 1}}}
-        proposal = self.run.agent(self.bounded_inputs(view, {
+        proposal = self.decide(self.bounded_inputs(view, {
             "task": DISCOVERY_TASK, "objective": str(view.goal.objective),
             "operation": "propose_discovery_attempt",
             "instruction": DISCOVERY_TASK,
@@ -123,6 +126,8 @@ class DiscoverySource(ResearchSource):
             "global_score": self.run.root_credit_projection(),
             "response_contract": schema}))
         self.last_proposal = proposal
+        if proposal.get("action") == "recall":
+            return self.recall(proposal)
         commission = ScientificAttemptCommission(proposal["question"],
             proposal["inputs"], proposal["snapshots"])
         commission.request(sheet)
@@ -135,6 +140,11 @@ class DiscoverySource(ResearchSource):
 
 class ScientificSource(ResearchSource):
     instructions = SCIENTIFIC_TASK
+    assessment_fields = {
+        "scientific_answer": "Current answer about the candidate causal inference, its role in theories and possible causal changes, with provenance references.",
+        "expected_generalizability_bounds": "What was expected, what supports or breaks that expectation and why; preserve revisions.",
+        "qualifications": "What remains conditional, disputed or unverified.",
+        "next_uncertainties": "Specific evidence or reasoning that could change the answer."}
     commission_type = ScientificAttemptCommission
     record_kinds = SCIENTIFIC_KINDS
     credit_columns = ("attempt_scientific_gain",)
@@ -154,8 +164,8 @@ class ScientificSource(ResearchSource):
         component_changes = {name: Fraction(value) - Fraction(before["components"][name])
                              for name, value in after["components"].items()}
         report.update(starting_question=self.commission.question,
-            scientific_changes={"items": [{"key": row["key"], "kind": row["kind"]}
-                                          for row in changed[:8]], "total": len(changed)},
+            scientific_changes={"selected": [ref for ref in self.working_assessment["record_refs"]
+                if self.ledger.causal_sheet.rows[ref["key"]]["kind"] != "evidence"], "total": len(changed)},
             score_change=float(sum(component_changes.values(), Fraction())),
             score_component_changes={name: float(value) for name, value in component_changes.items()})
         return report
@@ -179,10 +189,12 @@ class ScientificSource(ResearchSource):
              "then": {"required": ["search_commission", "approach"]}},
             {"if": {"properties": {"action": {"const": "reasoning"}}},
              "then": {"required": ["commission"]}}])
-        proposal = self.run.agent(self.inputs(view, operation="propose_scientific_action",
+        proposal = self.decide(self.inputs(view, operation="propose_scientific_action",
             instruction=SCIENTIFIC_TASK + SHEET_TOOLS, allowed_actions=actions,
             response_contract=schema, calculation_criteria=CRITERIA))
         self.last_proposal = proposal
+        if proposal.get("action") == "recall":
+            return self.recall(proposal)
         action = selected_choice(proposal.get("action"), actions, "action")
         if action == "search_strategy":
             commission = SearchStrategyCommission(**proposal["search_commission"])
@@ -229,6 +241,11 @@ class ScientificSource(ResearchSource):
 
 class ReasoningSource(ResearchSource):
     commission_type = SheetCommission
+    assessment_fields = {
+        "logical_answer": "Answer to the commissioned derivation, comparison, repair or countermodel question.",
+        "premises_and_derivation": "Public essential steps and premises, with exact references to full derivations.",
+        "qualifications": "Conditions, counterexamples and limits; executable verification is distinct from an authored claim.",
+        "unresolved_premises": "Missing premises or checks that the parent could commission."}
     instructions = ("Resolve the commissioned logical question through repeated choices of derivation, "
         "countermodel, comparison, repair analysis, independent argument checking, or formal calculation. "
         "Selected inputs and historical snapshots in this call contain their complete records. "
@@ -252,10 +269,12 @@ class ReasoningSource(ResearchSource):
         if schema["properties"]["assessment"] is not False:
             actions.append("evaluate")
         schema["properties"]["action"] = {"enum": actions}
-        proposal = self.run.agent(self.inputs(view, operation="propose_reasoning_action",
+        proposal = self.decide(self.inputs(view, operation="propose_reasoning_action",
             instruction=self.instructions + SHEET_TOOLS, allowed_actions=actions,
             response_contract=schema, calculation_criteria=CRITERIA))
         self.last_proposal = proposal
+        if proposal.get("action") == "recall":
+            return self.recall(proposal)
         selected_choice(proposal.get("action"), actions, "action")
         return _execute_sheet_tool(self, proposal, visible)
 

@@ -34,7 +34,7 @@ def main():
     initial = ResearchResult(causal_sheet_updates=tuple(incomplete.history))
     counts, requests, events = {}, [], []
     support = incomplete.rows['S_two']['data']
-    def scripted(request):
+    def choose(request):
         requests.append(request)
         operation = request['operation']
         counts[operation] = counts.get(operation, 0) + 1
@@ -54,6 +54,10 @@ def main():
                     assessment='D_two', case_ids=['0','1','2'], evaluation_context='check_two')
             return dict(action='calculate', rationale='Read the executed support result', keys=['check_two'])
         raise RuntimeError('Unexpected offline operation '+operation)
+    def scripted(request):
+        response = choose(request)
+        response['working_assessment'] = dict(request['working_assessment'])
+        return response
     run = ResearchRun(ResearchProviders(scripted, lambda q,n: [], lambda row: '', trace_event=events.append),
         ResearchLimits(yield_window=2,root_yield_window=2,root_yield_threshold=None),
         'SYNTHETIC episode scoring demonstration', initial=initial)

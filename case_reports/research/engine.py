@@ -12,7 +12,6 @@ from ...method_loop.communication import ParentModelInputError
 from ...task_executors._http import ProviderError
 from ...task_executors.evidence_extraction.argo import ModelOutputError
 from ...task_executors.outbreak_search.queries import search_results_from_provider, source_locator, source_text
-from .communication import compact_reading_coverage
 from .goal_state import GLOBAL_GOAL_PROGRESS, ScientificGoalState
 from .model_tiers import ModelTier, tier_for_operation
 from .records import Credit, Ledger, ResearchMessage, ResearchResult, diagnostic_value, identity, scenario_relation_key
@@ -104,6 +103,7 @@ class ResearchRun:
         self.model_calls = len(self.model_attempts)
         self.total_units = self.sequence = self.diagnostic_sequence = 0
         self.controller_specs, self.live_controllers, self.sources = {}, {}, {}
+        self.handoff_details = {}
         self.root_source = self.root_key = None
         root = Path(__file__).resolve().parents[2]
         paths = list(root.glob("*.py"))
@@ -277,6 +277,8 @@ class ResearchRun:
         return {**diagnostic, "diagnostic_id": self.diagnostic_sequence}
 
 class ResearchSource:
+    assessment_fields = {}
+
     def __init__(self, run, inherited=()):
         self.run, self.ledger = run, Ledger(inherited)
         self.initial = self.ledger.result()
@@ -299,6 +301,8 @@ class ResearchSource:
         self._prompt_selected_keys = set()
         self._prompt_historical_refs = set()
         self._prompt_catalog_offset = 0
+        from .episode_memory import initialize
+        initialize(self)
 
     def scoped_snapshots(self):
         refs = [*(self.commission.snapshots if self.commission else ()), *self.selected_snapshots]
@@ -331,16 +335,17 @@ class ResearchSource:
             newly_selected = sorted(set(self.selected_keys) - self._prompt_selected_keys)
             newly_selected_snapshots = [dict(ref) for ref in self.scoped_snapshots()
                 if (ref["key"], ref["version"]) not in self._prompt_historical_refs]
+            public_unit = unit.child.grain.name if isinstance(unit, ChildEpisodeUnit) else unit.label
             self.last_own_action = {
-                "unit": unit.label, "choice": proposal.get("action", unit.label),
+                "unit": public_unit, "choice": proposal.get("action", public_unit),
                 "operation_status": event["operation_status"],
                 "selected_keys": list(self.selected_keys),
                 "newly_exposed_keys": newly_selected,
-                "newly_exposed_snapshots": newly_selected_snapshots[:8],
+                "newly_exposed_snapshots": newly_selected_snapshots,
                 "catalog_offset_before": self._prompt_catalog_offset,
                 "catalog_offset_after": self.catalog_offset,
                 "admitted_records": [{"key": row["key"], "kind": row["kind"]}
-                                     for row in changes.causal_sheet_updates[:8]],
+                                     for row in changes.causal_sheet_updates],
                 "admitted_record_count": len(changes.causal_sheet_updates),
                 "credit_gain": view.controller_step.gain,
                 "scope_score": view.controller_step.score,
@@ -349,7 +354,15 @@ class ResearchSource:
             }
             self.own_action_count += 1
             self.own_action_outcomes.append(self.last_own_action)
-            self.own_action_outcomes = self.own_action_outcomes[-self.run.limits.yield_window:]
+            from .episode_memory import flatten_child, learn_references, unit_result
+            update = contribution.episode_update
+            if update is not None:
+                returned = update.report.as_record()
+                learn_references(self, returned)
+                self.unreviewed_children.extend(flatten_child(returned))
+                self.detail_refs.append(returned["details_ref"])
+            else:
+                self.unreviewed_results.append(unit_result(self, changes))
             self.run.emit_trace("credit_verdict", episode_id=self.goal.goal_id,
                 episode_type=type(self).__name__, question=str(self.goal.objective),
                 contract=self.parent_contract.as_record() if self.parent_contract else None, **event)
@@ -381,17 +394,8 @@ class ResearchSource:
         raise NotImplementedError("Each episode owns its credit projection")
 
     def parent_report(self, result, completion=None, request=None):
-        baseline = self.ledger.result() if request is not None else self.initial
-        delta = changed_records(result, baseline)
-        sheet = Ledger(baseline)
-        sheet.merge(delta)
-        return {"completion": {"ended_by": getattr(completion, "ended_by", result.stop_reason) or "in_progress",
-                               "evaluated": result.evaluated},
-                "causal_sheet_changes": sheet.causal_sheet.return_page(delta.causal_sheet_updates,
-                    calculation_context=getattr(self.commission, "calculation_context", None)),
-                "reading_coverage": compact_reading_coverage(delta.reading_attempts),
-                "operations": [{k: row.get(k) for k in ("stage", "category", "status", "why")}
-                               for row in delta.diagnostics[-3:]]}
+        from .episode_memory import job_report
+        return job_report(self, result, completion)
 
     def context(self):
         sheet = self.ledger.causal_sheet
@@ -438,25 +442,42 @@ class ResearchSource:
                        "policy_details": status["scientific_calculations"]["support_credit"]["policy_details"],
                        "controller_limitation": status["controller_limitation"],
                        "meaning": status["meaning"]},
-            "last_calculation": self.last_calculation,
-            "own_results": self.parent_report(self.ledger.result()), **kwargs}
+            **kwargs}
         return self.bounded_inputs(view, declared)
 
     def bounded_inputs(self, view, declared):
-        # Only the latest direct-child report is steering.
+        from .episode_memory import learn_references
         steering = dict(declared)
-        own_results = steering.get("own_results")
-        if self.own_action_outcomes and not (isinstance(own_results, Mapping) and "work_outcomes" in own_results):
-            steering["own_action_outcomes"] = {
-                "recent": self.own_action_outcomes,
-                "total": self.own_action_count,
-            }
-        inputs = view.model_inputs(steering, reports=view.child_reports[-1:])
+        steering["working_assessment"] = self.working_assessment
+        steering["new_results"] = self.unreviewed_results
+        if self.assessment_error:
+            steering["assessment_update_error"] = self.assessment_error
+        self._prompt_child_count = len(view.child_reports)
+        inputs = view.model_inputs(steering, reports=view.child_reports[self.reviewed_child_count:])
+        learn_references(self, inputs)
         self._prompt_selected_keys = {row["key"] for row in inputs.get("selected_sheet_inputs", ())}
         self._prompt_historical_refs = {(row["key"], row["version"])
                                         for row in inputs.get("historical_sheet_inputs", ())}
         self._prompt_catalog_offset = inputs.get("catalog_page", {}).get("offset", self.catalog_offset)
         return inputs
+
+    def decide(self, inputs):
+        from .episode_memory import ASSESSMENT_INSTRUCTION, accept_assessment, decision_schema
+        request = dict(inputs)
+        request["instruction"] = request.get("instruction", self.instructions) + ASSESSMENT_INSTRUCTION
+        request["response_contract"] = decision_schema(request["response_contract"], self.assessment_fields)
+        if "allowed_actions" in request:
+            request["allowed_actions"] = [*request["allowed_actions"], "recall"]
+        proposal = dict(self.run.agent(request))
+        accept_assessment(self, proposal.pop("working_assessment", None), self._prompt_child_count)
+        if self.assessment_error:
+            self.run.emit_trace("assessment_update_rejected", episode_type=type(self).__name__,
+                why=self.assessment_error, scientific_action_retained=True)
+        return proposal
+
+    def recall(self, proposal):
+        from .episode_memory import recall
+        return recall(self, proposal)
 
     def build_result(self, record):
         reason = self.failure or (record.controller_state.reason if record.ended_by == "yield_stop" else record.ended_by)

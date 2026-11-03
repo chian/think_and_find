@@ -50,35 +50,6 @@ def evidence_needs(sheet, keys):
     return needs
 
 
-def grading_report(delta, sheet):
-    """Project job-specific needs/outcomes separately from generic finding pagination.
-
-    All need IDs survive the handoff. Repeated actions on the same need expose
-    their latest factual result, not a transcript. Full actions remain in audit.
-    A returned calculation is not a declaration that the question is resolved.
-    """
-    keys = [row["key"] for row in delta.causal_sheet_updates]
-    needs = evidence_needs(sheet, keys)
-    actions = list(delta.grading_actions)
-    # An existing source's evidence may be inherited while Page assesses it now.
-    extra = [key for action in actions for key in action["evidence"]]
-    needs = list({need["id"]: need for need in [*needs, *evidence_needs(sheet, extra)]}.values())
-    latest = {}
-    for action in actions:
-        for need in action["needs"] or ["unflagged:" + action["source"]]:
-            latest[(need, action["action"])] = action
-    retained = {action["id"]: action for action in actions
-                if any(Fraction(value) for value in action["score_component_changes"].values())}
-    retained.update((action["id"], action) for action in latest.values())
-    for need in needs:
-        need["outcomes"] = [action["id"] for action in retained.values() if need["id"] in action["needs"]]
-    return {"grading_needs": needs,
-            "grading_outcomes": [{name: value for name, value in action.items() if name != "episode"}
-                                 for action in retained.values()],
-            "grading_action_count": len(actions),
-            "grading_status_meaning": "Needs remain questions; outcomes are actual tools and computed results, not model validity verdicts."}
-
-
 def page_action_outcome(source, result):
     """Record what the selected Page tool actually returned; award nothing here."""
     from .engine import changed_records

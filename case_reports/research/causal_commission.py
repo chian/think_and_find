@@ -147,16 +147,11 @@ class SheetCommission:
 
     def report_contract(self):
         from ...method_loop.communication import ReportContract
+        from .episode_memory import RETURN_FIELDS
         return ReportContract(decision=self.question, measurements={"scope": self.as_record()},
-            information={
-                "completion": "Actual execution status; yielding is not scientific completion.",
-                "causal_sheet_changes": "At most eight changed scientific records with identity, kind, "
-                    "currentness, admission/direction or score. next_offset permits further scoped retrieval. "
-                    "Full evidence and public derivations are retained in the sheet, not repeated in the return.",
-                "reasoning_results": "At most eight public arguments: premises, conclusion, limitations, and calculation results; full steps remain addressable by key.",
-                "unresolved_premises": "Referenced premises without source grounding or independent validation; these are requests for parent assessment, not refutations.",
-                "work_outcomes": "Recent completed own decisions with selected information, admitted records, diagnostics and credit; no recursive transcript.",
-                "operations": "At most three recent failures or limitations relevant to the next decision."})
+            information={**RETURN_FIELDS, "assessment":
+                "Answer to the commissioned logical question, essential public premises and derivation, "
+                "qualifications and unresolved premises, with exact record and executable receipt references."})
 
     def request(self, sheet):
         if not isinstance(self.question, str) or not self.question.strip():

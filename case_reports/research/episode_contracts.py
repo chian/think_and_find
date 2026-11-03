@@ -1,25 +1,9 @@
-"""Role-specific literature commissions and bounded deterministic returns."""
+"""Role-specific commissions and episode-owned job returns."""
 from dataclasses import dataclass
 
 from ...method_loop.communication import ReportContract
-from .communication import compact_reading_coverage
-from .records import Ledger
 
-COMMON_RETURN = {
-    "completion": "Execution status; yield or exhaustion does not establish scientific completion.",
-    "causal_sheet_changes": "At most eight findings with record IDs, source anchors, bearing on the question and open reasoning questions. Further records are addressable through pagination.",
-    "reading_coverage": "At most eight coverage records; an examined passage need not supply evidence.",
-    "operations": "At most three failures or limitations; failed retrieval is not negative scientific evidence.",
-}
-
-GRADING_RETURN = {
-    "score_component_changes": "Numerical changes to all five scientific score components since this episode began; repeated calculations earn zero.",
-    "source_findings": "Latest reader synthesis per source and reading episode, with unresolved questions; source records retain exact evidence.",
-    "grading_needs": "Source-linked assessment questions and qualifications, including needs outside the generic findings preview. Outcomes link actual Page actions; they do not certify resolution.",
-    "grading_outcomes": "Latest actual Page sheet/grader outcomes per need and operation, with provenance, computed results, numerical score changes and diagnostics.",
-    "grading_action_count": "Number of recorded Page tool actions; execution itself earns zero.",
-    "grading_status_meaning": "Interpretation of needs and factual outcomes; no model verdict gates credit.",
-}
+from .episode_memory import RETURN_FIELDS, job_report
 
 
 @dataclass(frozen=True)
@@ -53,7 +37,8 @@ class ScientificAttemptCommission:
     def report_contract(self):
         return ReportContract(decision=self.question,
             measurements={"scope": self.as_record()},
-            information={**COMMON_RETURN, **GRADING_RETURN,
+            information={**RETURN_FIELDS,
+                "assessment": "Scientific answer about G and its theoretical role, expected generalizability bounds and their revisions, qualifications and next uncertainties.",
                 "starting_question": "The starting question of this attempt, retained to avoid repeating the same unproductive start.",
                 "scientific_changes": "Kinds and keys of changed scientific records, excluding source evidence; counts remain visible.",
                 "score_change": "Numeric sum of the five score-component changes relative to this attempt's starting sheet.",
@@ -86,45 +71,43 @@ class LiteratureCommission:
 
     def report_contract(self):
         return ReportContract(decision=self.question, measurements={"scope": self.as_record()},
-                              information={**COMMON_RETURN, **GRADING_RETURN, **self.return_fields})
+                              information={**RETURN_FIELDS, "assessment": self.assessment_meaning, **self.return_fields})
 
 
 class SearchStrategyCommission(LiteratureCommission):
-    return_fields = {"searches": "Last eight literal queries and count omitted; guides changes of search approach.",
-                     "reasoning_questions": "At most eight source-linked unresolved questions for the scientific parent to turn into reasoning commissions."}
+    assessment_meaning = "Commission answer across searches, coverage and gaps, qualifications and specific remaining reasoning questions, with selected references."
+    return_fields = {"searches": "Query count and latest literal query; the strategy assessment explains coverage and gaps.",
+                     "reasoning_questions": "The strategy assessment's remaining logical questions for the scientific parent."}
 
 
 class SearchCommission(LiteratureCommission):
+    assessment_meaning = "Answer from this query's examined sources, their comparison and remaining information need, with selected references."
     return_fields = {"query": "The single literal query whose results this episode selects among.",
-                     "examined_sources": "At most eight sources actually read, with versions; not just search hits."}
+                     "examined_sources": "Sources selected from this query, with retrieved versions when available; a selection alone is not successful reading."}
 
 
 class PageCommission(LiteratureCommission):
+    assessment_meaning = "Source answer, status of scientific assessment tied to actual grader receipts, qualifications and remaining reading need."
     return_fields = {"source": "The retrieved document identity and version.",
                      "remaining_source": "Unexamined character count and available table count for selecting further reading."}
 
 
 class ReportCommission(LiteratureCommission):
-    return_fields = {"reading_findings": "Reader's concise synthesis and unresolved links, with exact source anchors.",
+    assessment_meaning = "Source-grounded answer across document-order windows, cross-window qualifications and unresolved links or grading needs for Page."
+    return_fields = {"source_anchors": "Source identity, version and exact spans retained by this reader; findings and open questions belong to its assessment.",
                      "document_position": "Document-order cursor and remaining windows; cross-window context stays with the reader."}
 
 
 class LexicalCommission(LiteratureCommission):
-    return_fields = {"reading_findings": "Reader's concise synthesis and unresolved links, with exact source anchors.",
+    assessment_meaning = "Answer from source-local ranked passages, context and qualifications, and unresolved source links or grading needs for Page."
+    return_fields = {"source_anchors": "Source identity, version and exact spans retained by this reader; findings and open questions belong to its assessment.",
                      "passage_selection": "Literal source-local query, number of ranked passages considered and remaining."}
 
 
 class TableCommission(LiteratureCommission):
-    return_fields = {"reading_findings": "Reader's concise synthesis and unresolved links, with exact source anchors.",
+    assessment_meaning = "Answer from queried table rows with their headers and conditions, qualifications and unresolved comparisons or grading needs for Page."
+    return_fields = {"source_anchors": "Source identity, version and exact spans retained by this reader; findings and open questions belong to its assessment.",
                      "table_queries": "Last eight row queries, selected row keys and remaining row count; findings retain headers and exact row anchors."}
-
-
-def changed_sheet(source, result):
-    from .engine import changed_records
-    delta = changed_records(result, source.initial)
-    sheet = Ledger(source.initial)
-    sheet.merge(delta)
-    return delta, sheet.causal_sheet
 
 
 def completion_fields(result, completion):
@@ -132,59 +115,9 @@ def completion_fields(result, completion):
             "evaluated": result.evaluated}
 
 
-def operation_fields(delta):
-    return [{k: row.get(k) for k in ("stage", "category", "status", "why")} for row in delta.diagnostics[-3:]]
-
-
 def literature_report(source, result, completion):
-    from .grading_handoff import grading_report
-    from ...credit_assignment.causal_progress import compile_episode_points
-    from fractions import Fraction
-    delta, sheet = changed_sheet(source, result)
-    before = compile_episode_points(Ledger(source.initial).causal_sheet)["components"]
-    after = compile_episode_points(sheet)["components"]
-    summaries = {}
-    for attempt in delta.reading_attempts:
-        if attempt.get("reading_summary"):
-            summaries[(attempt["source"], attempt["source_version"], attempt["episode_id"])] = {
-                name: attempt[name] for name in ("source", "source_version", "question", "reading_summary", "unresolved_links")}
-    return {"completion": completion_fields(result, completion),
-            **grading_report(delta, sheet),
-            "score_component_changes": {name: float(Fraction(value) - Fraction(before[name]))
-                                        for name, value in after.items()},
-            "source_findings": list(summaries.values()),
-            "causal_sheet_changes": sheet.return_page(delta.causal_sheet_updates),
-            "reading_coverage": compact_reading_coverage(delta.reading_attempts),
-            "operations": operation_fields(delta)}
+    return job_report(source, result, completion)
 
 
 def reasoning_report(source, result, completion):
-    delta, sheet = changed_sheet(source, result)
-    keys = list(dict.fromkeys(row["key"] for row in delta.causal_sheet_updates))
-    arguments, unresolved = [], []
-    for key in keys:
-        row = sheet.rows[key]
-        data = row["data"]
-        if row["kind"] == "reasoning":
-            arguments.append({"key": key, "premises": data["premises"][:8],
-                "premise_count": len(data["premises"]), "conclusion": data["conclusion"][:800],
-                "limitations": data["limitations"][:800], "current": sheet.current(key),
-                "derivation": {"key": key, "version": row["version"]}})
-            for premise in data["premises"]:
-                dependency = sheet.rows[premise]
-                linked_ground = any(sheet.rows[ref]["kind"] in {"evidence", "reasoning"} and sheet.current(ref)
-                                    for ref in dependency["dependencies"])
-                if (dependency["kind"] == "premise" and not linked_ground) or not sheet.current(premise):
-                    unresolved.append({"argument": key, "premise": premise,
-                        "reason": "Input is stale" if not sheet.current(premise) else "No current evidence or argument is linked to this premise"})
-        elif row["kind"] == "verification":
-            arguments.append({"key": key, "argument": data["reasoning"], "legacy_model_opinion": data["verdict"], "scoring_effect": "none",
-                "checks": [text[:400] for text in data["checks"][:4]], "counterexample": data["counterexample"][:800]})
-    return {"completion": completion_fields(result, completion),
-            "causal_sheet_changes": sheet.return_page(delta.causal_sheet_updates,
-                calculation_context=source.commission.calculation_context),
-            "reasoning_results": {"items": arguments[:8], "total": len(arguments)},
-            "unresolved_premises": {"items": unresolved[:8], "total": len(unresolved)},
-            "work_outcomes": {"items": source.own_action_outcomes,
-                              "total": source.own_action_count},
-            "operations": operation_fields(delta)}
+    return job_report(source, result, completion)

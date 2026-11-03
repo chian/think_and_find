@@ -191,7 +191,12 @@ class SearchPageProposer:
         self._selected: set[int] = set()
         self._history: list[Mapping[str, Any]] = []
 
-    async def next(self, goal: EpisodeGoal) -> Mapping[str, Any] | None:
+    @property
+    def history(self):
+        return list(self._history)
+
+    async def candidates(self, goal: EpisodeGoal) -> list[Mapping[str, Any]]:
+        """Expose pending options without consuming a selection or running an agent."""
         if self._results is None:
             results = search_results_from_provider(self.provider_search(self.query, self.limit))
             self._results = tuple({source_locator(r): r for r in results if source_locator(r)}.values())
@@ -206,7 +211,7 @@ class SearchPageProposer:
                     )
         pending = [rank for rank in range(1, len(self._results) + 1) if rank not in self._selected]
         if not pending or len(self._selected) >= self.limit:
-            return None
+            return []
         candidates = []
         for rank in pending:
             result = self._results[rank - 1]
@@ -218,21 +223,35 @@ class SearchPageProposer:
                 "description": str(result.get("description") or result.get("snippet") or ""),
                 "jev_assessment": self._assessments[rank].to_dict() if rank in self._assessments else None,
             })
+        return candidates
+
+    async def next(self, goal: EpisodeGoal) -> Mapping[str, Any] | None:
+        candidates = await self.candidates(goal)
+        if not candidates:
+            return None
         if self.select_page is not None:
-            response = self.select_page(goal.as_record(), candidates, list(self._history))
-            options = {row["option_id"]: row for row in candidates}
-            option = response.get("option_id")
-            if not isinstance(option, str) or option not in options:
-                raise ValueError("Search page proposer selected an undeclared option_id")
-            if any(not isinstance(response.get(key), str) or not response[key].strip()
-                   for key in ("objective", "rationale")):
-                raise ValueError("Search page proposal requires objective and rationale")
-            proposal = SearchPageProposal(option, options[option]["provider_rank"],
-                                         response["objective"], response["rationale"])
+            response = self.select_page(goal.as_record(), candidates, self.history)
         else:
             proposal = await propose_search_page(
-                self.llm, goal=goal.as_record(), candidates=candidates, previous_pages=self._history,
+                self.llm, goal=goal.as_record(), candidates=candidates, previous_pages=self.history,
             )
+            return self._consume(proposal)
+        return self.select(response, candidates)
+
+    def select(self, response, candidates):
+        """Consume exactly the source chosen by the owning episode."""
+        options = {row["option_id"]: row for row in candidates}
+        option = response.get("option_id")
+        if not isinstance(option, str) or option not in options:
+            raise ValueError("Search page proposer selected an undeclared option_id")
+        if any(not isinstance(response.get(key), str) or not response[key].strip()
+               for key in ("objective", "rationale")):
+            raise ValueError("Search page proposal requires objective and rationale")
+        proposal = SearchPageProposal(option, options[option]["provider_rank"],
+                                      response["objective"], response["rationale"])
+        return self._consume(proposal)
+
+    def _consume(self, proposal):
         rank = proposal.provider_rank
         self._selected.add(rank)
         self._history.append(proposal.to_dict())

@@ -23,7 +23,8 @@ CALL_SITE_TIERS = MappingProxyType({
     "propose_guideline_action": ModelTier.REASONING,
     "propose_reasoning_action": ModelTier.REASONING,
     "propose_strategy_query": ModelTier.REASONING,
-    "choose_research_source": ModelTier.FAST,
+    # Search owns source comparison and its query answer as well as selection.
+    "choose_research_source": ModelTier.REASONING,
     "propose_page_child": ModelTier.REASONING,
     "propose_table_query": ModelTier.REASONING,
     "extract_research_evidence": ModelTier.REASONING,

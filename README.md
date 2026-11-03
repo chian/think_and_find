@@ -9,7 +9,7 @@ scientific instructions define the requested result.
 The implementation foundation is the existing research composition in
 `case_reports/research/` and the shared `method_loop` runtime. The discarded
 parallel causal-discovery implementation is deleted. The launcher now runs this causal-inference research application. The scientific
-parent and investigations populate and calculate the global sheet; acquisition
+parent, Page and Reasoning episodes populate and calculate the global sheet; acquisition
 uses the existing Search Strategy/Search/Page/reading hierarchy.
 
 ## Episode design

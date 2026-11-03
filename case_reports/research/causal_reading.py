@@ -34,10 +34,12 @@ def read_source_window(reader, spans, question):
             "reasoning_question": {"type": "string", "maxLength": 800},
             "grading_needs": {"type": "array", "items": GRADING_NEED_SCHEMA}}}
     memory_schema = {"type": "object", "additionalProperties": False,
-        "required": ["summary", "unresolved_links", "anchors"], "properties": {
-            "summary": {"type": "string", "maxLength": 1600},
-            "unresolved_links": {"type": "array", "maxItems": 6, "items": {"type": "string"}},
-            "anchors": {"type": "array", "maxItems": 3, "items": {
+        "required": ["summary", "unresolved_links", "anchors", "retained_evidence"], "properties": {
+            "summary": {"type": "string"},
+            "unresolved_links": {"type": "array", "items": {"type": "string"}},
+            "retained_evidence": {"type": "array", "items": {"type": "object", "additionalProperties": False,
+                "required": ["key", "version"], "properties": {"key": {"type": "string"}, "version": {"type": "string"}}}},
+            "anchors": {"type": "array", "items": {
                 "type": "object", "additionalProperties": False, "required": ["span"],
                 "properties": {"span": {"enum": list(allowed)}}}}}}
     try:
@@ -45,6 +47,7 @@ def read_source_window(reader, spans, question):
             "context": reader.context(), "source": reader.document.source,
             "source_spans": {key: span.as_record() for key, span in allowed.items()},
             "reading_memory": reader.memory,
+            "new_results": reader.unreviewed_results,
             "instruction": reader.instructions + " Read the supplied source windows for the scoped scientific question. Retain theory mechanisms, "
                 "causal claims and their premises, equations, observations, limits, or evidence about a proposed repair. "
                 "State what the source establishes and what it leaves open. Select the supplied fragment ID supporting "
@@ -90,7 +93,10 @@ def read_source_window(reader, spans, question):
                 "Return these needs to Page. Page decides whether to register scientific operands or invoke a grader "
                 "in its next iteration. You extract and flag; you cannot invoke graders, register G/bounds/applications, "
                 "assign points, or declare the assessment valid. A potential reversal remains a question. "
-                "Memory is concise working context, not evidence. Return an empty findings list if no relevant finding exists.",
+                "Memory is your current source-grounded answer, not an accumulating history. Preserve material qualifications. "
+                "In retained_evidence select prior exact key/version references still needed for this answer or open assessment "
+                "questions. The host adds this window's admitted findings automatically. All evidence remains retrievable by Page. "
+                "Return an empty findings list if no relevant finding exists.",
             "response_contract": {"type": "object", "additionalProperties": False,
                 "required": ["findings", "reading_memory"], "properties": {
                     "findings": {"type": "array", "maxItems": 6, "items": record_schema},
@@ -165,6 +171,7 @@ def read_source_window(reader, spans, question):
                 {"span": anchor["span"], "quote": allowed[anchor["span"]].text}
                 for anchor in proposed["anchors"]]}
             reader.validate_memory(memory, allowed)
+            reader.pending_memory_update = True
         except (ValueError, TypeError, KeyError) as exc:
             memory = reader.memory
             diagnostics.extend(reader.failure_result(exc, "reading_memory").diagnostics)

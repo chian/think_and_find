@@ -19,13 +19,18 @@ instructions separate from concise steering; shortening history must not erase
 the assignment.
 Each completed own choice records its selected operands, information newly
 exposed, admitted records, diagnostic outcome and local credit change. The next
-decision receives a concise window of those factual outcomes alongside the
-current full selected records. Repeating an inspection remains an available
+decision receives the current owned assessment, newly completed factual outcomes
+and current full selected records. Its normal response updates that assessment;
+a successful update incorporates the results so they are not replayed on later
+turns. Full action records remain retrievable. The final result is returned even
+when the controller yields before another assessment update. Repeating an inspection remains an available
 choice; the episode can see whether the earlier inspection supplied anything.
 
 A parent constructs the child's task from its scoped commission. Initial facts
 are supplied explicitly. The child does not inherit the parent's whole context.
 The returned typed fields become relevant steering for the parent's own task.
+The parent can select `recall` to inspect an exact record version, grader receipt
+or job detail index instead of inheriting the child's full working history.
 Collect required interpretations in the actual work responses; project recorded
 facts directly, without a separate model composing a report.
 

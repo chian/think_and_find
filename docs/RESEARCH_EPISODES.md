@@ -39,21 +39,49 @@ limitations, critiques, calculated sheet changes and unresolved
 premises. Full derivations remain addressable by record key and version.
 Neither return contains a recursive transcript or invokes a report composer.
 
+Every decision response also replaces that episode's working assessment of its
+completed work. Each concrete source declares its own assessment questions:
+Page answers the source question and reports assessment status; Search compares
+sources from one query; Search Strategy answers the delegated information need
+and identifies remaining reasoning questions; Reasoning states its argument,
+premises and limitations; Scientific states its causal assessment and remaining
+uncertainties. Readers update their source-grounded reading memory during
+extraction and select prior evidence still needed for their answer.
+
+The next decision receives the current assessment and results not yet incorporated
+into it. A child report is delivered once after a successful assessment update;
+it is not also rebuilt from the entire ledger under `own_results`. If an update
+is malformed, the previous assessment and unreviewed results remain available;
+that transport failure does not invalidate scientific operands or gate credit.
+The controller may yield immediately after any unit. The outward return therefore
+includes both the owned assessment and actual final results not yet reviewed.
+Final child outcomes are flattened into factual packets, not recursively nested
+episode histories. There is no separate final report-composition call.
+
+Each return includes an immutable `details_ref`. `recall` is a read-only primitive
+selected in the same episode loop: it retrieves a job's record/receipt index,
+an exact scientific record version, or an actual grading receipt. Search and
+Search Strategy have this primitive as well as scientific episodes. Retrieval
+earns zero points. Complete records and receipts remain in the ledger; prompts
+contain the episode's chosen assessment and relevant results. Assessment and
+reference selection has no character or item quota. Score components are calculated
+from the complete scientific ledger, independently of summary selection.
+
 Readers return explicit source-linked grading needs and a concise synthesis to Page.
 Page can select record, inspect, evaluate, calculate or a fixed observation comparison
 in its existing loop, alongside further reading. Report, Lexical reading and Table
 cannot invoke graders or register scientific operands. Grading flags earn zero points
 and neither require an action order nor certify a finding. Page tool outcomes record
 actual calculated results, exact evidence/record references, score-component changes
-and unresolved diagnostics. Search and Search Strategy receive these needs and outcomes
-separately from the generic findings preview. Their next decisions can use the result
+and unresolved diagnostics. Search and Search Strategy receive relevant needs and actual outcomes
+in the owned return and unreviewed final results. Their next decisions can use the result
 without waiting for the scientific parent. Repeated actions remain available.
 
 Search returns its literal query and examined sources. Page returns its source
 version and remaining source coverage. Report returns document position and
 unresolved links. Lexical reading returns query/ranking position and unresolved
 links. Table returns row-query outcomes and remaining rows. Each also returns
-bounded findings, coverage and failures relevant to its parent's next decision.
+selected findings, coverage and failures relevant to its parent's next decision.
 The commissioned G and expected generalizability bounds travel as explicitly
 selected records or historical snapshots, not copied parent context.
 
