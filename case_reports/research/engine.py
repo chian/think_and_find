@@ -330,6 +330,7 @@ class ResearchSource:
             rejected_records = sum(d.get("stage") == "scientific_record" and d.get("status") == "failed"
                                    for d in changes.diagnostics)
             event = dict(unit=unit.label, evaluated=self.pending.evaluated,
+                yield_observed=True, controller_reason=view.controller_step.reason,
                 operation_status=("partial" if self.pending.evaluated and rejected_records else
                                   "completed" if self.pending.evaluated else "failed"),
                 record_admission={"accepted": len(changes.causal_sheet_updates),

@@ -2,9 +2,20 @@
 
 The user's original instructions and later corrections govern this work.
 
-Use this checkout's `tools/one_workflow.sh` for every local Python command, with
-disposable output beneath this checkout's `runs/`. Do not borrow another repo's
-launcher. Use the stable `CODEX_THREAD_ID`; confirm the previous complete workload
+Run Think and Find from this repository's root using its own
+`tools/one_workflow.sh` for every local Python command. In this workspace the
+launcher is `/home/chia/repos/think_and_find/tools/one_workflow.sh`; its resource
+supervisor is this repository's `tools/workflow_resources.py`. This application
+has its own launcher and no longer launches through `gene_annotation_episode`.
+Do not reuse that repository's launcher, working directory, supervisor or run
+directory, even when restarting a historical job that used them. Disposable
+output belongs beneath this checkout's `runs/`. Verify the launched service is
+named `think-and-find-workflow-<window-key>.service` and its working directory is
+this checkout before reporting a successful start.
+
+For a fresh job, select a new directory beneath this checkout's `runs/`, pass
+that directory's checkpoint/trace/report/audit paths, and omit `--resume`.
+Use the stable `CODEX_THREAD_ID`; confirm the previous complete workload
 has exited before launching another in this window. Keep one CPU, 5 GiB RAM and
 no swap across the complete workload, without process/thread count ceilings.
 

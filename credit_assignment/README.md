@@ -16,6 +16,16 @@ extra parent turns, and child scores are not summed into parent progress.
 Repeated facts, report construction and shared-state refreshes do not manufacture
 new contributions.
 
+A returned failed unit is still an observed attempt with zero realized yield.
+`ResearchController.observe` sends that empty numerical sample to the estimator
+while retaining the result's `evaluated=False`, failure count and diagnostics.
+Scientific validity and numerical observation availability are distinct. Do not
+map a completed failed operation to a missing incidence observation: a history
+containing only such failures would never acquire enough observed samples to
+yield. Child failures use the same return and parent credit path as other child
+outcomes; internal retries do not become extra parent observations. Trace events
+separate `evaluated` from `yield_observed` and record the controller's reason.
+
 Keep investigation progress distinct from support for a particular conclusion.
 Useful negative findings and corrections can advance the investigation while
 weakening that conclusion. Numerical yielding does not establish scientific

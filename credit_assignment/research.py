@@ -6,7 +6,7 @@ import math
 
 from .incidence_rarefaction import (
     ChannelSchema, ControllerConfig, EstimatorController,
-    OBSERVATION_FAILED, OBSERVATION_OBSERVED,
+    OBSERVATION_OBSERVED,
     adaptive_marginal_credit_threshold,
 )
 
@@ -159,15 +159,19 @@ class ResearchController:
             earned = self._earned_identities() if value.evaluated else []
             if value.evaluated:
                 self._observe_credit_snapshot()
+        # This hook receives a completed own unit. Even when its scientific
+        # result is unevaluated, its realized contribution is known: zero.
+        # OBSERVATION_FAILED would instead mark the numerical observation as
+        # missing, leaving a failure-only episode permanently insufficient.
+        # Keep result validity and failure accounting separate from sampling.
         incidence = self._incidence.advance(
             unit_label, earned,
-            observation_status=OBSERVATION_OBSERVED if value.evaluated else OBSERVATION_FAILED,
+            observation_status=OBSERVATION_OBSERVED,
             is_root=is_root,
         )
         complete = self._maximum() is not None and score >= self._maximum()
         self.stop = complete or (incidence.stop and self.yield_threshold != 0)
-        self.reason = "complete" if complete else (
-            incidence.verdict.outcome if value.evaluated or self.stop else "failed_observation")
+        self.reason = "complete" if complete else incidence.verdict.outcome
         self.rarefaction = {"should_yield": self.stop, "outcome": self.reason,
             "incidence": incidence.as_record()}
         return ResearchStep(self.stop, score, score - previous, value.evaluated, self.reason)
