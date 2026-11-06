@@ -25,7 +25,7 @@ class ResearchReport(ClosedRecord):
                 "models": {tier.value: dict(run.providers.model_route("report", tier)) for tier in ModelTier}
                           if run.providers.model_route else {}}
         # passed describes successful execution, never a confirmed causal reversal.
-        return cls(data, result.evaluated and not run.provider_unavailable and not any(
+        return cls(data, result.evaluated and not any(
             d.get("stage") == "episode_completion" and d.get("status") == "failed" for d in result.diagnostics))
 
     def as_record(self):

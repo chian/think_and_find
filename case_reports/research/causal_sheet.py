@@ -27,9 +27,9 @@ FIELDS = {
     "application": ("inference", "inference_version", "theory", "context_key", "context", "context_distinction", "direction",
                     "inference_use", "consequence_without_inference"),
     "evidence": ("source", "locator", "study_id", "finding", "measurements"),
+    "theory_fragment": ("reconstruction", "question", "entities", "quantities", "statements", "gaps"),
     "source_formalization": source_formalization.FIELDS,
     "reasoning": ("author", "premises", "steps", "conclusion", "limitations"),
-    "verification": ("reasoning", "reviewer", "verdict", "checks", "counterexample"),
     "comparison": ("left", "right", "mapping", "conflict", "repair_search_bounds"),
     "repair": ("comparison", "adjustment", "construction_evidence", "predictions", "test_evidence", "costs"),
     "expectation": ("inference", "bounds", "basis", "rationale", "grounds", "revision"),
@@ -46,7 +46,7 @@ LIST_FIELDS = {"variables", "predictions", "compared_with", "premises", "steps",
                "construction_evidence", "test_evidence", "sources"}
 ENUMS = {
     "admission": {"candidate", "distinct", "same_theory"},
-    "direction": {"supports", "possible_reversal", "unresolved"},
+    "direction": {"supports", "possible_transfer_failure", "unresolved"},
     "verdict": {"valid", "invalid", "unresolved"},
 }
 
@@ -55,7 +55,7 @@ BOUND_CHANGES = {"expand_bounds", "shrink_bounds", "change_inference", "repair_t
 REPAIR_KINDS = {"not_a_repair", "better_definition", "missing_dependency", "general_rule", "exceptional_patch", "unresolved"}
 REVISION_FIELDS = {"prior", "triggers", "changes", "change", "repair_kind", "proposed_rule",
                    "general_rules", "rule_reasoning", "retained", "lost", "new_predictions", "limitations"}
-TRIGGER_KINDS = {"evidence", "source_formalization", "premise", "theory", "application", "reasoning", "verification",
+TRIGGER_KINDS = {"evidence", "source_formalization", "premise", "theory", "theory_fragment", "application", "reasoning",
                  "comparison", "repair", "expectation_break", "importance_result", *GRADING_FIELDS}
 
 
@@ -102,7 +102,7 @@ class CausalSheet:
         """Construct a validated update without mutating the admitted sheet."""
         _text(key, "record key")
         data = deepcopy(data)
-        if kind == "application" and not data.get("inference_version"):
+        if kind == "application" and data["inference_version"] == "":
             data["inference_version"] = self.rows[data["inference"]]["version"]
         refs = set(dependencies) | self._references(kind, data)
         missing = refs - self.rows.keys()
@@ -154,21 +154,14 @@ class CausalSheet:
 
     def _references(self, kind, data):
         expected = set(FIELDS.get(kind, ()))
-        if kind in {"support_contribution", "causal_change"} and isinstance(data, dict):
-            accepted = getattr(causal_support, "accepted_fields", None)
-            if accepted is not None:
-                expected = set(accepted(kind, data))
-            elif "verification_required" in data:
-                expected.add("verification_required")  # Retired audit field, no scoring meaning.
-        if kind == "support_assessment" and isinstance(data, dict) and "source_formalization" not in data:
-            expected.discard("source_formalization")  # Historical assessments remain readable, without hypothesis credit.
-        if kind == "application" and isinstance(data, dict) and "inference_version" not in data:
-            expected.discard("inference_version")
         if kind not in FIELDS or not isinstance(data, dict) or set(data) != expected:
             raise ValueError(f"{kind!r} requires exactly its declared sheet fields")
         refs = []
         if kind in GRADING_FIELDS:
             refs = list(module_for(kind).references(data))
+        elif kind == "theory_fragment":
+            from .theory_language import evidence_references
+            refs = [ref["key"] for ref in evidence_references(data)]
         elif kind == "theory":
             # Identity comparisons are metadata, not inferential premises. Making
             # them causal dependencies would prevent later duplicate consolidation.
@@ -177,8 +170,6 @@ class CausalSheet:
             refs = [data["inference"], data["theory"]]
         elif kind == "reasoning":
             refs = data["premises"]
-        elif kind == "verification":
-            refs = [data["reasoning"]]
         elif kind == "comparison":
             refs = [data["left"], data["right"]]
         elif kind == "repair":
@@ -214,6 +205,9 @@ class CausalSheet:
 
     def snapshot_references(self, kind, data):
         """Direct audit references only; no recursive expansion of public arguments."""
+        if kind == "theory_fragment":
+            from .theory_language import evidence_references
+            return evidence_references(data)
         if kind in GRADING_FIELDS:
             function = getattr(module_for(kind), "snapshot_references", None)
             return list(function(data)) if function else []
@@ -328,6 +322,24 @@ class CausalSheet:
         refs = self._references(kind, data)
         if kind in GRADING_FIELDS:
             module_for(kind).validate(self, key, data)
+        elif kind == "theory_fragment":
+            from .theory_language import validate_fragment
+            def evidence(reference):
+                row = self.snapshot(reference)
+                if row["kind"] != "evidence":
+                    raise ValueError("Theory provenance must identify source evidence")
+                return row["data"]
+            validate_fragment(data, evidence_lookup=evidence)
+            if data["reconstruction"] != key:
+                raise ValueError("The fragment must retain its reconstruction identity")
+            previous = self.rows.get(key)
+            if previous:
+                if previous["data"]["question"] != data["question"]:
+                    raise ValueError("A reconstruction retains its original commissioned question")
+                for group in ("entities", "quantities", "statements", "gaps"):
+                    for ident, component in previous["data"][group].items():
+                        if data[group].get(ident) != component:
+                            raise ValueError("Theory components are immutable; add an explicit superseding component")
         elif kind == "importance":
             validate_protocol(data)
         elif kind == "source_formalization":
@@ -404,17 +416,11 @@ class CausalSheet:
         elif kind == "reasoning":
             if not data["steps"] or not data["premises"]:
                 raise ValueError("A public derivation needs explicit premises and checkable steps")
-        elif kind == "verification":
-            self._require_kind(data["reasoning"], "reasoning")
-            if data["reviewer"] == self.rows[data["reasoning"]]["data"]["author"]:
-                raise ValueError("Independent verification cannot be self-certification")
-            if not data["checks"]:
-                raise ValueError("Verification must identify the checked derivation steps or premises")
         elif kind == "comparison":
             for ref in (data["left"], data["right"]):
                 self._require_kind(ref, "application")
             if self.rows[data["left"]]["data"]["inference"] != self.rows[data["right"]]["data"]["inference"]:
-                raise ValueError("Compare uses of the same candidate inference; state the mapped opposing commitment in the reversal application")
+                raise ValueError("Compare uses of the same candidate inference; state its mapped role and possible transfer failure in the application")
             if data["left"] == data["right"]:
                 raise ValueError("A comparison needs different applications")
         elif kind == "repair":
@@ -559,9 +565,9 @@ class CausalSheet:
         return deepcopy(result)
 
     def snapshot_view(self, references):
-        """At most eight exact historical records, with their original input pins."""
-        if not isinstance(references, (list, tuple)) or len(references) > 8:
-            raise ValueError("Select at most eight scientific snapshots")
+        """Exact historical records, with their original input pins."""
+        if not isinstance(references, (list, tuple)):
+            raise ValueError("Scientific snapshots must be a list of exact references")
         result = []
         for reference in references:
             row = self.snapshot(reference)
@@ -594,8 +600,6 @@ class CausalSheet:
                 detail = {"calculated_credit": compact_calculation(causal_support.selected_credit(self, key), limit=2, summary=True)}
             else:
                 detail = {name: data[name] for name in ("admission", "direction") if name in data}
-                if row["kind"] == "verification":
-                    detail.update(legacy_model_opinion=data["verdict"], verification_established=False, scoring_effect="none")
                 if row["kind"] == "evidence":
                     measurements = data["measurements"]
                     native = measurements.get("native")
@@ -648,8 +652,6 @@ class CausalSheet:
             meaning = " ".join(str(data[name]) for name in (
                 "statement", "name", "distinction", "context", "inference_use", "finding",
                 "conclusion", "argument", "derivation", "limitations", "conflict", "adjustment", "costs", "basis", "bounds", "rationale", "question", "contrast", "error") if name in data)
-            if row["kind"] == "verification":
-                meaning = " ".join(data["checks"]) + " " + data["counterexample"]
             rows.append({"key": key, "kind": row["kind"], "version": row["version"], "status": status,
                          "current": self.current(key), "finding": meaning[:360],
                          "finding_truncated": len(meaning) > 360, **detail})

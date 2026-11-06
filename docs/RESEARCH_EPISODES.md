@@ -7,14 +7,26 @@ no generic Investigation episode, search-enabled flag, or parent/child role flag
 ```text
 Discovery root: which fresh scientific attempt should run next? ↻
 └── Scientific attempt: which scientific uncertainty deserves work next? ↻
-    ├── Search Strategy: which query/approach should address this information need? ↻
-    │   └── Search: which source from ONE query should be examined next? ↻
-    │       └── Page: what should be read or scientifically assessed in this source next? ↻
-    │           ├── Report: what does the next document-order window establish? ↻
-    │           ├── Lexical reading: what does the next ranked passage establish? ↻
-    │           └── Table: which row query should resolve the remaining question? ↻
+    ├── Theory Reconstruction: which component, connection or gap needs work next? ↻
+    │   ├── Search Strategy: which query or integration addresses this theory request? ↻
+    │   │   └── Search: which source or returned evidence addresses this request? ↻
+    │   │       └── Page: what should be read or represented from this source next? ↻
+    │   │           ├── Report: what does the next document-order window establish? ↻
+    │   │           ├── Lexical reading: what does the next ranked passage establish? ↻
+    │   │           └── Table: which row query should resolve the remaining question? ↻
+    │   ├── Page: revisit an identified source ↻
+    │   ├── Theory Gap: what reading or reasoning resolves this recorded gap? ↻
+    │   └── Reasoning: derive or check a specified consequence ↻
     └── Reasoning: which derivation, comparison, countermodel or check resolves this question? ↻
 ```
+
+Theory Gap can commission Search Strategy, Page and Reasoning. Reconstruction,
+Gap, Search Strategy, Search and Page can commission Theory Format Repair to
+correct rejected typed additions. Report and Lexical reading can commission
+Extraction Repair to correct rejected source extraction. These two output repair
+episodes use the common loop, return valid work and unresolved errors, and end
+when their requested output is repaired or their estimator yields. See
+[Theory reconstruction](THEORY_RECONSTRUCTION.md) for the shared representation.
 
 Edges declare allowed commissions, not a sequence. The discovery root retains
 the shared scientific sheet and starts another attempt after one yields. Each
@@ -31,18 +43,18 @@ The scoped input and historical snapshot records are already supplied in each
 Reasoning decision. The episode retains every tool choice; feedback from its
 completed actions tells it whether inspection exposed anything new.
 
-Search Strategy returns source findings, exact source/record references, their
-bearing on the assigned question, unresolved reasoning questions, searches and
-coverage. The parent uses that information to formulate a specific Reasoning
-commission. Reasoning returns public arguments, premises, conclusions,
-limitations, critiques, calculated sheet changes and unresolved
-premises. Full derivations remain addressable by record key and version.
+Search Strategy returns the shared typed theory fragment, source-grounded
+additions, exact references, unresolved reasoning questions, searches and coverage.
+Reconstruction uses these returns to connect the explanatory account, investigate
+gaps or formulate a specific Reasoning commission. Reasoning returns public
+arguments, premises, conclusions, limitations, critiques, calculated sheet changes
+and unresolved premises. Full derivations remain addressable by record key and version.
 Neither return contains a recursive transcript or invokes a report composer.
 
 Every decision response also replaces that episode's working assessment of its
 completed work. Each concrete source declares its own assessment questions:
-Page answers the source question and reports assessment status; Search compares
-sources from one query; Search Strategy answers the delegated information need
+Page answers the source question and reports which components it represented;
+Search compares sources from one query; Search Strategy answers the delegated information need
 and identifies remaining reasoning questions; Reasoning states its argument,
 premises and limitations; Scientific states its causal assessment and remaining
 uncertainties. Readers update their source-grounded reading memory during
@@ -67,23 +79,21 @@ contain the episode's chosen assessment and relevant results. Assessment and
 reference selection has no character or item quota. Score components are calculated
 from the complete scientific ledger, independently of summary selection.
 
-Readers return explicit source-linked grading needs and a concise synthesis to Page.
-Page can select record, inspect, evaluate, calculate or a fixed observation comparison
-in its existing loop, alongside further reading. Report, Lexical reading and Table
-cannot invoke graders or register scientific operands. Grading flags earn zero points
-and neither require an action order nor certify a finding. Page tool outcomes record
-actual calculated results, exact evidence/record references, score-component changes
-and unresolved diagnostics. Search and Search Strategy receive relevant needs and actual outcomes
-in the owned return and unreviewed final results. Their next decisions can use the result
-without waiting for the scientific parent. Repeated actions remain available.
+Readers return extracted source records, qualifications and local credit to Page.
+Page selects further reading or translates returned evidence into typed theory
+components. Search and Search Strategy can integrate returned evidence into that
+same fragment and use unresolved dependencies to choose subsequent work.
+Scientific and Reasoning episodes own G formalization, scientific graders and
+global score operands. Processing readers do not construct theory graphs or
+invoke graders. Repeated actions remain available.
 
 Search returns its literal query and examined sources. Page returns its source
 version and remaining source coverage. Report returns document position and
 unresolved links. Lexical reading returns query/ranking position and unresolved
 links. Table returns row-query outcomes and remaining rows. Each also returns
 selected findings, coverage and failures relevant to its parent's next decision.
-The commissioned G and expected generalizability bounds travel as explicitly
-selected records or historical snapshots, not copied parent context.
+G and expected generalizability bounds travel between scientific episodes as
+selected records. Processing leaves receive the extraction request and source material.
 
 The discovery root deduplicates global points across attempts. A scientific
 attempt projects only point changes since its starting sheet. The five numeric
@@ -93,14 +103,19 @@ registration (+1), theory/context application registration (+1), support for G
 multiplied by the qualifying restored original-scope fraction). Every component
 is shown separately; the total is their sum. Repeated scored identities add 0.
 Extracting a source claim or observation, writing a support argument, and
-executing calculations each earn 0 points. Calculation results are scientific
-inputs to support and change assessments; neither the shared score nor a
+executing calculations each earn 0 global scientific points. Calculation results
+are scientific inputs to support and change assessments; neither the shared score nor a
 Reasoning episode rewards the fraction of calculations completed.
 The calculators establish consequences within the supplied formal models and
 source mappings; model verdicts have no numerical effect.
+The causal-change component is narrower than the current scientific objective:
+it requires restored predictions and a changed executable G relation. It does
+not measure pragmatic costs or failures without a replacement. All roles retain
+those findings in their assessments and public records regardless of absent
+change credit; this clarification does not change the continuation controller.
 
-A sourced theoretical statement can be recorded as `source_formalization`, linked
-to its evidence and one G importance protocol. It uses that protocol's method
+A scientific or Reasoning episode can record a sourced theoretical statement as
+`source_formalization`, linked to its evidence and one G importance protocol. It uses that protocol's method
 (equations, acyclic SCM or discrete simulation), named circumstance inputs and
 output quantity/units. The support assessment compares the executed source and
 G models, including their declared common G alteration, within the tested
@@ -111,29 +126,21 @@ of authored formalizations, not fidelity of the source-to-model derivation or
 agreement over unexamined circumstances. Empirical observations are kept as
 typed measured targets rather than manufactured causal models.
 
-Literature roles project scientific contributions attributable to their returned
-evidence, with scope determined by their actual responsibility:
+Report and lexical readers return source findings with local extraction credit. Table
+returns parsed native cells directly, with local credit for distinct returned cells.
+Repeated information adds zero. Page aggregates returned identities across its
+readers, deduplicating overlap; extraction never creates global scientific points.
+Search, Search Strategy, Reconstruction and Gap measure new source-grounded typed
+contributions to their commissioned reconstruction, focus and requested component
+kinds. Their continuation does not use global G credit.
 
-| Episode | Attribution scope |
-| --- | --- |
-| Search Strategy | Evidence returned across its commissioned searches |
-| Search | Sources selected from its single query |
-| Page | Its source |
-| Report | Its document-order reading scope |
-| Lexical reading | Its selected source-local ranked passages |
-| Table | Its table rows |
-
-Each subtracts inherited scientific points before attributing new gain. Query
-activity, source count, passage count, characters and row count earn no points.
-Reading coverage remains available to guide further choices. For a fixed
-observation need, the parent can commission a support_assessment template.
-Page can select that template and source evidence to match native quantity, units
-and numeric conditions, execute the fixed case and compile actual support. Readers
-only extract and flag; no automatic reader assessment remains. Page can also record
-a new source-grounded G, expected generalizability bounds or application and formal
-comparison operands. Questions it cannot settle return upward with the actual outcomes. Later assessments can revalue the global ledger; closed child
-controllers are not retroactively reopened. No separate learning or retrospective
-credit redistribution algorithm is implemented.
+Processing readers receive their extraction question, source material and the
+parent-defined quantity meanings and vocabulary. Page owns translation into the
+shared theory fragment. Report and Lexical reading delegate malformed extraction
+to Extraction Repair with the rejected output, validator errors and valid partial
+findings. Unresolved extraction errors return to Page. Theory Format Repair
+corrects representation errors; Theory Gap investigates substantive uncertainties.
+Schema acceptance establishes neither source fidelity nor scientific truth.
 
 One completed own unit supplies one observation at that scope. Child turns do
 not become parent turns. The parent recomputes its own credit from returned state;
@@ -141,6 +148,7 @@ it never sums child scores. Shared refresh creates no extra observation.
 Numerical yielding, physical exhaustion, execution failure and scientific
 completion remain distinct. Reasoning does not auto-return after one changed row.
 
-Bindings live in `workflow.py`, `acquisition.py`, `episode_contracts.py` and
-`episode_credit.py` under `case_reports/research`. `engine.py` shares transport,
+Bindings live in `workflow.py`, `acquisition.py`, `theory_episodes.py`,
+`extraction_repair.py`, `episode_contracts.py` and `episode_credit.py` under
+`case_reports/research`. `engine.py` shares transport,
 ledger merging, trace handling and the existing Episode loop, not role selection.

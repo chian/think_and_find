@@ -50,8 +50,8 @@ def claim_of(sheet, expectation):
 def references(kind, data):
     if kind == "support_contribution":
         return [data["support"], data["argument"], *data["applications"],
-                *(item["evidence"] for item in data["facts"]), *data.get("checks", [])]
-    return [data["break"], data["importance"], data["argument"], *([data["assessment"]] if data.get("assessment") else [])]
+                *(item["evidence"] for item in data["facts"]), *data["checks"]]
+    return [data["break"], data["importance"], data["argument"], *([data["assessment"]] if data["assessment"] else [])]
 
 
 def context_pins(sheet, kind, data):
@@ -67,19 +67,14 @@ def context_pins(sheet, kind, data):
 
 
 def accepted_fields(kind, data):
-    """Replay legacy operand records without giving text-only claims credit."""
+    """Accept the current executable operand contract only."""
     required = set(SUPPORT_FIELDS if kind == "support_contribution" else CHANGE_FIELDS)
-    modern = "checks" if kind == "support_contribution" else "assessment"
-    allowed = [required, required - {modern}]
-    return set(data) if isinstance(data, dict) and any(set(data) == fields or set(data) == fields | {"verification_required"}
-                                         for fields in allowed) else set()
+    return required if isinstance(data, dict) and set(data) == required else set()
 
 
 def validate(sheet, key, kind, data):
     if not accepted_fields(kind, data):
         raise ValueError("Scientific credit record requires its exact executable operands")
-    if "verification_required" in data and type(data["verification_required"]) is not bool:
-        raise ValueError("Malformed retired audit field")
     sheet._require_kind(data["argument"], "reasoning")
     if kind == "support_contribution":
         sheet._require_kind(data["support"], "expectation_support")
@@ -109,7 +104,7 @@ def validate(sheet, key, kind, data):
         previous = sheet.rows.get(key)
         if previous and previous["data"]["support"] != data["support"]:
             raise ValueError("A contribution retains its B_G support identity")
-        checks = data.get("checks", [])
+        checks = data["checks"]
         if not isinstance(checks, list) or len(checks) > 16 or len(set(checks)) != len(checks):
             raise ValueError("Select at most sixteen distinct executable support assessments")
         for check in checks:
@@ -153,7 +148,7 @@ def validate(sheet, key, kind, data):
         raise ValueError("A change case retains its original break and expectation")
     if any(other != key and row["data"]["break"] == data["break"] for other, row in sheet.of_kind("causal_change")):
         raise ValueError("Update the existing change case; alternative repairs/adapters do not create another break reward")
-    if data.get("assessment"):
+    if data["assessment"]:
         sheet._require_kind(data["assessment"], "repair_assessment")
         repair = sheet.rows[data["assessment"]]["data"]
         source_test = sheet.rows[repair["expectation_test"]]["data"]
@@ -186,7 +181,7 @@ SUPPORT_POLICY = {
 
 
 def compile_support(sheet):
-    """Compile executed subscoring operands; prose-only legacy claims stay pending."""
+    """Compile executed subscoring operands; current executable operands are required."""
     from ..case_reports.research.support_grading import grade_support
     from ..case_reports.research.repairs import grade_repair
     from ..case_reports.research.importance import result_key
@@ -201,7 +196,7 @@ def compile_support(sheet):
         current, status = _current_operands(sheet, key, pins)
         entry = claims.setdefault(cid, {"inference": support["inference"], "hypotheses": {}, "facts": {}})
         bound = expectations.setdefault(bid, {"expectation": support["expectation"], "claim": cid, "hypotheses": {}, "facts": {}})
-        checks = data.get("checks", [])
+        checks = data["checks"]
         graded = []
         if current:
             for check in checks:
@@ -317,7 +312,7 @@ def compile_support(sheet):
         cid = claim_id(claim_of(sheet, data["source"]))
         support = Fraction(claims.get(cid, {}).get("support_exact", "0"))
         current, _ = _current_operands(sheet, key, context_pins(sheet, "causal_change", data))
-        assessment = data.get("assessment")
+        assessment = data["assessment"]
         repair = grade_repair(sheet, assessment) if current and assessment else None
         factor = repair["qualifying_restored_fraction"] if repair else {"lower": "0", "upper": "1", "value": None}
         lower = support * Fraction(factor["lower"])

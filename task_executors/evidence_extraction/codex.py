@@ -90,16 +90,12 @@ def _access_token() -> tuple[str, dict]:
 @dataclass(frozen=True)
 class CodexOAuthClient:
     model: str
-    timeout: float = 300.0
     reasoning_effort: str = "medium"
     record_response: Callable[[dict], None] | None = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         if not isinstance(self.model, str) or not self.model.strip():
             raise ValueError("Codex model must be a non-empty string")
-        if (isinstance(self.timeout, bool) or not isinstance(self.timeout, (int, float))
-                or not math.isfinite(self.timeout) or self.timeout <= 0):
-            raise ValueError("Codex timeout must be positive and finite")
         if self.reasoning_effort not in {"none", "low", "medium", "high", "xhigh", "max"}:
             raise ValueError("Codex reasoning effort is invalid")
 
@@ -138,19 +134,20 @@ class CodexOAuthClient:
             data=json.dumps(payload, ensure_ascii=False, allow_nan=False).encode("utf-8"),
             headers=headers, method="POST")
         chunks, deltas, items = [], {}, {}
-        completed_response = None
+        terminal_response = None
+        failure_details = {}
         selected = None
         agreement = None
         event_counts = {}
         assembly_source = None
         try:
-            with urlopen(request, timeout=self.timeout) as response:
-                deadline = time.monotonic() + self.timeout
+            request_deadline = time.monotonic() + 300
+            with urlopen(request, timeout=300) as response:
                 stream_bytes = 0
                 for line in response:
+                    if time.monotonic() >= request_deadline:
+                        raise ProviderError("LLM API request exceeded 300 seconds")
                     stream_bytes += len(line)
-                    if time.monotonic() >= deadline:
-                        raise ProviderError("Codex response exceeded the request time limit")
                     if stream_bytes > 4 * 1024 * 1024:
                         raise ProviderError("Codex response stream exceeded 4 MiB")
                     if not line.startswith(b"data: "):
@@ -174,13 +171,28 @@ class CodexOAuthClient:
                         if isinstance(item, dict):
                             items[event.get("output_index")] = item
                     elif kind == "response.completed":
-                        completed_response = event.get("response", {})
+                        terminal_response = event.get("response", {})
                         break
                     elif kind in {"response.failed", "response.incomplete"}:
-                        raise ProviderError(f"Codex response did not complete: {kind}")
-            if not completed_response or completed_response.get("status") != "completed":
+                        terminal_response = event.get("response")
+                        if not isinstance(terminal_response, dict):
+                            terminal_response = None
+                            raise ProviderError(f"Codex {kind} event is missing its response object")
+                        error = terminal_response.get("error")
+                        if isinstance(error, dict):
+                            for key in ("code", "message", "param", "type"):
+                                value = error.get(key)
+                                if isinstance(value, str):
+                                    failure_details[key] = value.replace(token, "[redacted]")
+                        incomplete = terminal_response.get("incomplete_details")
+                        if isinstance(incomplete, dict) and isinstance(incomplete.get("reason"), str):
+                            failure_details["incomplete_reason"] = incomplete["reason"].replace(token, "[redacted]")
+                        detail = (json.dumps(failure_details, ensure_ascii=False)
+                                  if failure_details else "no failure details supplied")
+                        raise ProviderError(f"Codex response did not complete: {kind}; {detail}")
+            if not terminal_response or terminal_response.get("status") != "completed":
                 raise ProviderError("Codex response stream ended without completion")
-            output = completed_response.get("output")
+            output = terminal_response.get("output")
             if not isinstance(output, list):
                 raise ProviderError("Codex completed response is missing output items")
             assembly_source = "completed_response"
@@ -209,12 +221,13 @@ class CodexOAuthClient:
             raise ProviderError(f"Codex connection failed: {exc}") from exc
         finally:
             if self.record_response is not None:
-                output = (completed_response or {}).get("output")
+                output = (terminal_response or {}).get("output")
                 observed = (list(enumerate(output)) if output
                             else sorted(items.items(), key=lambda pair: pair[0] or 0))
                 self.record_response({"event": "model_transport_response", "model": model,
-                    "response_id": (completed_response or {}).get("id"),
-                    "status": (completed_response or {}).get("status", "interrupted"),
+                    "response_id": (terminal_response or {}).get("id"),
+                    "status": (terminal_response or {}).get("status", "interrupted"),
+                    "failure_details": failure_details,
                     "output_items": [_message_record(i, item) for i, item in observed
                                      if item.get("type") == "message"],
                     "selected_message": selected,

@@ -24,7 +24,7 @@ def score_candidate_outbreak_sources(
     extra_outputs: Mapping[str, Any] | None = None,
     errors: tuple[CalculationError, ...] = (),
     score_history: tuple[float, ...] = (),
-    identity_history: tuple[tuple[str, ...], ...] | None = None,
+    identity_history: tuple[tuple[str, ...], ...] = (),
 ) -> CqCalibrationChildReport:
     """Score normalized source candidates from an outbreak-search run."""
 
@@ -64,7 +64,7 @@ def score_candidate_outbreak_sources(
         score_history + (score,),
         max_score=max_score,
         score_resolution=score_resolution,
-        identity_history=identity_history,
+        identity_history=(*identity_history, tuple(sorted(set(passed) - {key for sample in identity_history for key in sample}))),
     )
     if errors:
         outputs["provider_errors"] = tuple(

@@ -17,7 +17,6 @@ class JevDecisionClient:
     api_key: str = field(repr=False)
     endpoint: str = JEV_API_ENDPOINT
     model: str = JEV_MODEL
-    timeout: float = 45.0
 
     def __post_init__(self) -> None:
         if not isinstance(self.api_key, str) or not self.api_key.strip():
@@ -52,7 +51,6 @@ class JevDecisionClient:
                 },
             },
             api_key=self.api_key,
-            timeout=self.timeout,
         )
         answers = body.get("answers")
         answer = answers.get("decision") if isinstance(answers, Mapping) else None
@@ -86,7 +84,7 @@ class JevDecisionClient:
         body = await asyncio.to_thread(
             post_json, self.endpoint,
             {"state": dict(state), "model": self.model, "questions": declarations},
-            api_key=self.api_key, timeout=self.timeout,
+            api_key=self.api_key,
         )
         answers = body.get("answers")
         if not isinstance(answers, Mapping):

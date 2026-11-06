@@ -7,8 +7,7 @@ from pathlib import Path
 from typing import Callable, Mapping
 
 from ...credit_assignment.research import ResearchController
-from ...method_loop import ChildEpisodeUnit, Episode, EpisodeGoal, EpisodeRequest, EpisodeTree, Grain, Leaf, SourceEnd
-from ...method_loop.communication import ParentModelInputError
+from ...method_loop import ChildEpisodeUnit, Episode, EpisodeGoal, EpisodeRequest, EpisodeTree, Grain, Leaf
 from ...task_executors._http import ProviderError
 from ...task_executors.evidence_extraction.argo import ModelOutputError
 from ...task_executors.outbreak_search.queries import search_results_from_provider, source_locator, source_text
@@ -20,12 +19,16 @@ from .grading import GRADING_FIELDS
 
 TREE = {
     "discovery": ("scientific",),
-    "scientific": ("search_strategy", "reasoning"),
+    "scientific": ("theory_reconstruction", "reasoning"),
+    "theory_reconstruction": ("search_strategy", "page", "reasoning", "theory_gap", "theory_format_repair"),
+    "theory_gap": ("search_strategy", "page", "reasoning", "theory_format_repair"),
+    "theory_format_repair": (),
     "reasoning": (),
-    "search_strategy": ("search",),
-    "search": ("page",),
-    "page": ("source_table", "report", "lexical_probe"),
-    "source_table": (), "report": (), "lexical_probe": (),
+    "search_strategy": ("search", "theory_format_repair"),
+    "search": ("page", "theory_format_repair"),
+    "page": ("source_table", "report", "lexical_probe", "theory_format_repair"),
+    "source_table": (), "report": ("extraction_repair",), "lexical_probe": ("extraction_repair",),
+    "extraction_repair": (),
 }
 
 @dataclass(frozen=True)
@@ -99,7 +102,6 @@ class ResearchRun:
         self.model_attempts = (providers.checkpoint.archive.sequence("model_attempts", providers.preflight_attempts or ())
                               if providers.checkpoint else list(providers.preflight_attempts or ()))
         self.provider_events = []
-        self.provider_unavailable = None
         self.model_calls = len(self.model_attempts)
         self.total_units = self.sequence = self.diagnostic_sequence = 0
         self.controller_specs, self.live_controllers, self.sources = {}, {}, {}
@@ -111,12 +113,13 @@ class ResearchRun:
             paths.extend((root / folder).rglob("*.py"))
         self.implementation = {str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
                                for path in sorted(paths)}
-        if providers.checkpoint:
-            self.implementation = providers.checkpoint.run_start_implementation(self.implementation)
         self.context = {"research_request": research_request}
         units = {
             "discovery": "one completed scientific attempt from a selected starting question",
-            "scientific": "a completed search strategy, reasoning commission, or scientific sheet action",
+            "scientific": "a completed theory reconstruction, reasoning commission, or scientific sheet action",
+            "theory_reconstruction": "a completed literature commission, substantive gap investigation, typed integration or reasoning check",
+            "theory_gap": "a completed focused literature commission, source reread, typed integration or reasoning check",
+            "theory_format_repair": "a corrected typed theory addition and its validator feedback",
             "reasoning": "a completed derivation, check, comparison or calculation for the assigned logical question",
             "search_strategy": "a completed search for one proposed query",
             "search": "a completed source investigation from this query's results",
@@ -124,6 +127,7 @@ class ResearchRun:
             "source_table": "one table query and source-grounded extraction",
             "report": "one document-order window and source-grounded extraction",
             "lexical_probe": "one ranked source window and source-grounded extraction",
+            "extraction_repair": "one corrected source extraction and its validator feedback",
         }
         self.grains = {name: Grain(name, unit, "scoped findings and causal-sheet state", self.controller)
                        for name, unit in units.items()}
@@ -217,10 +221,6 @@ class ResearchRun:
         return result
 
     def agent(self, request, *, completing=False, tier=None):
-        if self.provider_unavailable is not None:
-            exc = ProviderError(self.provider_unavailable["why"])
-            exc.model_call_diagnostic = dict(self.provider_unavailable)
-            raise exc
         self.model_calls += 1
         operation = request.get("operation", "")
         tier = tier or tier_for_operation(operation)
@@ -240,9 +240,6 @@ class ResearchRun:
                           "operation": attempt["operation"]}
             exc.model_call_diagnostic = diagnostic
             attempt.update(status="response_failed", diagnostic=diagnostic)
-            if diagnostic.get("category") == "provider_usage_limit" or any(
-                    term in str(exc).lower() for term in ("http 401", "http 403", "unauthorized", "token has expired")):
-                self.provider_unavailable = dict(diagnostic)
             if isinstance(exc, ModelOutputError):
                 exc.diagnostic.update(model_call=self.model_calls, operation=attempt["operation"])
                 attempt["raw_response"] = diagnostic_value(exc.raw_response)
@@ -300,6 +297,7 @@ class ResearchSource:
         self.own_action_count = 0
         self._prompt_selected_keys = set()
         self._prompt_historical_refs = set()
+        self._seen_record_versions = set()
         self._prompt_catalog_offset = 0
         from .episode_memory import initialize
         initialize(self)
@@ -312,9 +310,20 @@ class ResearchSource:
         self.run.total_units += 1
         if self.pending is not None:
             changes = changed_records(self.pending, self.ledger.result())
+            proposal = self.last_proposal if isinstance(self.last_proposal, Mapping) else {}
+            public_unit = unit.child.grain.name if isinstance(unit, ChildEpisodeUnit) else unit.label
+            from .episode_memory import action_diagnostic, public_diagnostic
+            attributed = {identity(diagnostic): action_diagnostic(self, diagnostic,
+                public_unit, proposal.get("action", public_unit)) for diagnostic in changes.diagnostics}
+            if attributed:
+                self.pending = replace(self.pending, diagnostics=tuple(
+                    attributed.get(identity(row), row) for row in self.pending.diagnostics))
+                if self.pending_global is not None:
+                    self.pending_global = replace(self.pending_global, diagnostics=tuple(
+                        attributed.get(identity(row), row) for row in self.pending_global.diagnostics))
+                changes = replace(changes, diagnostics=tuple(attributed[identity(row)]
+                    for row in changes.diagnostics))
             self.ledger.merge(self.pending)
-            if changes.causal_sheet_updates:
-                self.selected_keys = list(dict.fromkeys(r["key"] for r in changes.causal_sheet_updates))[-2:]
             status = self.run.global_goal.commit(self.pending_global or self.pending)
             self.run.refresh_controllers(self, status)
             self.evaluated_units += int(self.pending.evaluated)
@@ -330,17 +339,19 @@ class ResearchSource:
                 global_goal_score=status["total_score"], scientific_calculations=status["scientific_calculations"],
                 global_score_components=status["score_components"],
                 score_binding=status["score_binding"],
-                diagnostics=list(self.pending.diagnostics[-3:]))
-            proposal = self.last_proposal if isinstance(self.last_proposal, Mapping) else {}
-            newly_selected = sorted(set(self.selected_keys) - self._prompt_selected_keys)
+                diagnostics=list(changes.diagnostics))
+            newly_selected_records = [{"key": key, "version": self.ledger.causal_sheet.rows[key]["version"]}
+                for key in sorted(set(self.selected_keys))
+                if (key, self.ledger.causal_sheet.rows[key]["version"]) not in self._seen_record_versions]
+            newly_selected = [ref["key"] for ref in newly_selected_records]
             newly_selected_snapshots = [dict(ref) for ref in self.scoped_snapshots()
-                if (ref["key"], ref["version"]) not in self._prompt_historical_refs]
-            public_unit = unit.child.grain.name if isinstance(unit, ChildEpisodeUnit) else unit.label
+                if (ref["key"], ref["version"]) not in self._seen_record_versions]
             self.last_own_action = {
                 "unit": public_unit, "choice": proposal.get("action", public_unit),
                 "operation_status": event["operation_status"],
                 "selected_keys": list(self.selected_keys),
                 "newly_exposed_keys": newly_selected,
+                "newly_exposed_records": newly_selected_records,
                 "newly_exposed_snapshots": newly_selected_snapshots,
                 "catalog_offset_before": self._prompt_catalog_offset,
                 "catalog_offset_after": self.catalog_offset,
@@ -349,8 +360,7 @@ class ResearchSource:
                 "admitted_record_count": len(changes.causal_sheet_updates),
                 "credit_gain": view.controller_step.gain,
                 "scope_score": view.controller_step.score,
-                "diagnostics": [{name: row.get(name) for name in ("stage", "category", "status", "why")}
-                                for row in event["diagnostics"]],
+                "diagnostics": [public_diagnostic(row) for row in event["diagnostics"]],
             }
             self.own_action_count += 1
             self.own_action_outcomes.append(self.last_own_action)
@@ -458,6 +468,9 @@ class ResearchSource:
         self._prompt_selected_keys = {row["key"] for row in inputs.get("selected_sheet_inputs", ())}
         self._prompt_historical_refs = {(row["key"], row["version"])
                                         for row in inputs.get("historical_sheet_inputs", ())}
+        self._seen_record_versions.update((row["key"], row["version"])
+            for field in ("selected_sheet_inputs", "historical_sheet_inputs")
+            for row in inputs.get(field, ()))
         self._prompt_catalog_offset = inputs.get("catalog_page", {}).get("offset", self.catalog_offset)
         return inputs
 
@@ -525,12 +538,6 @@ class ResearchSource:
         return Leaf(None, execute, lambda _, result: self.project(result), label)
 
     def next(self, view):
-        if self.run.provider_unavailable is not None:
-            self.failure = "provider_usage_limit_not_scientific_convergence"
-            return SourceEnd("source_failed")
-        if self.failure:
-            return SourceEnd("source_failed")
-        before_calls = self.run.model_calls
         try:
             # A parent may have been suspended while a child revised a premise.
             # Its next calculation must use the current main-table inputs.
@@ -540,16 +547,5 @@ class ResearchSource:
             self.last_proposal = None
             return self.propose(view)
         except (ProviderError, ValueError, TypeError, KeyError, OSError) as exc:
-            if (isinstance(exc, ParentModelInputError) or
-                    (isinstance(exc, (ValueError, TypeError, KeyError))
-                     and not isinstance(exc, (ProviderError, OSError)) and self.run.model_calls == before_calls)):
-                # A malformed model response can be revised on a later choice.
-                # A request-construction failure has no new model response and
-                # cannot be repaired by recording another zero-gain unit.
-                self.failure = "invalid_parent_model_input"
-                failure = self.failure_result(exc, "parent_model_input")
-                self.ledger.merge(replace(failure, diagnostics=tuple(
-                    self.run.identify_diagnostic(d) for d in failure.diagnostics)))
-                return SourceEnd("source_failed")
             result = self.failure_result(exc, "proposal")
             return self.leaf(lambda: result, f"proposal_failure:{view.units_consumed}")

@@ -72,6 +72,11 @@ SHEET_TOOLS = ("Use the following scientific sheet tools within your assigned re
         "comparison.left and comparison.right must be two distinct application record keys for the same G; "
         "never use an inference, theory, evidence or reasoning key there. If two applications do not exist, "
         "record a public reasoning argument and its unresolved comparison instead of forcing a comparison record. "
+        "The applications can address different tasks, quantities and scales; comparison.mapping explains "
+        "their connection through G and conflict identifies an attempted transfer and its outcome. "
+        "Use possible_transfer_failure for a candidate that need not reverse a causal sign. "
+        "Preserve evidence for why a transfer fails and the consequences of tested repairs; "
+        "a demonstrated current failure is reportable without proving all reductions impossible. "
         "A repair references a comparison key; construction_evidence and test_evidence contain only evidence keys. "
         "theory.compared_with contains only theory keys. importance.application contains an application key. "
         "If one proposed record is rejected, earlier and later independently valid records can still be admitted; "
@@ -121,6 +126,12 @@ SHEET_TOOLS = ("Use the following scientific sheet tools within your assigned re
         "The original G relation and intervention are frozen from the source test, not inferred from a new label or different equation text. "
         "Use causal_change.assessment to reference the repair comparison. Numerical change credit uses support for original G and the measured restored "
         "original-scope fraction requiring a G change among the compared preserving alternatives. Empty or unexecuted alternatives leave necessity unresolved. "
+        "This calculator does not measure the broader usefulness of a transfer or repair. Any fitting "
+        "G-preserving alternative defeats its scoped necessity even if costs or losses on other tasks remain. "
+        "Retain those consequences in repair.costs and public reasoning; do not turn prose judgments "
+        "into numeric grades. Failure without a restored prediction is also outside this change score. "
+        "A zero or unresolved score does not refute such a scientific finding. Keep numerical comparators "
+        "fixed within a test without imposing identical tasks or observables on discovery generally. "
         "The component aggregation and restoration scaling convention is exposed in policy_details; do not enter numerical merit grades. "
         "Later support for original G increases that existing change's value; never rediscover its break to claim the gain. "
         "A result receipt, including one with an execution error, is final for that immutable protocol and case. "
@@ -142,10 +153,7 @@ def _execute_sheet_tool(source, proposal, visible_keys):
             if row.get("kind") not in source.record_kinds:
                 raise ValueError("Record kind is outside this episode's scientific responsibility")
         def record():
-            result = source.record_results(records)
-            # The next decision sees the actual outcomes, not the entire trace.
-            source.selected_keys = list(dict.fromkeys(r["key"] for r in result.causal_sheet_updates))[-2:]
-            return result
+            return source.record_results(records)
         return source.leaf(record, "scientific_reasoning")
     if action == "inspect":
         keys = proposal["keys"]

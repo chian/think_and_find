@@ -278,10 +278,10 @@ def assumption_claim(assessment):
 def assumption_matches(record, key, assessment):
     if not assessment:
         return False
-    version = record.get("assumption_versions", {}).get(key)
-    if version is None or version == assessment.get("version"):
+    version = record["assumption_versions"][key]
+    if version == assessment["version"]:
         return True
-    claim = record.get("assumption_claims", {}).get(key)
+    claim = record["assumption_claims"][key]
     return claim is not None and claim == assumption_claim(assessment)
 
 

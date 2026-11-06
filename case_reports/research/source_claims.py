@@ -8,7 +8,7 @@ from hashlib import sha256
 import json
 
 
-CLAIM_FIELDS = frozenset({"kind", "source_id", "locator", "left", "relation",
+CLAIM_FIELDS = frozenset({"kind", "statement_id", "locator", "left", "relation",
                           "right", "conditions", "symbols"})
 CLAIM_KINDS = frozenset({"equation", "causal_relation", "boundary_condition"})
 CLAIM_RELATIONS = {
@@ -26,10 +26,14 @@ def _text(value, name, *, empty=False):
     return " ".join(value.split())
 
 
-def claims_schema():
+def claims_schema(*, source):
     text = {"type": "string", "minLength": 1, "maxLength": 2000}
+    statement_id = {"type": "string", "maxLength": 2000, "not": {"const": source},
+        "description": "The source's own equation or statement label, such as '(1)'. "
+                       "Use an empty string when the source gives no statement label. "
+                       "Never use the document URL, study identifier, or an invented label."}
     properties = {"kind": {"enum": sorted(CLAIM_KINDS)},
-                  "source_id": {"type": "string", "maxLength": 2000},
+                  "statement_id": statement_id,
                   "locator": text, "left": text,
                   "relation": {"enum": sorted(set().union(*CLAIM_RELATIONS.values()))}, "right": text,
                   "conditions": text,
@@ -82,9 +86,13 @@ def claim_identity(evidence_data, claim_id):
     if claim["kind"] not in CLAIM_KINDS:
         raise ValueError("Unknown source claim kind")
     quote, version = source_anchor(evidence_data)
-    source_id = _text(claim["source_id"], "source_id", empty=True)
+    statement_id = _text(claim["statement_id"], "statement_id", empty=True)
     locator = _text(claim["locator"], "native locator")
-    if not source_id and not locator:
+    if statement_id and statement_id in {
+            _text(evidence_data["source"], "source"), _text(evidence_data["study_id"], "study_id")}:
+        raise ValueError("Source claim statement_id identifies a statement within the source, "
+                         "not the document URL or study ID; use an empty string when no native statement label exists")
+    if not statement_id and not locator:
         raise ValueError("Source claim needs a source-native identifier or locator")
     structural = {"kind": claim["kind"]}
     for name in ("left", "relation", "right", "conditions"):
@@ -107,7 +115,7 @@ def claim_identity(evidence_data, claim_id):
                   "evidence_locator": evidence_data["locator"], "structure": structural}
     canonical = json.dumps(provenance, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     ident = sha256(canonical.encode()).hexdigest()[:32]
-    detail = {"claim": claim_id, "source_id": source_id, "native_locator": locator,
+    detail = {"claim": claim_id, "statement_id": statement_id, "native_locator": locator,
               "source": evidence_data["source"], "source_version": version,
               "evidence_locator": evidence_data["locator"], "study_id": evidence_data["study_id"],
               "quote": quote, "structure": structural}

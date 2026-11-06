@@ -4,8 +4,8 @@ from copy import deepcopy
 from fractions import Fraction
 
 from ...method_loop import Context, EpisodeGoal
-from .acquisition import SearchStrategySource
-from .episode_contracts import SearchStrategyCommission, ScientificAttemptCommission
+from .episode_contracts import TheoryReconstructionCommission, ScientificAttemptCommission
+from .theory_episodes import TheoryReconstructionSource, reconstruction_commission_schema
 from .causal_commission import SheetCommission, read_sheet_result, SNAPSHOT_SCHEMA
 from .causal_sheet import CausalSheet
 from .engine import ResearchLimits, ResearchProviders, ResearchRun, ResearchSource, changed_records, selected_choice
@@ -18,6 +18,9 @@ from .task import RESEARCH_OBJECTIVE
 
 DISCOVERY_TASK = ("Launch repeated independent attempts at the generic scientific objective. "
     "Choose a starting question for each attempt from unresolved candidates or a fresh natural-phenomenon direction. "
+    "Seek a useful G whose transfer across explanatory tasks may fail in a specified present "
+    "representation, and evidence that could explain why. Do not require identical questions, "
+    "settings, scales or observables, or proof that all reduction is impossible. "
     "Use the shared scientific sheet and the latest attempt's returned changes to avoid restarting an unchanged, "
     "unproductive question. A previous attempt's yield is not scientific completion. "
     "Do not research or grade at this level; each scientific attempt owns those decisions. "
@@ -31,10 +34,25 @@ exploration, deeper reasoning, evidence, comparison,
 repair assessment, or executable calculation could improve the assessment. You may
 introduce, revisit, or set aside candidates as outcomes warrant. Reuse an existing
 inference identity for the same claim; renaming a candidate is not new scientific work.
-Choose a Search Strategy child for source evidence or a Reasoning child for a specific logical problem.
-Use returned source findings, their bearing on G and expected generalizability bounds,
+Choose Theory Reconstruction to digest a theory or explanatory account into its connected components,
+or Reasoning for a specific logical problem. A new reconstruction commission defines a seed with
+its reconstruction key, original question, entities, quantities, statements and gaps; empty maps
+are appropriate where the theory's vocabulary must first be discovered. State the entities,
+property meanings and mathematical roles already known. The theory_request refers to that key,
+selects existing component IDs as focus (or [] for broad reconstruction), and names requested kinds.
+An existing reconstruction is continued with seed=null. Its literature children investigate
+definitions, mechanisms, equations, assumptions, derivations, approximations and explicit gaps.
+They may pursue focused searches after broad extraction identifies a missing relationship.
+Use the returned typed theory fragment, source findings, G and expected generalizability bounds,
 and unresolved questions to formulate the Reasoning commission. Supply selected record keys
 and exact historical snapshots; the child receives its own assignment, not your transcript.
+Include the source and destination tasks, G's proposed correspondence, the attempted transfer
+or repair, evidence of its outcome and the unresolved explanation when pertinent. Children
+must distinguish demonstrated failure from an untested suspicion and preserve successful
+repairs. Do not narrow commissions to identical observables or sign reversals by default.
+The current change score covers only restored predictions requiring a change in the original
+executable relation; it omits some pragmatic costs and explained failures without replacements.
+Preserve such findings in your scientific answer instead of treating absent points as a refutation.
 When an executable result reports an error, inspect the receipt and its protocol.
 Repeating an unchanged immutable protocol returns the same receipt and earns no new credit. Correct
 the formal expression in a newly keyed protocol, then reconnect any source formalization
@@ -44,11 +62,12 @@ records the child must inspect, along with the failed receipts.
 When a sourced theoretical statement could support or challenge G, commission its
 formalization and comparison where the source permits it. Keep an empirical
 measurement as a typed observation rather than inventing a causal equation for it.
-For an empty sheet, Search Strategy may start with inputs=[] and snapshots=[].
-For an already formalized observation need, commission a support_assessment key among
-Search Strategy inputs. Readers return evidence and grading needs to Page. Page can select the
-fixed observation comparison or record source-grounded scientific operands and invoke graders
-before returning to Search. Source findings, grader outcomes and unresolved needs travel upward. There is no prescribed sequence or
+For an empty sheet, Theory Reconstruction may start with inputs=[] and snapshots=[] and an empty
+declaration seed. Page and Search translate source findings into that same typed reconstruction;
+this scientific episode and Reasoning own G assessment and its executable protocols.
+Use the fragment's exact version as a premise when defining G and examining changes to its
+relationships, assumptions or contributions. Source findings, typed additions and unresolved
+dependencies travel upward. There is no prescribed sequence or
 mandatory reasoning library. Source evidence comes through reading; never invent a
 citation or observation. Scientific merit and investigation progress are separate:
 useful negative findings can resolve uncertainty. The numerical controller governs
@@ -141,9 +160,9 @@ class DiscoverySource(ResearchSource):
 class ScientificSource(ResearchSource):
     instructions = SCIENTIFIC_TASK
     assessment_fields = {
-        "scientific_answer": "Current answer about the candidate causal inference, its role in theories and possible causal changes, with provenance references.",
+        "scientific_answer": "G's role in each explanatory task; attempted transfer, demonstrated outcome, evidence for why it failed or succeeded, and consequences of examined repairs, with provenance references.",
         "expected_generalizability_bounds": "What was expected, what supports or breaks that expectation and why; preserve revisions.",
-        "qualifications": "What remains conditional, disputed or unverified.",
+        "qualifications": "What remains conditional, disputed or unverified; distinguish proposed explanations, untested repairs and limits of the executable score.",
         "next_uncertainties": "Specific evidence or reasoning that could change the answer."}
     commission_type = ScientificAttemptCommission
     record_kinds = SCIENTIFIC_KINDS
@@ -172,21 +191,17 @@ class ScientificSource(ResearchSource):
 
     def propose(self, view):
         schema, visible = _sheet_tool_contract(self, self.record_kinds)
-        actions = ["record", "inspect", "calculate", "search_strategy", "reasoning"]
+        actions = ["record", "inspect", "calculate", "reconstruct_theory", "reasoning"]
         if schema["properties"]["assessment"] is not False:
             actions.append("evaluate")
         schema["properties"]["action"] = {"enum": actions}
         commission_schema = _reasoning_commission_schema(self, visible)
         schema["properties"].update({
             "commission": commission_schema,
-            "search_commission": {"type": "object", "additionalProperties": False,
-                "required": ["question", "inputs", "snapshots"],
-                "properties": {name: deepcopy(commission_schema["properties"][name])
-                               for name in ("question", "inputs", "snapshots")}},
-            "approach": {"type": "string", "minLength": 1}})
+            "theory_commission": reconstruction_commission_schema()})
         schema["allOf"].extend([
-            {"if": {"properties": {"action": {"const": "search_strategy"}}},
-             "then": {"required": ["search_commission", "approach"]}},
+            {"if": {"properties": {"action": {"const": "reconstruct_theory"}}},
+             "then": {"required": ["theory_commission"]}},
             {"if": {"properties": {"action": {"const": "reasoning"}}},
              "then": {"required": ["commission"]}}])
         proposal = self.decide(self.inputs(view, operation="propose_scientific_action",
@@ -196,15 +211,13 @@ class ScientificSource(ResearchSource):
         if proposal.get("action") == "recall":
             return self.recall(proposal)
         action = selected_choice(proposal.get("action"), actions, "action")
-        if action == "search_strategy":
-            commission = SearchStrategyCommission(**proposal["search_commission"])
+        if action == "reconstruct_theory":
+            commission = TheoryReconstructionCommission(**proposal["theory_commission"])
             commission.request(self.ledger.causal_sheet)
-            approach = proposal.get("approach")
-            if not isinstance(approach, str) or not approach.strip():
-                raise ValueError("Search Strategy needs an initial approach")
-            child = SearchStrategySource(self.run, self.ledger.result(), approach=approach)
-            return self.edge(self.run.child(view, child, "search_strategy", commission.question,
-                contract=commission.report_contract(), proposal={"approach": approach, "question": commission.question}))
+            child = TheoryReconstructionSource(self.run, self.ledger.result())
+            return self.edge(self.run.child(view, child, "theory_reconstruction", commission.question,
+                contract=commission.report_contract(), proposal={"question": commission.question,
+                    "theory_request": commission.theory_request}))
         if action == "reasoning":
             commission = SheetCommission(**proposal["commission"])
             commission.request(self.ledger.causal_sheet)
@@ -242,7 +255,7 @@ class ScientificSource(ResearchSource):
 class ReasoningSource(ResearchSource):
     commission_type = SheetCommission
     assessment_fields = {
-        "logical_answer": "Answer to the commissioned derivation, comparison, repair or countermodel question.",
+        "logical_answer": "Answer to the commissioned derivation, transfer-failure explanation, comparison, repair or countermodel question; scope any failure to the alternatives actually examined.",
         "premises_and_derivation": "Public essential steps and premises, with exact references to full derivations.",
         "qualifications": "Conditions, counterexamples and limits; executable verification is distinct from an authored claim.",
         "unresolved_premises": "Missing premises or checks that the parent could commission."}
@@ -255,6 +268,12 @@ class ReasoningSource(ResearchSource):
         "unresolved premises so the scientific parent can commission further evidence. Reconsider the "
         "derivation when a calculation or counterexample defeats it. You have sheet tools, not search "
         "children. Model critiques are reasoning claims, never verification receipts or credit gates. "
+        "Explain which representation or transfer fails and why under the commissioned task's "
+        "requirements. Separate a demonstrated reason from a hypothesis and numerical target fit "
+        "from a useful repair. Different tasks can be connected through G without identical "
+        "questions or settings; justify their mapping and preserve each task's success criteria. "
+        "The absence of a useful replacement or a numerical change score does not erase an "
+        "established present failure. No conclusion needs to exclude all future reductions. "
         "An invalid argument or countermodel can be useful; do not force a positive result.")
     record_kinds = list(SCIENTIFIC_KINDS)
     credit_columns = ("reasoning_scientific_gain",)
@@ -334,7 +353,7 @@ def run_research(*, research_request=RESEARCH_OBJECTIVE, providers, limits=None)
     run = ResearchRun(providers, limits or ResearchLimits(), research_request)
     source = DiscoverySource(run)
     goal = EpisodeGoal.root(objective=research_request,
-        result_contract={"result": "Candidate examples assessed through inference-specific theory, generalizability and reversal subsheets",
+        result_contract={"result": "Candidate examples assessed through inference-specific theories, expected generalizability bounds, present transfer failures and examined repairs; executable scores retain their stated limits",
                          "uncertainty_retained": True}, task_context=run.context)
     episode = run.episode("discovery", source, goal=goal)
     record = episode.run(Context(tree=run.tree))

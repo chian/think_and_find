@@ -29,8 +29,11 @@ which prediction or explanation changes if the inference is removed or reversed?
 Attach essentially identical applications to the same theory and group genuinely identical
 contexts under the same context_key. A different context can add generalizability evidence
 without adding another theory. Compare proposed new theories with the existing theory
-catalogue. Keep uncertain identities as candidates. Retain possible causal reversals even
-before their support, comparability or resistance to repair is established.
+catalogue. Keep uncertain identities as candidates. Retain possible transfer failures,
+including causal reversals, before their evidence and explanations are established.
+Investigate what fails in a specified present representation and why, without requiring
+fundamental incompatibility or the failure of every possible reduction. A well-supported
+current failure can be reported even when no successful replacement has been found.
 
 Keep G's meanings, grain, intervention and expected generalizability bounds explicit
 (expectation records hold those bounds; inference.domain is only the initial scope hint).
@@ -71,13 +74,29 @@ the original G after a break and revision; retain that attribution to the origin
 Revise an existing support argument when its evidence changes; do not rediscover the break
 under a new identity. The host compiles support and proportional change credit from the explicit operands below.
 Model-specific realizations and mappings may differ; an unexplained label match is not
-an established correspondence. A contradiction caused only by new contrary evidence is
-different from incompatible causal commitments arising from the chosen conceptualization.
+an established correspondence. The scientific tasks can ask different questions at different
+scales or use different quantities. Connect them through G, describe each task's intended
+prediction or explanation, and justify any mapping rather than demanding identical settings.
+The failure of an attempted transfer, omission or transformation of G's representation need
+not be an opposite-sign effect or a claim that the underlying mechanism ceases to exist.
+Use application.direction=possible_transfer_failure for such candidates, including a
+possible reversal. This label does not establish a finding.
+Record what was attempted, what failed, why that diagnosis follows from the evidence, and
+which alternative explanations remain. You may construct and evaluate a transfer by public
+derivation from sourced premises across literature; the source need not already recognize
+the failure. Distinguish published outcomes from your derived conditional consequences and
+an untested proposal. A new contrary observation alone does not establish
+a failure arising from conceptualization, grain, framing or approximation.
 
 For repairs, separate facts used to construct or fit the adjustment from independent tests
 of its additional consequences. Record retained successes, scope losses, information costs,
-and whether one mechanism generates further applications. No search proves all repairs
-impossible. No independent test means unknown corroboration, not zero corroboration.
+and whether one mechanism generates further applications. Test the usefulness of specified
+repairs against each affected task, including earlier successes; fitting one target alone
+does not establish a useful reconciliation. Keep demonstrated failure, proposed cause,
+tested repair and untested possibility distinct. A successful general repair is a useful
+result. Scope a negative conclusion to the alternatives and evidence actually examined.
+No search proves all repairs impossible. No independent test means unknown corroboration,
+not zero corroboration. Preserve these arguments in reasoning, comparison and repair records.
 
 For importance, define the question, G's realization, its alteration, fixed circumstances,
 positive weights, and answer expression. The host computes changed circumstance mass /
@@ -111,6 +130,15 @@ Model opinions never certify these operands; executable checks must establish th
 The host compiles executed support operands and a scoped restored-prediction fraction,
 including support added after the break. These explicit implementation conventions are
 reported in policy_details; raw changed-answer importance remains a separate quantity. Alternative descriptions, repairs and adapters do not create more breaks.
+The present causal-change calculator measures a narrower result: restored predictions that
+require the original executable G relation to change among the compared alternatives.
+It does not grade information costs, usefulness across different tasks, or an explained
+failure without a successful replacement. A fitting G-preserving alternative blocks that
+numeric result even if its practical costs remain unresolved. A zero or unavailable change
+score is therefore not a scientific refutation of a pragmatic transfer failure. Keep the
+evidence and limitations in the scientific answer; do not manufacture a sign reversal or
+Boolean proxy merely to fit the calculator. Fixed quantities, circumstances and targets
+within one numerical test protect that test; they do not constrain all discovery candidates.
 Never enter a numerical support grade or change score. Retain repair_kind without inventing
 a multiplier for its label. Parent transcripts and recursive child traces are not inputs or deliverables.
 """
@@ -211,10 +239,11 @@ def bounds_schema(kind):
 
 def record_schema(kind):
     """The reader's concrete output shape, derived from the sheet it populates."""
+    if kind == "theory_fragment":
+        from .theory_language import fragment_schema
+        return fragment_schema()
     if kind in GRADING_FIELDS:
         return module_for(kind).record_schema(SNAPSHOT_SCHEMA)
-    if kind == "verification":
-        raise ValueError("Model-authored verification is not an output type")
     if kind in {"support_contribution", "causal_change"}:
         return causal_support.record_schema(kind, SNAPSHOT_SCHEMA)
     if kind == "importance":
@@ -226,16 +255,25 @@ def record_schema(kind):
         raise ValueError("Calculation receipts are host-generated, never model-authored records")
     if kind in {"expectation", "expectation_break", "expectation_support"}:
         return bounds_schema(kind)
-    reference_descriptions = {
+    field_descriptions = {
         "theory": {"same_as": "Exact theory record key only for same_theory admission; otherwise empty string.",
                    "compared_with": "Exact theory record keys, never inference or application keys."},
         "application": {"inference": "Exact inference record key for G.",
-                        "theory": "Exact theory record key for this application."},
+                        "theory": "Exact theory record key for this application.",
+                        "context": "This explanatory task, native quantities, grain, conditions and intended predictive or explanatory success.",
+                        "direction": "Candidate interpretation only. possible_transfer_failure includes costly, failed or unusable transfer without a sign reversal; no label certifies failure or changes credit.",
+                        "inference_use": "How this task represents or attempts to use G; distinguish carrying it unchanged, omitting, aggregating or reformulating it from denying the mechanism exists.",
+                        "consequence_without_inference": "Consequences of omitting or changing G for this task; distinguish demonstrated results from predictions and unresolved questions."},
         "comparison": {"left": "Exact application record key. Both sides must be different applications of the same G; never use an inference, evidence, theory or reasoning key.",
-                       "right": "Exact application record key. Both sides must be different applications of the same G; never use an inference, evidence, theory or reasoning key."},
+                       "right": "Exact application record key. Both sides must be different applications of the same G; never use an inference, evidence, theory or reasoning key.",
+                       "mapping": "Correspondence of G between the tasks, preserving their native quantities, scales and success criteria. Identical questions or settings are not required; justify any numerical mapping.",
+                       "conflict": "Specified attempted transfer and observed failure or candidate conflict; distinguish evidence for why it fails from proposed explanations. No claim of universal irreducibility is required.",
+                       "repair_search_bounds": "Representations and repairs actually examined, their conditions and evidence, and what remains untested; never a claim that all conceivable repairs fail."},
         "repair": {"comparison": "Exact comparison record key.",
+                   "adjustment": "Concrete attempted change, its assumptions and connection to G; distinguish a tested repair from a proposal.",
                    "construction_evidence": "Exact evidence record keys used to construct or fit the adjustment; reasoning records belong in a public argument, not here.",
-                   "test_evidence": "Exact evidence record keys from independent tests; reasoning records belong in a public argument, not here."},
+                   "test_evidence": "Exact evidence record keys from independent tests; reasoning records belong in a public argument, not here.",
+                   "costs": "Consequences for each task: retained/lost predictions or scope, fitting assumptions and information requirements, with evidence and unknowns. Report native numerical operands where available, never an invented usefulness grade. These costs are not currently graded by repair_assessment."},
     }
     properties = {}
     for name in FIELDS[kind]:
@@ -253,8 +291,8 @@ def record_schema(kind):
             schema = {"type": "string", "minLength": 0 if name in {"same_as", "reasoning", "counterexample"} else 1}
         if name == "inference_version":
             schema = {"type": "string", "description": "Exact version of G, including a commissioned historical version; empty uses current G"}
-        if name in reference_descriptions.get(kind, {}):
-            schema["description"] = reference_descriptions[kind][name]
+        if name in field_descriptions.get(kind, {}):
+            schema["description"] = field_descriptions[kind][name]
         properties[name] = schema
     return {"type": "object", "additionalProperties": False,
             "required": list(FIELDS[kind]), "properties": properties}
@@ -314,12 +352,8 @@ def read_sheet_result(sheet, commission, records, *, actor, owned_subjects=()):
             kind, data = record["kind"], dict(record["data"])
             if kind == "reasoning":
                 data["author"] = actor
-            elif kind == "verification":
-                raise ValueError("Model verdicts are not verification; record a public reasoning critique instead")
             if kind == "importance_result":
                 raise ValueError("Only the host evaluate action can produce importance results")
-            if kind in {"support_contribution", "causal_change"} and "verification_required" in data:
-                raise ValueError("The model-verdict credit gate has been removed")
             if kind == "importance" and data["application"] not in visible:
                 raise ValueError("Child cannot define a protocol outside its scientific commission")
             if key in sheet.rows and key not in visible:

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import getpass
-import math
 import json
 import sys
 from dataclasses import dataclass, field, replace
@@ -46,7 +45,6 @@ class WorkflowProviderConfig:
     firecrawl_base_url: str = FIRECRAWL_BASE_URL
     jev_endpoint: str = JEV_API_ENDPOINT
     jev_model: str = JEV_MODEL
-    request_timeout_s: float = 300.0
     firecrawl_scrape_results: bool = False
     require_jev: bool = True
     llm_provider: str = "argo"
@@ -77,15 +75,6 @@ class WorkflowProviderConfig:
                 object.__setattr__(self, name, http_url(getattr(self, name), name))
             except ValueError as exc:
                 raise ProviderConfigurationError(str(exc)) from exc
-        if (
-            isinstance(self.request_timeout_s, bool)
-            or not isinstance(self.request_timeout_s, (int, float))
-            or not math.isfinite(self.request_timeout_s)
-            or self.request_timeout_s <= 0
-        ):
-            raise ProviderConfigurationError(
-                "request_timeout_s must be positive and finite"
-            )
 
 
 
@@ -123,7 +112,6 @@ def firecrawl_argo_research_providers(config: WorkflowProviderConfig, *, progres
         api_key=config.typesafe_api_key,
         endpoint=config.jev_endpoint,
         model=config.jev_model,
-        timeout=config.request_timeout_s,
     )
     if checkpoint is not None:
         from .checkpoint import JournaledClient
@@ -131,7 +119,7 @@ def firecrawl_argo_research_providers(config: WorkflowProviderConfig, *, progres
             "llm_provider", "llm_base_url", "llm_model", "llm_fast_model",
             "llm_reasoning_effort", "llm_fast_reasoning_effort", "llm_user",
             "firecrawl_base_url", "firecrawl_scrape_results", "jev_endpoint",
-            "jev_model", "request_timeout_s", "require_jev")},
+            "jev_model", "require_jev")},
             secrets=(config.firecrawl_api_key, config.typesafe_api_key))
         clients = {tier: JournaledClient(client, checkpoint, "model." + tier.value)
                    for tier, client in clients.items()}
@@ -164,7 +152,9 @@ def firecrawl_argo_research_providers(config: WorkflowProviderConfig, *, progres
             "Do not fabricate evidence or citations. Distinguish guesses, assumptions, reported models and "
             "observations. Numeric controllers govern continuation. Use explicit public derivations for "
             "logical conclusions; their empirical premises remain separate. Preserve theory identity across "
-            "contexts, retain possible reversals as candidates, and grade only the requested scoring cells. "
+            "contexts and retain possible transfer failures or reversals as candidates. Establish what "
+            "fails in an examined representation and why, without claiming all reduction impossible. "
+            "Supply scientific operands for the requested calculations, never numerical merit grades. "
             "Do not fabricate source evidence. A computed or derived consequence does not validate its premises."
         ))
         return parse_json_object(response)
@@ -183,13 +173,12 @@ def firecrawl_argo_research_providers(config: WorkflowProviderConfig, *, progres
             return firecrawl_search(
                 query, api_key=config.firecrawl_api_key, limit=limit,
                 scrape_results=config.firecrawl_scrape_results,
-                base_url=config.firecrawl_base_url, timeout=config.request_timeout_s,
+                base_url=config.firecrawl_base_url,
             )
         return invoke() if checkpoint is None else checkpoint.call(
             "firecrawl.search", {"query": query, "limit": limit}, invoke)
 
-    retrieve = firecrawl_retrieve_callable(config.firecrawl_api_key, base_url=config.firecrawl_base_url,
-                                         timeout=config.request_timeout_s)
+    retrieve = firecrawl_retrieve_callable(config.firecrawl_api_key, base_url=config.firecrawl_base_url)
     if checkpoint is not None:
         original_retrieve = retrieve
         retrieve = lambda candidate: checkpoint.call("firecrawl.retrieve", candidate,
@@ -217,27 +206,26 @@ def firecrawl_argo_config_from_env(
 
     try:
         values = workflow_environment(env)
-        timeout = float(values.get("EPISODIC_REQUEST_TIMEOUT_S", "300"))
     except (ValueError, OSError) as exc:
         raise ProviderConfigurationError(f"Invalid workflow environment: {exc}") from exc
     scrape = values.get("FIRECRAWL_SCRAPE_RESULTS", "false").strip().lower()
     if scrape not in {"true", "false", "1", "0", "yes", "no"}:
         raise ProviderConfigurationError("FIRECRAWL_SCRAPE_RESULTS must be true or false")
-    provider = values.get("EPISODIC_LLM_PROVIDER") or "argo"
+    provider = _required_env(values, "EPISODIC_LLM_PROVIDER")
+    prefix = f"EPISODIC_LLM_{provider.upper()}"
     return WorkflowProviderConfig(
         firecrawl_api_key=_required_env(values, "FIRECRAWL_API_KEY"),
         llm_base_url=values.get("EPISODIC_LLM_BASE_URL", "http://127.0.0.1:12329/v1"),
-        llm_model=_required_env(values, "EPISODIC_LLM_MODEL"),
-        llm_fast_model=values.get("EPISODIC_LLM_FAST_MODEL", ""),
-        llm_reasoning_effort=values.get("EPISODIC_LLM_REASONING_EFFORT", "medium"),
-        llm_fast_reasoning_effort=values.get("EPISODIC_LLM_FAST_REASONING_EFFORT", "none"),
+        llm_model=_required_env(values, f"{prefix}_MODEL"),
+        llm_fast_model=values.get(f"{prefix}_FAST_MODEL", ""),
+        llm_reasoning_effort=values.get(f"{prefix}_REASONING_EFFORT", "medium"),
+        llm_fast_reasoning_effort=values.get(f"{prefix}_FAST_REASONING_EFFORT", "none"),
         typesafe_api_key=_required_env(values, "TYPESAFE_API_KEY") if require_jev else values.get("TYPESAFE_API_KEY", ""),
         llm_user=(values.get("EPISODIC_LLM_USER") or values.get("CELS_USERNAME")
                   or getpass.getuser()),
         firecrawl_base_url=values.get("FIRECRAWL_BASE_URL", FIRECRAWL_BASE_URL),
         jev_endpoint=values.get("TYPESAFE_ENDPOINT", JEV_API_ENDPOINT),
         jev_model=values.get("TYPESAFE_MODEL", JEV_MODEL),
-        request_timeout_s=timeout,
         firecrawl_scrape_results=scrape in {"true", "1", "yes"},
         require_jev=require_jev,
         llm_provider=provider,
@@ -247,12 +235,11 @@ def firecrawl_argo_config_from_env(
 def _llm_client(config: WorkflowProviderConfig, *, model=None, reasoning_effort=None, record_response=None):
     model = model or config.llm_model
     if config.llm_provider == "codex_oauth":
-        return CodexOAuthClient(model, timeout=config.request_timeout_s,
+        return CodexOAuthClient(model,
                                 reasoning_effort=reasoning_effort or config.llm_reasoning_effort,
                                 record_response=record_response)
     return ArgoClient(config.llm_base_url, model,
-        user=config.llm_user, reasoning_effort=reasoning_effort or config.llm_reasoning_effort,
-        timeout=config.request_timeout_s)
+        user=config.llm_user, reasoning_effort=reasoning_effort or config.llm_reasoning_effort)
 
 
 def _required_env(env: Mapping[str, str], name: str) -> str:

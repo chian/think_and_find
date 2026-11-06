@@ -295,6 +295,7 @@ def build_attack_probability_from_extraction(
     rarefaction = cq_normalization_rarefaction(
         (float(len(passed)),),
         max_score=float(len(criteria)),
+        identity_history=(passed,),
     )
     return score_cq_normalization_child(
         child,

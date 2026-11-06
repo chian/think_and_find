@@ -201,31 +201,7 @@ def _selected_source_changes(dependency, ledger):
                 "selected_assumption_key": current.get("selected_assumption_key"),
                 "reason": "The used numerical input differs from the current main-table value or is no longer available."})
         return changes
-    # Older records lack execution-time selection context. Preserve their
-    # existing invalidation behavior without inventing a historical snapshot.
-    keys = dependency.get("assumption_keys", dependency.get("assumption_versions", {}))
-    premises = [ledger.assumptions[key] for key in keys if key in ledger.assumptions]
-    if not premises:
-        return []
-    from .progress import found_parameter_progress
-    selected = {row["group_id"]: row for row in found_parameter_progress(ledger.result(), ledger=ledger)}
-    by_target = {(subject, row["parameter"]): row for row in selected.values() for subject in row["subjects"]}
-    changes = []
-    for previous in premises:
-        if previous.get("entry_type") == "source_candidate":
-            current = selected.get(previous.get("source_candidate_group"), {})
-        else:
-            current = by_target.get((previous["subject"], previous["field"]))
-            if current is None:
-                continue
-        if current.get("found") and (current["value"], current["unit"]) == (previous["value"], previous["unit"]):
-            continue
-        changes.append({"kind": "selected_target_value", "key": previous["key"],
-            "field": previous["field"], "previous_value": previous["value"],
-            "selected_value": current.get("value"),
-            "selected_assumption_key": current.get("selected_assumption_key"),
-            "reason": "The automatically selected source value changed or is no longer available."})
-    return changes
+    raise ValueError("Calculation requires selected_target_bindings")
 
 
 def _changed_dependencies(dependency, ledger, seen=frozenset()):

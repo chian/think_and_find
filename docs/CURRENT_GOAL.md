@@ -4,7 +4,7 @@ The user's original scientific instructions, including their later corrections,
 define this one generic research task type: finding and assessing examples of
 pragmatic causal pluralism across natural phenomena. Recover and read those messages when resolving
 its causal-inference definitions, theory relationships, generalizability bounds
-and useful reversals. This file does not replace or abbreviate that authority.
+and useful changes or failures of transfer. This file does not replace or abbreviate that authority.
 
 The application must investigate through the existing Episode structure. Every
 Episode revisits a scoped decision using its assignment, actual outcomes and
@@ -61,6 +61,28 @@ retains the surrounding user instructions with exact source locations.
 
 ## Current design and precedence
 
+**2026-11-04 — current conversation, later scientific clarification.** After
+discussing asymptotic approximation as an analogy for context-dependent useful
+representations, the user stated:
+
+> That might be more accurate then trying to argue that there is pluralism on a fundamental level and is closer to what I mean. We do not need to establish that every reductionist effort must eventually fail. We must know that it fails and why it fails right now. Can you use that to shape the prompts and search better? Do we need to change any of the formal framework we are trying to set up to find these "contradictions"?
+
+This supersedes reading earlier references to fundamental failures or reversals
+as a requirement to prove universal irreducibility. Investigate a specified
+attempt to carry G into another explanatory task, its actual outcome, and the
+evidence explaining that outcome. The tasks need a justified connection through
+G; they need not share identical questions, quantities, settings or grain. A
+causal representation can be omitted, aggregated or transformed without denying
+the existence of its mechanisms. Such a change alone does not establish failure:
+show its consequences for the tasks concerned. Preserve useful general repairs,
+the losses or requirements of unsuccessful repairs, and uncertainty about causes.
+The asymptotic-series discussion is design guidance, not a prescribed runtime case.
+
+The prompts and existing record descriptions now reflect that target. Numerical
+change credit still measures the narrower restored-prediction/relation-change
+case. Its limitations and a proposed extension are documented in
+[the scoring specification](CAUSAL_SCORING_SHEET.md#pragmatic-transfer-failures-and-current-scoring-limits).
+
 The later discussion in the current conversation makes the scientific requirements
 into a scoring rubric: a global sheet records the state of a generalized causal
 inference and children supply evidence or reasoning for scoped subsheets. The
@@ -87,7 +109,7 @@ for constructing the criteria. They were not assigned to the application as a
 research objective. The runtime investigates natural phenomena generally, with
 no prescribed author, case or second task binding.
 
-The latest clarification makes expected generalizability bounds provisional,
+The earlier clarification about bounds makes expected generalizability bounds provisional,
 revisable expectations whose purpose is to reveal and explain where expectations
 break. Literature and reasoning across literature ground them where available;
 provisional judgment is explicitly permitted for these bounds when unavailable.
@@ -102,5 +124,3 @@ scientific snapshots, proposed rules and their retained/lost consequences.
 Bounded inspect and commission paths expose historical public records; G changes
 invalidate current expectations without erasing the original claim. Later
 support can address that original claim and expected-bounds version explicitly.
-The offline synthetic demonstration is `scripts/show_expected_bounds.py`;
-it validates state/link behavior, not scientific proof or empirical discovery.

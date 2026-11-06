@@ -19,7 +19,6 @@ def firecrawl_search_callable(
     page_assessor: Any,
     scrape_results: bool = True,
     base_url: str = FIRECRAWL_BASE_URL,
-    timeout: float = 300.0,
 ):
     """Return a binding-mediated `search(query, limit)` callable."""
 
@@ -30,7 +29,6 @@ def firecrawl_search_callable(
             limit=limit,
             scrape_results=scrape_results,
             base_url=base_url,
-            timeout=timeout,
         ),
         page_selection_llm,
         jev=page_assessor,
@@ -41,7 +39,6 @@ def firecrawl_retrieve_callable(
     api_key: str,
     *,
     base_url: str = FIRECRAWL_BASE_URL,
-    timeout: float = 300.0,
 ):
     """Return a `retrieve(candidate)` callable backed by Firecrawl."""
 
@@ -50,7 +47,7 @@ def firecrawl_retrieve_callable(
         if not url:
             raise ValueError("Firecrawl retrieval needs a candidate URL")
         return firecrawl_scrape(
-            url, api_key=api_key, base_url=base_url, timeout=timeout,
+            url, api_key=api_key, base_url=base_url,
         )
 
     return retrieve
@@ -63,7 +60,6 @@ def firecrawl_search(
     limit: int | None,
     scrape_results: bool = True,
     base_url: str = FIRECRAWL_BASE_URL,
-    timeout: float = 300.0,
 ) -> tuple[Mapping[str, Any], ...]:
     """Issue one Firecrawl v2 Search request."""
 
@@ -82,10 +78,11 @@ def firecrawl_search(
         f"{http_url(base_url, 'Firecrawl base URL')}/search",
         payload,
         api_key=_required_text(api_key, "firecrawl_api_key"),
-        timeout=timeout,
     )
     data = body.get("data")
-    records = data.get("web") if isinstance(data, Mapping) else data
+    if not isinstance(data, Mapping) or "web" not in data:
+        raise ProviderError("Firecrawl search data requires a web result list")
+    records = data["web"]
     if not isinstance(records, list) or any(
         not isinstance(item, Mapping) for item in records
     ):
@@ -104,7 +101,6 @@ def firecrawl_scrape(
     *,
     api_key: str,
     base_url: str = FIRECRAWL_BASE_URL,
-    timeout: float = 300.0,
 ) -> Mapping[str, Any]:
     """Issue one Firecrawl v2 Scrape request."""
 
@@ -112,7 +108,6 @@ def firecrawl_scrape(
         f"{http_url(base_url, 'Firecrawl base URL')}/scrape",
         {"url": _required_text(url, "url"), "formats": ["markdown"]},
         api_key=_required_text(api_key, "firecrawl_api_key"),
-        timeout=timeout,
     )
     result = body.get("data")
     if not isinstance(result, Mapping) or not source_text(result):

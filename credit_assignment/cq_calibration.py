@@ -698,19 +698,13 @@ def cq_normalization_rarefaction(
     score_history: Iterable[float],
     *,
     max_score: float | None,
-    identity_history: Iterable[Iterable[str]] | None = None,
+    identity_history: Iterable[Iterable[str]],
     score_resolution: float = 1.0,
     efficiency_fraction: float = DEFAULT_EFFICIENCY_FRACTION,
     window_size: int = 2,
     gain_threshold: float | None = None,
 ) -> CqRarefactionReport:
-    """Use nano-graphrag's incidence estimator on explicit score quanta.
-
-    Legacy callers retain only cumulative criterion scores. Their positive
-    increments are atomized after rationalizing float scores and fed
-    as one incidence sample per completed observation. The research Episode
-    controller instead supplies its actual scientific credit identities.
-    """
+    """Use the incidence estimator on explicit returned credit identities."""
 
     if gain_threshold is not None and (isinstance(gain_threshold, bool) or
             not isinstance(gain_threshold, (int, float)) or not math.isfinite(gain_threshold) or gain_threshold < 0):
@@ -746,8 +740,8 @@ def cq_normalization_rarefaction(
             for item in (*positive, resolution))), denominator)
     else:
         quantum = resolution
-    samples = None if identity_history is None else tuple(tuple(sample) for sample in identity_history)
-    if samples is not None and len(samples) != len(scores):
+    samples = tuple(tuple(sample) for sample in identity_history)
+    if len(samples) != len(scores):
         raise ValueError("One identity sample is required for each completed score observation")
     def threshold_adapter(context):
         update = adaptive_marginal_credit_threshold(context)
@@ -771,8 +765,7 @@ def cq_normalization_rarefaction(
     )
     step = None
     for index, gain in enumerate(gains):
-        atoms = (samples[index] if samples is not None else
-            tuple(f"score:{index}:{part}" for part in range(int(gain / quantum))))
+        atoms = samples[index]
         step = controller.advance(str(index), atoms, observation_status=OBSERVATION_OBSERVED)
     if step is None:
         raise ValueError("At least one score observation is required")
@@ -797,7 +790,7 @@ def cq_normalization_rarefaction(
         window_size=window_size,
         observations=len(scores),
         outcome=outcome,
-        statistical_estimate={"identity_basis": "declared_credits" if samples is not None else "rationalized_score_quanta",
+        statistical_estimate={"identity_basis": "declared_credits",
             "quantum": str(quantum),
             "threshold_units": "expected_next_hypervolume_credit",
             "paired_incidence": estimate},

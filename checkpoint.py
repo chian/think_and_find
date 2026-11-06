@@ -108,11 +108,7 @@ def _atomic(path, value):
 class CheckpointJournal:
     SCHEMA = "episodic-workflow-checkpoint-v1"
 
-    def __init__(self, path, *, inputs=None, resume=False, fork_from=None,
-                 through_record=None, allowed_changes=(), fork_reason=""):
-        if resume and fork_from is not None:
-            raise CheckpointError("An explicit fork is not an ordinary resume")
-        fork = self._prepare_fork(fork_from, through_record, allowed_changes, fork_reason) if fork_from is not None else None
+    def __init__(self, path, *, inputs=None, resume=False):
         self.path = Path(path).expanduser().resolve()
         self.position = 0
         self.records = []
@@ -121,7 +117,7 @@ class CheckpointJournal:
         self.pending = None
         self.current_episode = None
         self.cursor = None
-        self.activated = not (resume or fork is not None)
+        self.activated = not resume
         self.authorize = None
         self.attempt = None
         self._historical_effects = False
@@ -146,14 +142,6 @@ class CheckpointJournal:
                 if self.manifest["implementation"] != implementation_identity():
                     raise CheckpointError("Checkpoint implementation/Python differs; unchanged code is required for exact replay")
                 self._read_records()
-            elif fork is not None:
-                self.manifest, self.records = fork
-                if inputs is not None and inputs != self.inputs:
-                    raise CheckpointError("Fork runtime inputs cannot change")
-                (self.path / "records").mkdir(mode=0o700)
-                for record in self.records:
-                    _atomic(self.path / "records" / f"{record['index']:012d}.json", record)
-                _atomic(self.path / "manifest.json", self.manifest)
             else:
                 if not isinstance(inputs, dict):
                     raise CheckpointError("A new checkpoint requires runtime inputs")
@@ -166,7 +154,7 @@ class CheckpointJournal:
             self.replay_count = len(self.records)
             self.archive = JsonArchive(self.path / "archive")
             self._begin_attempt(resume)
-            if resume or fork is not None:
+            if resume:
                 self._reconstruction_cursor()
         except BaseException:
             self.close()
@@ -189,83 +177,10 @@ class CheckpointJournal:
                 or not isinstance(m.get("logical_run_id"), str)
                 or "provider_configuration" not in m):
             raise CheckpointError("Invalid or unsupported checkpoint manifest")
-        fork = m.get("fork")
-        if fork is not None:
-            if (not isinstance(fork, dict) or fork.get("kind") != "verified_prefix_experiment"
-                    or not isinstance(fork.get("fork_id"), str)
-                    or fork.get("new_implementation") != m["implementation"]
-                    or fork.get("parent_logical_run_id") != m["logical_run_id"]
-                    or not isinstance(fork.get("historical_run_implementation"), dict)
-                    or type(fork.get("through_record")) is not int):
-                raise CheckpointError("Invalid compatible-fork provenance")
-
-    @classmethod
-    def _prepare_fork(cls, source, through, allowed_changes, reason):
-        """Read an immutable parent; changed-code experiments require explicit admission."""
-        if type(through) is not int or through < 0 or not isinstance(reason, str) or not reason.strip():
-            raise CheckpointError("A fork requires an exact unit boundary and explicit compatibility reason")
-        parent = object.__new__(cls)
-        parent.path = Path(source).expanduser().resolve()
-        parent.records, parent.pending = [], None
-        try:
-            lock = (parent.path / "lock").open("rb")
-        except OSError as exc:
-            raise CheckpointError(f"Cannot read parent checkpoint: {exc}") from exc
-        with lock:
-            try:
-                fcntl.flock(lock, fcntl.LOCK_SH | fcntl.LOCK_NB)
-            except BlockingIOError as exc:
-                raise CheckpointError("Cannot fork a checkpoint owned by a running executor") from exc
-            parent.manifest = _load(parent.path / "manifest.json")
-            parent._validate_manifest()
-            parent._read_records()
-            _, previous = parent._validated_attempts()
-            if previous is None or previous["status"] == "running":
-                raise CheckpointError("Fork parent needs a committed terminal attempt")
-            parent._reconstruction_cursor()
-            if through >= len(parent.records):
-                raise CheckpointError("Fork boundary is outside committed history")
-            boundary = parent.records[through]
-            if (boundary["frame_type"] != "run_event" or boundary["body"].get("event_kind") != "unit_completed"
-                    or boundary["body"]["payload"].get("controller_step", {}).get("stop") is not False):
-                raise CheckpointError("Fork requires a completed, continuing unit boundary")
-            current, old = implementation_identity(), parent.manifest["implementation"]
-            if any(current[name] != old.get(name) for name in ("python", "platform")):
-                raise CheckpointError("Compatible forks cannot change Python or platform")
-            changes = {name: {"old": old["files"].get(name), "new": current["files"].get(name)}
-                       for name in old["files"].keys() | current["files"].keys()
-                       if old["files"].get(name) != current["files"].get(name)}
-            if set(allowed_changes) != set(changes):
-                raise CheckpointError(f"Fork changed-file admission must exactly name {sorted(changes)!r}")
-            prefix = parent.records[:through + 1]
-            source_terminal = parent._terminal_ref()
-            historical = parent.manifest.get("fork", {}).get("historical_run_implementation", old["files"])
-            provenance = {"kind": "verified_prefix_experiment", "fork_id": "fork_" + uuid.uuid4().hex,
-                "reason": reason, "parent_path": str(parent.path),
-                "parent_logical_run_id": parent.manifest["logical_run_id"],
-                "parent_manifest_sha256": _digest(parent.manifest),
-                "parent_registration_hash": previous["registration_hash"],
-                "parent_attempt_sha256": _digest(previous), "parent_terminal": source_terminal,
-                "through_record": through, "prefix_sha256": boundary["sha256"],
-                "old_implementation": old, "new_implementation": current,
-                "admitted_file_changes": dict(sorted(changes.items())),
-                "historical_run_implementation": historical,
-                "identity_semantics": "Distinct experiment fork; original episode namespace retained only for exact reconstruction."}
-            manifest = {"schema": cls.SCHEMA, "inputs": parent.inputs,
-                "implementation": current, "status": "active",
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "provider_configuration": parent.manifest["provider_configuration"],
-                "logical_run_id": parent.manifest["logical_run_id"], "fork": provenance}
-        return manifest, prefix
-
-    def run_start_implementation(self, current):
-        """Only the historical start event retains its original code identity."""
-        return self.manifest.get("fork", {}).get("historical_run_implementation", current)
 
     def provenance(self):
         return {"checkpoint_path": str(self.path), "logical_run_id": self.manifest["logical_run_id"],
-                "current_implementation": self.manifest["implementation"],
-                "fork": self.manifest.get("fork")}
+                "current_implementation": self.manifest["implementation"]}
 
     def _read_records(self):
         previous = ""
@@ -306,15 +221,10 @@ class CheckpointJournal:
         if self.manifest["status"] == "complete" and (
                 self.manifest.get("records") != len(self.records) or self.pending is not None):
             raise CheckpointError("Completed checkpoint is missing committed history")
-        fork = self.manifest.get("fork")
-        if fork is not None:
-            through = fork["through_record"]
-            if through >= len(self.records) or self.records[through]["sha256"] != fork["prefix_sha256"]:
-                raise CheckpointError("Fork no longer contains its admitted immutable prefix")
 
     def _registration_hash(self):
         return _digest({key: self.manifest[key] for key in
-            ("schema", "inputs", "implementation", "logical_run_id", "fork") if key in self.manifest})
+            ("schema", "inputs", "implementation", "logical_run_id") if key in self.manifest})
 
     def _validated_attempts(self):
         directory = self.path / "attempts"
@@ -416,7 +326,7 @@ class CheckpointJournal:
             raise CheckpointError("Host denied continuation")
         self.attempt["run_reconstructed"] = {"resume_from": self.attempt["resume_from"],
             "reconstruction": self.cursor.report(), "activation_admission": admission,
-            "fork": self.manifest.get("fork"), "implementation": self.manifest["implementation"]}
+            "implementation": self.manifest["implementation"]}
         _atomic(self.path / "attempts" / f"{self.attempt['attempt']:012d}.json", self.attempt)
         self.activated = True
 

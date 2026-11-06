@@ -1299,6 +1299,7 @@ def _score_passed(
     rarefaction = cq_normalization_rarefaction(
         (float(len(passed)),),
         max_score=float(len(criteria)),
+        identity_history=(passed,),
     )
     return score_cq_normalization_child(
         child,

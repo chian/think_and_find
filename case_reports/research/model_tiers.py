@@ -20,6 +20,9 @@ class ModelTier(str, Enum):
 CALL_SITE_TIERS = MappingProxyType({
     "propose_discovery_attempt": ModelTier.REASONING,
     "propose_scientific_action": ModelTier.REASONING,
+    "propose_theory_reconstruction": ModelTier.REASONING,
+    "propose_theory_gap_repair": ModelTier.REASONING,
+    "repair_theory_output": ModelTier.REASONING,
     "propose_guideline_action": ModelTier.REASONING,
     "propose_reasoning_action": ModelTier.REASONING,
     "propose_strategy_query": ModelTier.REASONING,

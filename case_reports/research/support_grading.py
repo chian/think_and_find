@@ -15,12 +15,11 @@ from .importance import rational
 from .support_observations import observation_identity, observation_target
 
 FIELDS = ("support", "application", "importance", "bounds_test", "source_formalization", "prediction", "facts", "limitations")
-LEGACY_FIELDS = tuple(name for name in FIELDS if name != "source_formalization")
 
 
 def references(data):
     return ([data[name] for name in ("support", "application", "importance", "bounds_test")] +
-            ([data["source_formalization"]] if data.get("source_formalization") else []) +
+            ([data["source_formalization"]] if data["source_formalization"] else []) +
             [item["evidence"] for item in data["facts"]])
 
 
@@ -33,7 +32,7 @@ def context_pins(sheet, data):
 
 
 def validate(sheet, key, data):
-    if not isinstance(data, dict) or set(data) not in (set(FIELDS), set(LEGACY_FIELDS)):
+    if not isinstance(data, dict) or set(data) != set(FIELDS):
         raise ValueError("Support assessment needs its exact executable operands")
     for name in ("support", "application", "importance", "bounds_test", "limitations"):
         if not isinstance(data[name], str) or not data[name].strip():
@@ -52,7 +51,7 @@ def validate(sheet, key, data):
         raise ValueError("Support dependence protocol must address the selected application")
     if bounds_test["expectation"] != support["expectation"] or bounds_test["assessment"] != data["importance"]:
         raise ValueError("Support and B_G subscoring sheets must share the exact expected bounds and formal protocol")
-    formalization = data.get("source_formalization", "")
+    formalization = data["source_formalization"]
     if formalization:
         sheet._require_kind(formalization, "source_formalization")
         formal = sheet.rows[formalization]["data"]
@@ -82,7 +81,7 @@ def validate(sheet, key, data):
             raise ValueError("An observation can be selected once per support assessment")
         seen.add(identity)
     prior = sheet.rows.get(key)
-    if prior and any(prior["data"].get(name, "") != data.get(name, "") for name in FIELDS if name != "limitations"):
+    if prior and any(prior["data"][name] != data[name] for name in FIELDS if name != "limitations"):
         raise ValueError("Support comparison operands are fixed; create an explicit new assessment for a changed comparison")
 
 
@@ -183,7 +182,7 @@ def grade_support(sheet, key):
         elif classification["original_G_relation"] is True and classification["baseline_fits"] is True and receipt["baseline"] != receipt["altered"]:
             witnesses.append(case["id"])
     source_comparison = None
-    formalization = data.get("source_formalization", "")
+    formalization = data["source_formalization"]
     if formalization:
         from .source_formalization import compare as compare_source
         source_comparison = compare_source(sheet, formalization, data["bounds_test"], pins=pins)

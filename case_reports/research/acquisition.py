@@ -14,14 +14,14 @@ from .assumptions import text as required_text
 from .documents import Document, Span, rank_spans
 from .communication import merged_ranges, compact_reading_coverage
 from .engine import ResearchSource, changed_records, selected_choice
-from .model_tiers import ModelTier, TABLE_PAGE_EXTRACTION_TIER
+from .model_tiers import ModelTier
 from .records import Ledger, ResearchResult, identity
 from .episode_contracts import (SearchStrategyCommission, SearchCommission, PageCommission,
     ReportCommission, LexicalCommission, TableCommission, literature_report)
 from . import episode_credit
-from .sheet_tools import SCIENTIFIC_KINDS, SHEET_TOOLS, _sheet_tool_contract, _execute_sheet_tool
-from .causal_commission import SheetCommission, read_sheet_result
-from .grading_handoff import page_action_outcome
+from .theory_runtime import (
+    theory_context, theory_credit, theory_report, integration_schema, integrate_theory,
+)
 
 
 SOURCE_ASSESSMENT_BATCH_SIZE = 3
@@ -41,36 +41,57 @@ class LiteratureSource(ResearchSource):
 
     def child_contract(self, commission_type, question):
         keys = list(dict.fromkeys([*self.commission.inputs, *self.selected_keys]))
-        # Preserve commissioned G/B inputs. Latest evidence is addressable from child returns.
-        keys = keys[:8]
-        commission = commission_type(question, tuple(keys), tuple(self.scoped_snapshots()))
+        commission = commission_type(question=question, inputs=tuple(keys),
+            snapshots=tuple(self.scoped_snapshots()), theory_request=self.commission.theory_request)
         commission.request(self.ledger.causal_sheet)
         return commission.report_contract()
 
     def parent_report(self, result, completion=None, request=None):
         return literature_report(self, result, completion)
 
+    def after_verdict(self, unit, contribution, view):
+        super().after_verdict(unit, contribution, view)
+        if contribution.episode_update is not None:
+            returned = contribution.episode_update.report.as_record()
+            if returned["job"]["responsibility"] == "TheoryFormatRepairSource":
+                self.theory_repair = returned["repair_status"]["repair"]
+
+    def next(self, view):
+        if getattr(self, "theory_repair", None) is not None:
+            from .theory_episodes import repair_theory_unit
+            self.ledger.merge(self.run.global_goal.ledger.result())
+            return repair_theory_unit(self, view)
+        return super().next(view)
+
 
 class SearchStrategySource(LiteratureSource):
     commission_type = SearchStrategyCommission
     assessment_fields = {
-        "commission_answer": "Synthesis answering the delegated information need across completed searches, with selected provenance.",
-        "coverage_and_gaps": "Which approaches informed the answer, what remains missing, and which new search could address it.",
-        "qualifications": "Material source disagreements, limitations and unresolved grading operands.",
-        "reasoning_questions": "Specific logical questions the scientific parent could commission Reasoning to resolve."}
-    instructions = ("Own repeated choices of search query and search approach for the parent's information need. "
-        "Use source findings, coverage, failed searches and open questions to choose the next query. "
-        "Return grounded findings and unresolved logical questions that let the scientific parent commission Reasoning. "
-        "Local credit follows executed scientific contributions attributable to the evidence returned by these searches.")
-    credit_columns = ("strategy_scientific_evidence_gain",)
+        "commission_answer": "What the returned theory components establish about the parent's reconstruction request, with source references.",
+        "coverage_and_gaps": "Which requested components and their dependencies have been reconstructed, what is missing, and which source search could resolve it.",
+        "qualifications": "Source disagreements, alternative formulations, unresolved symbols and qualifications on the reconstructed theory.",
+        "reasoning_questions": "Specific unresolved derivations, assumptions or relationships for the reconstruction parent."}
+    instructions = ("Own repeated choices of literature query and integration for the parent's theory reconstruction request. "
+        "Use the supplied theory fragment, requested component kinds, focus, source findings and unresolved dependencies "
+        "to decide what to search next or what returned evidence to integrate. Keep entities, quantities, equations, "
+        "causal relations, mechanisms, assumptions, derivations, approximations and gaps distinct in the supplied representation. "
+        "Preserve source qualifications and alternative formulations. Do not invent missing components or infer that a "
+        "failed search establishes their absence. Return the reconstructed fragment and its unresolved dependencies. "
+        "Local credit measures new typed contributions to this request; neither global scientific points nor the number "
+        "of searches or extracted passages assigns it. Numerical yield controls continuation.")
+    credit_columns = ("strategy_theory_gain",)
 
     def credit(self, result):
-        return episode_credit.search_strategy_credit(result, self.initial)
+        return theory_credit(result, self.initial, self.commission.theory_request, self.credit_columns[0])
+
+    def context(self):
+        return {**super().context(), **theory_context(self)}
 
     def parent_report(self, result, completion=None, request=None):
         report = super().parent_report(result, completion, request)
         report["searches"] = {"query_count": len(self.queries), "latest_query": self.queries[-1] if self.queries else None}
         report["reasoning_questions"] = self.working_assessment["reasoning_questions"]
+        report.update(theory_report(self, result))
         return report
 
     def __init__(self, run, inherited, *, approach):
@@ -89,20 +110,28 @@ class SearchStrategySource(LiteratureSource):
                 "result": "Source candidates, not execution of a browsing plan. The search episode selects sources; page and reading episodes retrieve and examine their content.",
             },
             instruction=(
-                "Choose a literal search-engine query for the delegated scientific question. "
-                "Use the current job assessment, new source findings, actual grading outcomes and unresolved questions to revise your approach. "
-                "Seek source evidence about theory mechanisms, meaningful uses of the focal inference, "
-                "expected generalizability bounds, incompatible causal commitments or proposed repairs, as commissioned. "
+                "Choose action=search to find source information needed by the commissioned theory reconstruction, "
+                "or action=integrate_theory to incorporate grounded components from returned source evidence. "
+                "Use the current fragment and its dependencies, your job assessment and actual child returns to revise your approach. "
+                "An integration supplies additions in the declared representation, with exact source references and existing "
+                "component identities where they match. Rewording or repeating an existing component earns no new credit. "
+                "A query should target a concrete missing component or relationship, including definitions, equations, "
+                "derivations, assumptions and approximation conditions needed to understand the requested theory. "
                 "Query is search text; objective states the specific reading question and necessary context. "
                 "Do not copy the whole parent assignment into each query. Repeated search decisions belong "
                 "to this Search Strategy episode; there is no fixed number or order. Repeating a query remains possible; use prior outcomes to judge its value."),
-            response_contract={"type": "object", "additionalProperties": False,
-                "required": ["query", "objective"], "properties": {
+            response_contract={"oneOf": [{"type": "object", "additionalProperties": False,
+                "required": ["action", "query", "objective"], "properties": {
+                    "action": {"const": "search"},
                     "query": {"type": "string", "minLength": 1, "description": "Literal search-engine query, forwarded unchanged; not browsing or extraction instructions"},
-                    "objective": {"type": "string", "minLength": 1, "description": "Information the child should resolve and how it bears on the parent's uncertainty; not part of the search query"}}}))
+                    "objective": {"type": "string", "minLength": 1, "description": "The requested theory component or dependency this search should resolve; not part of the search query"}}},
+                integration_schema()]}))
         self.last_proposal = proposal
         if proposal.get("action") == "recall":
             return self.recall(proposal)
+        if proposal.get("action") == "integrate_theory":
+            return self.leaf(lambda: integrate_theory(self, proposal["additions"]), "integrate_theory")
+        selected_choice(proposal.get("action"), ("search",), "action")
         query = required_text(proposal.get("query"), "query")
         objective = required_text(proposal.get("objective"), "objective")
         child = self.run.child(view, SearchSource(self.run, self.ledger.result(), query=query),
@@ -115,23 +144,30 @@ class SearchStrategySource(LiteratureSource):
 class SearchSource(LiteratureSource):
     commission_type = SearchCommission
     assessment_fields = {
-        "query_answer": "What examined sources from this query establish about the assigned question.",
-        "source_comparison": "Agreement, disagreement and qualifications across those sources, with exact references.",
-        "remaining_information_need": "What another source could resolve, including unresolved assessment operands."}
+        "query_answer": "Which requested theory components or dependencies the examined sources supply, with exact references.",
+        "source_comparison": "How the examined sources' definitions, formulations, assumptions and derivations agree or differ.",
+        "remaining_information_need": "Which components, source links or dependencies remain unresolved for the reconstruction request."}
     instructions = ("Own repeated source selections from ONE literal query's result set. "
-        "Compare source descriptions and returned page findings against the assigned information need; "
-        "choose the next source to resolve what remains open. Hits are not evidence. "
-        "Local credit follows executed scientific contributions attributable to selected sources from this query.")
-    credit_columns = ("query_scientific_evidence_gain",)
+        "Compare source descriptions and returned Page findings against the parent's theory reconstruction request. "
+        "Choose the next source to resolve a missing component or dependency, or integrate already returned evidence "
+        "into the supplied typed theory fragment. Hits and topical mentions are not reconstructed components. "
+        "Keep source formulations and qualifications explicit, reuse existing identities, and leave unsupported "
+        "relationships unresolved. Local credit measures new typed contributions to the request, independently of "
+        "global scientific points and raw extraction volume. Numerical yield controls continuation.")
+    credit_columns = ("query_theory_gain",)
 
     def credit(self, result):
-        return episode_credit.search_credit(result, self.initial, self.selected_sources)
+        return theory_credit(result, self.initial, self.commission.theory_request, self.credit_columns[0])
+
+    def context(self):
+        return {**super().context(), **theory_context(self)}
 
     def parent_report(self, result, completion=None, request=None):
         report = super().parent_report(result, completion, request)
         report["query"] = self.query
         report["examined_sources"] = [{"source": url, "version": self.run.documents.get(url, {}).get("sha256_utf8")}
                                       for url in sorted(self.selected_sources)]
+        report.update(theory_report(self, result))
         return report
 
     def __init__(self, run, inherited, *, query):
@@ -142,34 +178,50 @@ class SearchSource(LiteratureSource):
                                           provider_search=run.search,
                                           jev=run.providers.page_assessor,
                                           select_page=self.select_page,
-                                          standing_task="Assess candidate sources for causal-inference generalizability, theories, contradictions and repairs",
-                                          information_need=query,
-                                          assessment_instructions="Does this source offer substantive mechanisms, evidence, a derivation or a counterexample relevant to the information need?",
-                                          assessment_criteria={"true": "Substantive evidence or reasoning relevant to the scoped question", "false": "Only topical mention or unrelated content"})
+                                          standing_task="Find source material for the parent's specified theory reconstruction",
+                                          assessment_instructions=("Could this source supply a definition, quantity, equation, causal relation, "
+                                              "mechanism, assumption, derivation, approximation condition or evidence resolving the commissioned "
+                                              "information need? Judge the stated information request, not keyword overlap with the literal query. "
+                                              "This is candidate selection evidence, not a judgment that the theory has been reconstructed."),
+                                          assessment_criteria={"true": "Source material could supply a component or dependency requested by the commission", "false": "Only topical mention or unrelated content"})
         self.view = None
 
     def select_page(self, goal, candidates, previous_pages):
+        choices = [integration_schema()]
+        if candidates:
+            choices.insert(0, {"type": "object", "additionalProperties": False,
+                "required": ["action", "option_id", "objective", "rationale"], "properties": {
+                    "action": {"const": "read_source"},
+                    "option_id": {"type": "string", "enum": [row["option_id"] for row in candidates]},
+                    "objective": {"type": "string", "minLength": 1,
+                                  "description": "The specific theory component or dependency this Page should investigate"},
+                    "rationale": {"type": "string", "minLength": 1}}})
         proposal = self.decide(self.inputs(self.view, operation="choose_research_source", query=self.query,
             search_goal=str(self.goal.objective), candidates=candidates,
             latest_selection=previous_pages[-1] if previous_pages else None, selection_count=len(previous_pages),
-            response_contract={"type": "object", "additionalProperties": False,
-                "required": ["option_id", "objective", "rationale"], "properties": {
-                    "option_id": {"type": "string", "enum": [row["option_id"] for row in candidates]},
-                    "objective": {"type": "string", "minLength": 1,
-                                  "description": "Evidence to seek in the selected source"},
-                    "rationale": {"type": "string", "minLength": 1}}},
-            instruction="Select for the still-unresolved delegated question using the current job assessment, new source findings, actual grading outcomes and unresolved questions. Grader outcomes contain actual results and score changes; unresolved needs can guide source selection. The generic findings preview is not the whole return. Give the source child a specific question and necessary context. A missing returned value and a failed reading do not establish absence of evidence. Return an instance of the JSON Schema: the source choice belongs in option_id. Numerical yield controls continuation."))
+            response_contract={"oneOf": choices},
+            instruction=("Choose action=read_source with an exact option_id to investigate an available source, "
+                "or action=integrate_theory to incorporate returned source evidence into the commissioned reconstruction. "
+                "Use the typed current fragment, vocabulary, requested component kinds, focus and unresolved dependencies, "
+                "together with actual Page returns and the current job assessment. Source candidates are only leads. "
+                "An integration uses the declared additions schema and exact source references; reuse an existing "
+                "component identity rather than awarding a new identity to a paraphrase. Keep alternative formulations "
+                "and missing premises explicit. Give each Page a specific reading question and the context needed "
+                "to resolve it. A failed reading or absent returned value does not prove absence from the literature. "
+                "When no candidates remain, returned evidence can still be integrated. Numerical yield owns continuation.")))
         self.last_proposal = proposal
         return proposal
 
     def propose(self, view):
         self.view = view
+        self.proposer.information_need = self.commission.question
         candidates = asyncio.run(self.proposer.candidates(self.goal))
-        if not candidates:
-            return None
         proposal = self.select_page(self.goal.as_record(), candidates, self.proposer.history)
         if proposal.get("action") == "recall":
             return self.recall(proposal)
+        if proposal.get("action") == "integrate_theory":
+            return self.leaf(lambda: integrate_theory(self, proposal["additions"]), "integrate_theory")
+        selected_choice(proposal.get("action"), ("read_source",), "action")
         candidate = self.proposer.select(proposal, candidates)
         proposal = candidate["page_selection"]["proposal"]
         question = proposal["objective"]
@@ -177,7 +229,7 @@ class SearchSource(LiteratureSource):
             "query": self.query, "source": source_locator(candidate),
             "binding": "SearchPageProposer", "proposal": proposal,
             "jev_assessment": candidate["page_selection"]["assessment"],
-            "jev_score_meaning": "Page relevance to the local search question; scientific warrant requires source reading and assessment."}
+            "jev_score_meaning": "Possible contribution to the commissioned reconstruction; actual typed returns determine request credit."}
         self.run.provider_events.append(event)
         self.run.emit_trace("provider_event", provider_event=event)
         self.selected_sources.add(source_locator(candidate))
@@ -191,69 +243,34 @@ class PageSource(LiteratureSource):
     commission_type = PageCommission
     assessment_fields = {
         "source_answer": "What this source establishes about the commissioned question, linked to exact evidence.",
-        "assessment_status": "Which scientific questions actual registrations or grader outputs addressed and what they returned; no model verdicts.",
-        "qualifications": "Source limitations, possible reversals and unresolved formal operands.",
+        "assessment_status": "Which source definitions, relationships, mechanisms, assumptions and derivations have been represented in the shared theory fragment.",
+        "qualifications": "Source limitations, alternative formulations, scope conditions and unresolved explanatory dependencies.",
         "remaining_reading_need": "What additional reading or upstream reasoning could resolve."}
     instructions = ("Own repeated choices of where and how to examine ONE retrieved source and assess what it establishes. "
         "Use its outline, tables, remaining text and reader returns to choose ordered reading, "
         "lexical reading or a table query episode. Revisit a passage only for a specific unresolved "
-        "question. Readers return grading_needs with evidence and qualifications. Use these in your next decision: "
-        "you can register source-grounded G, expected generalizability bounds and theory/context applications, "
-        "formalize source statements, or select the relevant executable grader here before returning to Search. "
-        "Flagged needs are questions, not an action order or a requirement to earn points. You can also identify "
-        "an assessment from an unflagged finding. Preserve unresolved operands and questions for Search. "
-        "Do not turn correlation, a citation or a possible reversal into an established causal claim. "
-        "Link scientific records through dependencies to the evidence actually grounding them. "
-        "Local credit follows scientific contributions attributable to this source; the numerical controller owns continuation.")
-    record_kinds = list(SCIENTIFIC_KINDS)
-    credit_columns = ("page_scientific_evidence_gain",)
+        "question. Readers return extracted source records and qualifications. Use integrate_theory to translate "
+        "that evidence into the commissioned typed fragment: declared entities and properties, quantities, "
+        "relationships, mechanisms, assumptions, derivations, approximations and actual gaps. "
+        "Keep citation records and bibliographic metadata in source leads and provenance; report follow-up "
+        "leads in source_answer or remaining_reading_need. Do not encode a cited publication or its "
+        "bibliographic metadata as a theory entity or another theory component. A reference entry alone "
+        "does not establish the cited work's scientific definitions, equations or claims. "
+        "Integrate grounded definitions and relationships as they become clear, so later reading can use "
+        "those shared bindings. A partial connected fragment is useful while other passages, equations or "
+        "source references remain unresolved; represent those missing connections as gaps. "
+        "Use the shared vocabulary and exact evidence versions; keep existing quantity meanings fixed. "
+        "Preserve the source's native scope and alternative formulations. Distinguish a source claim, an "
+        "assumption, and a derived consequence. Record missing explanatory connections for focused follow-up. "
+        "Do not force a source into a preselected equation or manufacture an unspecified relationship. "
+        "Local credit aggregates newly extracted source information without duplicate credit; the numerical controller owns continuation.")
+    credit_columns = ("page_extraction_gain",)
 
     def credit(self, result):
         return episode_credit.page_credit(result, self.initial, source_locator(self.candidate))
 
     def inputs(self, view, **kwargs):
-        # Page needs selected scientific operands and calculated outcomes in
-        # addition to source coverage. Reading children retain literature inputs.
-        return ResearchSource.inputs(self, view, **kwargs)
-
-    def assess(self, result):
-        return page_action_outcome(self, result)
-
-    def catalog_rows(self):
-        sheet = self.ledger.causal_sheet
-        initial_keys = {row["key"] for row in self.initial.causal_sheet_updates}
-        keys = set(self.commission.inputs) | (sheet.rows.keys() - initial_keys)
-        keys.update(key for key, row in sheet.of_kind("evidence")
-                    if row["data"]["source"] == source_locator(self.candidate))
-        todo = list(keys)
-        while todo:
-            for dependency in sheet.rows[todo.pop()]["dependencies"]:
-                if dependency not in keys:
-                    keys.add(dependency)
-                    todo.append(dependency)
-        return sorted(((key, sheet.rows[key]) for key in keys),
-                      key=lambda item: (item[1]["kind"] == "evidence", item[0]))
-
-    def authorize_inspection(self, keys):
-        if not set(keys) <= {key for key, _ in self.catalog_rows()}:
-            raise ValueError("Page sheet inputs must belong to its source or commission")
-
-    def authorize_snapshots(self, snapshots):
-        allowed = {(ref["key"], ref["version"]) for ref in self.scoped_snapshots()}
-        allowed.update((key, row["version"]) for key, row in self.catalog_rows())
-        if any((ref["key"], ref["version"]) not in allowed for ref in snapshots):
-            raise ValueError("Page needs a source-local or commissioned historical snapshot")
-
-    def authorize_evaluation(self, assessment):
-        self.authorize_inspection([assessment])
-
-    def record_results(self, records):
-        commission = SheetCommission(self.commission.question,
-            tuple(dict.fromkeys([*self.commission.inputs, *self.selected_keys])),
-            snapshots=tuple(self.scoped_snapshots()))
-        initial_keys = {row["key"] for row in self.initial.causal_sheet_updates}
-        return read_sheet_result(self.ledger.causal_sheet, commission, records,
-            actor=self.actor, owned_subjects=self.ledger.causal_sheet.rows.keys() - initial_keys)
+        return super().inputs(view, **theory_context(self), **kwargs)
 
     def parent_report(self, result, completion=None, request=None):
         report = super().parent_report(result, completion, request)
@@ -261,6 +278,7 @@ class PageSource(LiteratureSource):
                             "version": self.document.sha256 if self.document else None}
         report["remaining_source"] = {"unexamined_characters": sum(len(span.text) for span in self.document.remaining("unexamined")),
                                       "tables": len(self.document.tables)} if self.document else None
+        report.update(theory_report(self, result))
         return report
 
     def __init__(self, run, inherited, *, candidate):
@@ -287,6 +305,7 @@ class PageSource(LiteratureSource):
         versions = dict(self.run.documents.get(locator, {}).get("versions", {}))
         versions[self.document.sha256] = version
         self.run.documents[locator] = {**version, "versions": versions}
+        self.failure = ""
 
     def propose(self, view):
         if self.document is None:
@@ -327,16 +346,6 @@ class PageSource(LiteratureSource):
                 "Sequential reading with cross-window context in the chosen scope. Unexamined skips prior coverage; "
                 "reexamine rereads in document order. A section name in question does not move the cursor."}
             options["lexical_probe"] = {"episode": "lexical_probe", "meaning": "Rank source-local chunks by a literal query within the chosen reading scope; unexamined scope excludes previously supplied text from ranking and extraction."}
-        sheet_schema, visible = _sheet_tool_contract(self, self.record_kinds)
-        sheet_schema["properties"]["grading_needs"] = {"type": "array", "uniqueItems": True,
-            "items": {"type": "string"},
-            "description": "IDs of reader grading needs this action addresses; optional, not a prerequisite for assessment."}
-        observation_schema = {"type": "object", "additionalProperties": False,
-            "required": ["action", "rationale", "templates", "evidence"], "properties": {
-                "action": {"const": "compare_observations"}, "rationale": {"type": "string"},
-                "templates": {"type": "array", "minItems": 1, "items": {"type": "string"}},
-                "evidence": {"type": "array", "minItems": 1, "items": {"type": "string"}},
-                "grading_needs": sheet_schema["properties"]["grading_needs"]}}
         proposal = self.decide(self.inputs(view, operation="propose_page_child",
             source_summary={"source": document.source, "title": document.title,
                 "characters": len(document.text), "chunks": len(document.spans),
@@ -349,14 +358,9 @@ class PageSource(LiteratureSource):
             reexamination_spans={key: {"start": span.start, "end": span.end,
                                       "opening": span.text[:240]} for key, span in span_page.items()},
             available_children=options,
-            instruction=(SHEET_TOOLS + " Choose a sheet operation or action=read with one of the available reading options. "
-                "Use source-linked grading_needs and grading_outcomes in new_results and unreviewed reader returns to decide what to assess "
-                "now, which operands to inspect or formalize, and what further reading could resolve. "
-                "Record dependencies on the source evidence for G registration and other source-grounded scientific operands. "
-                "compare_observations takes selected support_assessment templates and evidence keys; it matches native "
-                "quantity/units/circumstances and executes the fixed comparisons. It is useful only when those formal operands exist. "
-                "With no preexisting G, you can register the source-grounded candidate and expected generalizability bounds "
-                "using record. Neither that registration nor a reader flag establishes support or a reversal. "
+            instruction=(self.instructions + " Choose integrate_theory with typed source-grounded additions, "
+                "or action=read with one of the available reading options. Use extracted_records and table data "
+                "from reader returns to decide which components can be represented and what further reading could resolve. "
                 "Choose among the actual available reading scopes using the delegated information need and prior coverage. "
                 "The inventory is paged: choose inventory with inventory_offset to inspect more spans, headings or tables. "
                 "A lexical query searches the whole selected reading scope even when its spans are absent from this preview. "
@@ -373,10 +377,10 @@ class PageSource(LiteratureSource):
                 "Earlier reading under a different question does not rule out a useful reread. "
                 "Distinguish unread material from examined material that did not answer "
                 "the question. Give the reader that specific question and necessary context; "
-                "its JSON return supplies a current reading assessment, exact references, "
-                "new grading needs, findings, qualifications and completion for your next Page decision. No fixed reading order, "
+                "its JSON return supplies extracted records, local extraction credit, exact references, "
+                "qualifications, unresolved extraction errors and completion for your next Page decision. No fixed reading order, "
                 "no mandatory reading choice. You do not decide continuation."),
-            response_contract={"oneOf": [sheet_schema, observation_schema,
+            response_contract={"oneOf": [integration_schema(),
                 {"type": "object", "additionalProperties": False,
                 "required": ["action", "option", "question"], "properties": {
                     "action": {"const": "read"},
@@ -399,13 +403,9 @@ class PageSource(LiteratureSource):
         self.last_proposal = proposal
         if proposal.get("action") == "recall":
             return self.recall(proposal)
-        if proposal.get("action") == "compare_observations":
-            from .observation_admission import compare_observations
-            self.authorize_inspection([*proposal["templates"], *proposal["evidence"]])
-            return self.leaf(lambda: compare_observations(self.ledger.causal_sheet,
-                proposal["templates"], proposal["evidence"]), "compare_source_observations")
-        if proposal.get("action") != "read":
-            return _execute_sheet_tool(self, proposal, visible)
+        if proposal.get("action") == "integrate_theory":
+            return self.leaf(lambda: integrate_theory(self, proposal["additions"]), "integrate_theory")
+        selected_choice(proposal.get("action"), ("read",), "action")
         option = selected_choice(proposal.get("option"), options, "option")
         question = required_text(proposal.get("question"), "question")
         if option == "inventory":
@@ -442,12 +442,16 @@ class PageSource(LiteratureSource):
             grain = "lexical_probe"
         source.page_task = page_task
         child = self.run.child(view, source, grain, question, proposal=proposal,
-            contract=self.child_contract(source.commission_type, f"Establish source-grounded evidence for {question}"))
+            contract=source.commission_type(question, (),
+                theory_request=self.commission.theory_request).report_contract())
         return self.edge(child)
 
 
 class ReadingSource(LiteratureSource):
     extraction_tier = ModelTier.REASONING
+
+    def context(self):
+        return {"question": self.commission.question}
 
     def __init__(self, run, inherited, *, document):
         super().__init__(run, inherited)
@@ -456,6 +460,22 @@ class ReadingSource(LiteratureSource):
         self.pending_memory_update = False
         self.seen_spans = {}
         self.pending_spans, self.pending_memory = (), None
+        self.extraction_repair = None
+
+    def repair_unit(self, view):
+        from .extraction_repair import ExtractionRepairSource
+
+        repair = self.extraction_repair
+        source = ExtractionRepairSource(self.run, self.ledger.result(),
+            document=self.document, repair=repair, memory=self.memory,
+            seen_spans={anchor["span"]: self.seen_spans[anchor["span"]]
+                        for anchor in self.memory["anchors"]})
+        source.page_task = getattr(self, "page_task", None)
+        child = self.run.child(view, source, "extraction_repair", repair["question"],
+            proposal={"operation": "repair_source_extraction", "errors": repair["errors"]},
+            contract=source.commission_type(repair["question"], (),
+                theory_request=self.commission.theory_request).report_contract())
+        return self.edge(child)
 
     def read(self, spans, question):
         from .causal_reading import read_source_window
@@ -463,6 +483,9 @@ class ReadingSource(LiteratureSource):
 
     def parent_report(self, result, completion=None, request=None):
         report = super().parent_report(result, completion, request)
+        report["extraction_credit"] = self.credit(result).as_record()
+        report["extracted_records"] = list(changed_records(result, self.initial).causal_sheet_updates)
+        report["extraction_errors"] = self.extraction_repair["errors"] if self.extraction_repair is not None else []
         report["source_anchors"] = {"source": self.document.source, "version": self.document.sha256,
             "spans": [anchor["span"] for anchor in self.memory["anchors"]]}
         return report
@@ -481,12 +504,13 @@ class ReadingSource(LiteratureSource):
             if not isinstance(anchor, dict) or anchor.get("span") not in allowed:
                 raise ValueError("Reading anchor must refer to a seen source span")
             exact_span(anchor.get("quote"), allowed[anchor["span"]].text)
+        if not isinstance(memory["retained_evidence"], list):
+            raise ValueError("Retained evidence must be a list of exact supplied references")
         for ref in memory["retained_evidence"]:
-            if set(ref) != {"key", "version"} or (ref["key"], ref["version"]) not in self.known_records:
+            if (not isinstance(ref, dict) or set(ref) != {"key", "version"}
+                    or (ref["key"], ref["version"]) not in self.known_records):
                 raise ValueError("Retained evidence must reference an exact record already supplied to this reader")
-            row = self.ledger.causal_sheet.snapshot(ref)
-            if row["kind"] != "evidence" or row["data"]["source"] != self.document.source:
-                raise ValueError("Reader memory retains evidence from its own source")
+            self.ledger.causal_sheet.snapshot(ref)
 
     def after_verdict(self, unit, contribution, view):
         if self.pending is not None:
@@ -510,6 +534,19 @@ class ReadingSource(LiteratureSource):
                     record_refs=self.memory["retained_evidence"])
                 self.unreviewed_results = []
         super().after_verdict(unit, contribution, view)
+        if contribution.episode_update is not None:
+            returned = contribution.episode_update.report.as_record()
+            repair = returned["repair_status"]
+            self.validate_memory(repair["reading_memory"], self.seen_spans)
+            self.memory = repair["reading_memory"]
+            self.working_assessment.update(reading_answer=self.memory["summary"],
+                open_questions="\n".join(self.memory["unresolved_links"]),
+                record_refs=self.memory["retained_evidence"])
+            if repair["repaired"]:
+                self.extraction_repair = None
+            else:
+                self.extraction_repair = {**self.extraction_repair,
+                    "response": repair["rejected_response"], "errors": repair["errors"]}
         self.pending_spans, self.pending_memory = (), None
         self.pending_memory_update = False
 
@@ -518,12 +555,12 @@ class ReportSource(ReadingSource):
     commission_type = ReportCommission
     assessment_fields = {
         "reading_answer": "Source-grounded synthesis across document-order windows; preserve cross-window qualifications and exact evidence references.",
-        "open_questions": "Unresolved source links or assessment questions for Page; readers extract and flag, never grade."}
+        "open_questions": "Unresolved source links, missing context or extraction questions for Page."}
     instructions = ("Read successive document-order windows for the assigned question. Decide which "
         "source claims and premises the new window establishes, which cross-window links remain "
         "unresolved, and which exact anchors must be retained. Preserve document context. "
-        "Local credit follows executed scientific contributions attributable to evidence in this reader's document-order scope.")
-    credit_columns = ("report_scientific_evidence_gain",)
+        "Local credit counts newly returned source information; repeated information adds no credit.")
+    credit_columns = ("report_extraction_gain",)
 
     def credit(self, result):
         return episode_credit.report_credit(result, self.initial, self.document, self.spans)
@@ -539,6 +576,8 @@ class ReportSource(ReadingSource):
         self.spans, self.position = self.document.remaining(reading_scope), 0
 
     def propose(self, view):
+        if self.extraction_repair is not None:
+            return self.repair_unit(view)
         if self.position >= len(self.spans):
             return None
         spans, size = [], 0
@@ -561,8 +600,8 @@ class LexicalProbeSource(ReadingSource):
     instructions = ("Examine successive source-local passages ranked for the assigned literal query. "
         "Decide whether a ranked match actually addresses the scientific question, retain exact "
         "anchors and resolve contextual links before treating keyword matches as evidence. "
-        "Local credit follows executed scientific contributions attributable to evidence in the ranked reading scope.")
-    credit_columns = ("lexical_scientific_evidence_gain",)
+        "Local credit counts newly returned source information; repeated information adds no credit.")
+    credit_columns = ("lexical_extraction_gain",)
 
     def credit(self, result):
         return episode_credit.lexical_credit(result, self.initial, self.document, self.parts)
@@ -587,6 +626,8 @@ class LexicalProbeSource(ReadingSource):
         self.ranked = tuple(span.key for span in rank_spans(ranking, query) if self.parts.get(span.key))
 
     def propose(self, view):
+        if self.extraction_repair is not None:
+            return self.repair_unit(view)
         while self.position < len(self.ranked):
             key = self.ranked[self.position]
             self.position += 1
@@ -601,18 +642,25 @@ class SourceTableSource(ReadingSource):
     commission_type = TableCommission
     assessment_fields = {
         "reading_answer": "What queried rows establish with their headers, conditions and qualifications; distinguish absent cells from contrary evidence.",
-        "open_questions": "Unresolved row comparisons or scientific assessment needs to return to Page."}
+        "open_questions": "Unresolved row, header or source-context questions to return to Page."}
     instructions = ("Choose repeated row selections or column/text queries within ONE table. "
         "Use earlier query outcomes to choose rows resolving the remaining question. Interpret "
         "cells with the exact header, conditions and units; preserve missing values. "
-        "Local credit follows executed scientific contributions attributable to the selected table rows.")
-    credit_columns = ("table_scientific_evidence_gain",)
+        "Return native table cells. Local credit counts newly returned cells; repeated cells add no credit.")
+    credit_columns = ("table_extraction_gain",)
 
     def credit(self, result):
         return episode_credit.table_credit(result, self.initial, self.document, self.table)
 
     def parent_report(self, result, completion=None, request=None):
         report = super().parent_report(result, completion, request)
+        report["table"] = {"source": self.document.source, "source_version": self.document.sha256,
+            "id": self.table.key, "header": self.table.header.text, "columns": list(self.table.columns),
+            "rows": [row["data"]["measurements"]["native"]["table_row"]
+                for _, row in Ledger(result).causal_sheet.of_kind("evidence")
+                if row["data"]["source"] == self.document.source
+                and row["data"]["measurements"]["source_version"] == self.document.sha256
+                and row["data"]["measurements"]["native"].get("table_row", {}).get("table") == self.table.key]}
         report["table_queries"] = {"table": self.table.key,
             "queries": [{"query": q["query"], "column": q["column"], "matches": q["matches"],
                          "question": q["question"][:500], "selected_rows": q["selected_rows"][:8],
@@ -621,7 +669,30 @@ class SourceTableSource(ReadingSource):
             "revisitable_rows": len(self.queried)}
         return report
 
-    extraction_tier = TABLE_PAGE_EXTRACTION_TIER
+    def read(self, spans, question):
+        """Return parsed native cells; Page owns interpretation."""
+        working = Ledger(self.ledger.result())
+        rows = {span.key: values for span, values in zip(self.table.rows, self.table.cells)}
+        updates = []
+        for span in spans:
+            if span.key == self.table.header.key:
+                continue
+            data = {"source": self.document.source, "locator": f"characters {span.start}:{span.end}",
+                "study_id": self.document.source, "finding": span.text,
+                "measurements": {"source_version": self.document.sha256, "quote": span.text,
+                    "question": question, "native": {"observations": {}, "claims": {},
+                        "table_row": {"table": self.table.key, "row": span.key,
+                            "start": span.start, "end": span.end, "raw": span.text,
+                            "columns": list(self.table.columns), "header": self.table.header.text,
+                            "cells": list(rows[span.key])}}}}
+            key = "evidence:" + identity([self.document.source, self.document.sha256, span.key])[:24]
+            updates.append(working.causal_sheet.put(key, "evidence", data))
+        self.pending_spans = spans
+        return ResearchResult(causal_sheet_updates=tuple(updates), reading_attempts=({
+            "source": self.document.source, "source_version": self.document.sha256,
+            "document_characters": len(self.document.text), "episode_id": self.goal.goal_id,
+            "question": question, "ranges": [[span.start, span.end] for span in spans],
+            "status": "completed", "reading_summary": "Returned native table rows.", "unresolved_links": []},))
 
     def __init__(self, *args, table, **kwargs):
         super().__init__(*args, **kwargs)
@@ -633,6 +704,7 @@ class SourceTableSource(ReadingSource):
         available = {s.key: (s, values) for s, values in zip(self.table.rows, self.table.cells)}
         if not available:
             return None
+        remaining = {key: row for key, row in available.items() if key not in self.queried}
         question_schema = {"type": "string", "minLength": 1,
                            "description": "Claim to examine using selected rows and the exact header"}
         response_contract = {"oneOf": [
@@ -644,15 +716,15 @@ class SourceTableSource(ReadingSource):
                  "question": question_schema}},
             {"type": "object", "additionalProperties": False, "required": ["query", "question"],
              "properties": {
-                 "query": {"type": "string", "description": "Literal text; empty string scans all rows"},
+                 "query": {"type": "string", "description": "Literal text; empty string scans all unqueried rows"},
                  "column": {"type": ["string", "null"], "enum": [*self.table.columns, None]},
                  "question": question_schema}},
         ]}
         proposal = self.decide(self.inputs(view, operation="propose_table_query",
             table=self.table.summary(),
-            available_rows={k: {"cells": list(values), "raw": s.text, "previously_read": k in self.queried}
-                for k, (s, values) in list(available.items())[:8]},
-            unqueried_row_count=len(available) - len(self.queried), previous_queries=[
+            available_rows={k: {"cells": list(values), "raw": s.text}
+                for k, (s, values) in list(remaining.items())[:8]},
+            unqueried_row_count=len(remaining), previous_queries=[
                 {"query": row["query"], "column": row["column"], "matches": row["matches"],
                  "question": row["question"][:500], "selected_rows": row["selected_rows"][:8],
                  "selected_row_count": len(row["selected_rows"]), "outcome": row.get("outcome")}
@@ -660,7 +732,7 @@ class SourceTableSource(ReadingSource):
             earlier_query_count=max(0, len(self.queries) - 8),
             row_addressing={"format": f"{self.table.key}:row:NUMBER", "first": 1, "last": len(self.table.rows)},
             response_contract=response_contract,
-            instruction="Return an instance of one JSON Schema alternative: rows plus question, OR query plus question and an optional column. Omit rows entirely for a text query; do not send rows: []. The preview is not the whole table: a text query searches all rows and returns one execution window. Use prior questions, selected rows and outcomes to choose what information remains useful. Previously read rows remain available for a changed question. Execution returns exact spans, not inferred cells."))
+            instruction="Return an instance of one JSON Schema alternative: rows plus question, OR query plus question and an optional column. Omit rows entirely for a text query; do not send rows: []. The preview shows unqueried rows and is not the whole table. A text query searches all unqueried rows and returns one execution window; repeating it can reach later matching rows. Use prior questions, selected rows and outcomes to choose what information remains useful. Explicit row keys can select previously read rows for a changed question. Execution returns exact spans, not inferred cells."))
         self.last_proposal = proposal
         if proposal.get("action") == "recall":
             return self.recall(proposal)
@@ -675,7 +747,7 @@ class SourceTableSource(ReadingSource):
             if not isinstance(query, str) or (column is not None and column not in self.table.columns):
                 raise ValueError("Table query needs literal text and an existing optional column")
             rows, size, matches = [], len(self.table.header.text), 0
-            for key, (span, values) in available.items():
+            for key, (span, values) in remaining.items():
                 searched = values if column is None else (values[self.table.columns.index(column)],)
                 if not any(query.casefold() in cell.casefold() for cell in searched):
                     continue
@@ -724,4 +796,4 @@ class SourceTableSource(ReadingSource):
 
     @staticmethod
     def no_matches(query):
-        return ResearchResult(findings=(f"No table rows match literal query {query!r}; this is not a scientific refutation.",))
+        return ResearchResult(findings=(f"No unqueried table rows match literal query {query!r}; this is not a scientific refutation.",))

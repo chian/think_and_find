@@ -332,7 +332,7 @@ def register_candidate(candidate, ledger):
 
     same_claim = (current is not None and assumption_claim(current) == assumption_claim(claim)
         and provenance(current) == provenance(claim)
-        and current.get("candidate_scope_version", scope_version) == scope_version)
+        and current["candidate_scope_version"] == scope_version)
     if same_claim:
         changed_prose = (current["basis"] != claim["basis"] or
             current.get("derivation", {}).get("added_assumptions", ()) !=

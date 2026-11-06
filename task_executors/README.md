@@ -6,7 +6,7 @@ The owning Episode chooses when a capability serves its assigned question. Runti
 | Location | Role |
 | --- | --- |
 | `_http.py` | Shared HTTP requests and provider errors |
-| `outbreak_search/` | Firecrawl Search/Scrape, Jev assessment, result normalization and legacy query helpers |
+| `outbreak_search/` | Firecrawl Search/Scrape, Jev assessment, result normalization and query helpers |
 | `evidence_extraction/` | Model transports and extraction contracts |
 | `scenario_metrics/` | Existing domain calculation catalog, dependencies and evaluation |
 | Remaining tool directories | Numerical kernels and their API references |

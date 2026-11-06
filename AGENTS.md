@@ -2,6 +2,35 @@
 
 The user's original instructions and later corrections govern this work.
 
+Use this checkout's `tools/one_workflow.sh` for every local Python command, with
+disposable output beneath this checkout's `runs/`. Do not borrow another repo's
+launcher. Use the stable `CODEX_THREAD_ID`; confirm the previous complete workload
+has exited before launching another in this window. Keep one CPU, 5 GiB RAM and
+no swap across the complete workload, without process/thread count ceilings.
+
+Keep instructions local to their subject. On 2026-11-04 the user distinguished
+machine resource bounds from episode stopping budgets: no episode elapsed-time,
+token, turn, action-count or cumulative-usage budgets; retain sane compute bounds.
+The environment constrains CPU and RAM across the complete workload.
+An environmental CPU bound does not authorize any additional application budget.
+Do not add episode deadline/usage-budget knobs or enforcement, including a
+runtime-maximum setting with an unlimited value. API calls have their own request
+timeouts; LLM calls use 300 seconds. A failed or timed-out call returns its error
+to the episode. It does not terminate the episode. The yield estimator owns
+episode continuation. Retain per-window ownership.
+
+The current scientific target is a demonstrated failure of a specified causal
+representation to transfer usefully between explanatory tasks, and why it fails
+under the conditions examined. Do not require fundamental incompatibility or
+proof that every reduction must fail. Tasks can differ in question, observable,
+organism, scale or grain; justify their connection through G. Distinguish an
+observed failure, an explanation of it and the consequences of examined repairs.
+A useful omission or reformulation need not reverse a sign. Preserve successful
+repairs and explained failures even without a replacement. The current numerical
+change calculator covers a narrower relation-change/restored-prediction result;
+its zero score is not a refutation of other pragmatic failures. See the current
+user clarification in docs/CURRENT_GOAL.md and limits in docs/CAUSAL_SCORING_SHEET.md.
+
 Use the user's term "expected generalizability bounds" exactly. Distinguish those
 bounds from the circumstance domain and measure of a particular calculation.
 Their purpose is to expose and explain broken expectations, not establish an
@@ -33,8 +62,13 @@ a predetermined single case for the entire application.
 Every episode owns a specific set of iterative decisions, with its own complete
 instructions, numerical credit projection, input scope and return contract.
 Never switch one generic episode between scientific parent, search and reasoning
-roles. The scientific parent directly commissions Search Strategy or Reasoning;
-there is no Investigation wrapper and no search-enabled switch. Sharing the
+roles. The scientific parent commissions Theory Reconstruction or Reasoning.
+Theory Reconstruction owns a typed connected theory fragment and can commission
+Search Strategy, a focused source reread, Reasoning, or investigation of a
+recorded substantive gap. Search Strategy translates acquired source information
+into that same vocabulary. Typed-output repair and substantive-gap investigation
+have separate child episodes; the latter can acquire additional literature.
+There is no generic Investigation wrapper and no search-enabled switch. Sharing the
 Episode loop and primitive sheet/calculation tools does not share decision ownership.
 
 Every Episode is a decision point that iterates. Identify its recurring

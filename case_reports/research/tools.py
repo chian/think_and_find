@@ -143,13 +143,6 @@ def support_for(ledger, facts, conditions, subject):
                 complete = False
                 invalidated.append(key)
             return
-        matches = [a for a in ledger.assumptions.values() if a["subject"] == fact.subject
-                   and a["field"] == fact.field and a["value"] == fact.value
-                   and not a.get("source_candidate_unavailable")]
-        if matches:
-            a = max(matches, key=lambda a: a["reasonableness"])
-            selected[a["key"]] = a
-            return
         derivations = [c for c in ledger.calculations.values() if fact.key in c.get("output_fact_keys", ())]
         if fact.kind != "derived" or not derivations:
             complete = False

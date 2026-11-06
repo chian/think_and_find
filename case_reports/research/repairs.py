@@ -281,7 +281,8 @@ def grade_repair(sheet, key):
         'corroboration_qualification': 'A declared test partition is not proof of independent empirical corroboration; construction fit and test consequences are reported separately',
         'conceptual_equivalence': 'Original G is tested only through the declared executable relation over paired outputs. Model-to-natural-language correspondence and equivalence beyond the declared cases remain scientific obligations; syntax/version differences confer no credit',
         'cases': rows, 'domain_kind': source_protocol['domain']['kind'],
-        'necessity_scope': 'Only explicitly compared G-preserving alternatives; empty or unexecuted alternatives leave necessity unresolved',
+        'necessity_scope': 'Only target restoration among explicitly compared G-preserving alternatives; empty or unexecuted alternatives leave necessity unresolved. Any fitting preserving alternative defeats this test regardless of practical costs or performance on other tasks',
+        'pragmatic_scope': 'This calculation does not grade information costs, usefulness across tasks, useful omission or aggregation that preserves the original relation, or explained failures without a restored prediction. A zero or unresolved change score is not a refutation of those scientific findings',
         'qualification': 'Executed predictions conditional on supplied models and target interpretation. Syntactic G changes do not prove conceptual non-equivalence. Sample results do not establish continuous-domain coverage.',
         'meaning': 'The original expected-scope denominator and target remain fixed. Excluding a failed case from revised bounds does not repair it. Lost successes remain explicit; no model verdict or repair-kind label supplies credit.'}
 

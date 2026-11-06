@@ -17,9 +17,7 @@ identity and post-break revaluation of an existing change.
 
 Calculation receipts now reproduce their declared computation on admission.
 Digest or shape validation alone does not establish that a result was calculated.
-Text-only legacy support/change records replay for audit but earn no numerical
-credit until their executable operands are supplied. Retired model-verification
-flags and opinions have no scoring effect.
+Support/change records require their declared executable operands.
 
 ## Dependence and importance
 
@@ -125,6 +123,76 @@ and restored-target fraction remain distinct reported quantities. Later support
 for original G revalues the same change even after G and B_G have been revised.
 A subsequently demonstrated preserving repair can retract that scoped change
 contribution while leaving independent support for original G intact.
+
+## Pragmatic transfer failures and current scoring limits
+
+The current scientific target is a demonstrated failure of a specified present
+representation to transfer usefully, together with evidence explaining why.
+Universal irreducibility and fundamental contradiction are not required. Tasks
+may differ in question, observable, organism, scale or grain. Establish their
+connection through G and preserve each task's native meanings and success criteria.
+A numeric comparison within one task still requires a justified mapping and
+fixed operands. The repair adapter's common-case restrictions protect its test;
+they are not universal admission criteria for scientific candidates.
+
+The existing records can describe this broader target without a new workflow:
+
+- `application.context` identifies the task and conditions; `inference_use`
+  describes how it uses, attempts to carry over, omits or transforms G.
+- `application.direction=possible_transfer_failure` retains a candidate without
+  asserting an opposite-sign effect. This label does not grant credit or establish
+  a scientific conclusion.
+- `comparison.mapping` connects the tasks; `conflict` records the attempted
+  transfer and its consequences; `repair_search_bounds` scopes examined alternatives.
+- `expectation_break` preserves the expected transfer and triggering evidence.
+  Public `reasoning` records distinguish demonstrated causes from proposed
+  explanations and unresolved alternatives.
+- `repair` records construction versus test evidence and the costs of a concrete
+  adjustment. Expected-bounds revisions retain original successes and losses.
+
+The executable `repair_assessment` is a restricted adapter, not a complete
+decision procedure for pragmatic failure. It currently has three limitations:
+
+1. Change credit requires the original executable G predicate to become false
+   while a failed prediction is restored. Useful omission or aggregation can
+   escape that predicate even when its benefit is demonstrated.
+2. Any fitting G-preserving alternative defeats its scoped necessity test.
+   Information requirements, fitting assumptions and costs on other tasks do
+   not enter that decision. `repair.costs` remains a public scientific argument,
+   not an executable usefulness measurement.
+3. An explained failure without a successful replacement earns no change credit.
+   Its absence of credit must not be reported as absence of a scientific result.
+
+The five score components and continuation rules are unchanged. This is a real
+incentive limitation: broader prompt guidance does not make the scorer reward
+every newly relevant finding. Receipt qualifications and prompts expose that
+limit; they do not fix it by treating a model's usefulness verdict as an operand.
+
+### Proposed numerical extension, not implemented
+
+Retain the existing G identities, expected generalizability bounds, evidence,
+versioned failures and repair history. Extend executable comparison to separate
+task-specific evaluations. Each task would declare its intended prediction or
+explanation, available inputs, and a justified success requirement before
+comparing representations. Where measurable, use native prediction errors or
+reported intervals, information requirements with an actual availability or
+resource constraint, and retained or lost successes. Do not equate a coefficient
+count with information cost or invent an arbitrary usefulness threshold.
+
+Evaluate carrying G unchanged, concrete proposed repairs and a revised or reduced
+representation on the tasks for which each is claimed to work. Each task keeps
+its own observable, denominator and justified mappings; a more accurate result
+on one task cannot silently erase a failure on another. Keep construction fit,
+independent predictive performance, untested alternatives and unmeasured costs
+separate. A demonstrated current failure and the warrant for its explanation
+must be distinguishable from later success in replacing the representation.
+
+The resulting claim is limited to the examined transfers or repairs under those
+requirements. A successful useful repair can defeat that scoped failure claim;
+a fit that violates a demonstrated task requirement need not do so. Unknown
+costs or unsupported diagnoses remain unknown. The criteria for crediting these
+results, including non-numeric explanations, still require design and testing;
+no new scalar score or prose validity gate has been introduced.
 
 ## Episode and message integration
 

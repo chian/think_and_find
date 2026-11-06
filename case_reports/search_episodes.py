@@ -91,7 +91,7 @@ class OutbreakSearchEpisodeState:
                 for error in observation.errors
             ),
             score_history=score_history,
-            identity_history=identity_history or None,
+            identity_history=identity_history,
         )
 
     def as_record(self) -> dict[str, Any]:
@@ -145,7 +145,7 @@ class OutbreakSearchEpisodeState:
             current = set(report.credited_criteria)
             samples.append(tuple(sorted(current - seen)))
             seen = current
-        return tuple(scores[:-1]), tuple(samples)
+        return tuple(scores[:-1]), tuple(samples[:-1])
 
 
 @dataclass(frozen=True)

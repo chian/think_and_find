@@ -57,7 +57,7 @@ def assumption_credit(result, fields):
 
 
 def assumption_summary(result, completion, request, *, evidence_options=None):
-    """Project existing records into the closed legacy child-return contract."""
+    """Project existing records into the closed child-return contract."""
     def number(value, *, nullable=False):
         if value is None and nullable:
             return None

@@ -112,7 +112,7 @@ class AssumptionSearchEpisodeState:
                 for error in observation.errors
             ),
             score_history=score_history,
-            identity_history=identity_history or None,
+            identity_history=identity_history,
         )
 
     def as_record(self) -> dict[str, Any]:
@@ -157,7 +157,7 @@ class AssumptionSearchEpisodeState:
             scores.append(float(len(current)))
             samples.append(tuple(sorted(current - seen)))
             seen = current
-        return tuple(scores[:-1]), tuple(samples)
+        return tuple(scores[:-1]), tuple(samples[:-1])
 
 
 @dataclass(frozen=True)
@@ -449,7 +449,7 @@ def score_assumption_sources(
     extra_outputs: Mapping[str, Any] | None = None,
     errors: tuple[CalculationError, ...] = (),
     score_history: tuple[float, ...] = (),
-    identity_history: tuple[tuple[str, ...], ...] | None = None,
+    identity_history: tuple[tuple[str, ...], ...] = (),
 ) -> AssumptionSearchReport:
     """Score reusable assumption-search output with rarefaction."""
 
@@ -466,7 +466,8 @@ def score_assumption_sources(
     rarefaction = cq_normalization_rarefaction(
         score_history + (score,),
         max_score=4.0,
-        identity_history=identity_history,
+        identity_history=(*identity_history, tuple(sorted(set(_assumption_credit_ids(outputs.get("search_specs"), candidates))
+            - {key for sample in identity_history for key in sample}))),
     )
     if errors:
         outputs["provider_errors"] = tuple(

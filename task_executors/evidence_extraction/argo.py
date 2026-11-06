@@ -34,7 +34,6 @@ class ArgoClient:
     model: str
     user: str = field(default_factory=lambda: os.environ.get("CELS_USERNAME") or getpass.getuser())
     reasoning_effort: str | None = None
-    timeout: float = 300.0
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -44,13 +43,6 @@ class ArgoClient:
             raise ValueError("LLM model must be a non-empty string")
         if not isinstance(self.user, str) or not self.user.strip():
             raise ValueError("Argo user must be a non-empty string")
-        if (
-            isinstance(self.timeout, bool)
-            or not isinstance(self.timeout, (int, float))
-            or not math.isfinite(self.timeout)
-            or self.timeout <= 0
-        ):
-            raise ValueError("LLM timeout must be positive and finite")
 
     def call(self, prompt: str, system_prompt: str | None = None, *,
              response_schema: dict | None = None) -> str:
@@ -64,14 +56,11 @@ class ArgoClient:
         messages.append({"role": "user", "content": prompt})
         payload: dict[str, Any] = {"model": self.model, "messages": messages, "user": self.user}
         model_key = self.model.lower().replace("-", "").replace(" ", "").replace("_", "")
-        if model_key.startswith("gpt55"):
-            payload["max_completion_tokens"] = 16000
         if model_key.startswith(("gpt5", "gpt6", "o1", "o3", "o4")) and self.reasoning_effort is not None:
             payload["reasoning_effort"] = self.reasoning_effort
         body = post_json(
             f"{self.base_url}/chat/completions",
             payload,
-            timeout=self.timeout,
         )
         try:
             choice = body["choices"][0]

@@ -28,6 +28,10 @@ ASSESSMENT_INSTRUCTION = (
     "does not assign credit or certify scientific validity. The host retains actual results, including "
     "results received immediately before yielding. action=recall retrieves referenced records, receipts "
     "or job detail indexes within this same episode; it earns no points and imposes no action order."
+    " Each operation's diagnostics describe that completed action and retain their originating responsibility "
+    "and repair owner. A successful inspection does not repair a prior rejected record or grant new premise "
+    "permissions. Preserve still-relevant prior problems in your assessment and report missing commissioned "
+    "inputs as unresolved premises for the parent."
 )
 
 
@@ -37,6 +41,32 @@ def reference(row):
 
 def public_receipt(receipt):
     return {key: value for key, value in receipt.items() if key != "episode"}
+
+
+def public_diagnostic(diagnostic):
+    return {key: deepcopy(diagnostic[key]) for key in (
+        "stage", "category", "status", "why", "origin", "repair_owner", "repair_action")
+        if key in diagnostic}
+
+
+def action_diagnostic(source, diagnostic, unit, choice):
+    """Attribute a new failure once; receiving parents retain its origin."""
+    diagnostic = deepcopy(diagnostic)
+    diagnostic.setdefault("origin", {
+        "responsibility": type(source).__name__, "action": unit, "choice": choice,
+        "own_action": source.own_action_count + 1,
+        "model_call": diagnostic.get("model_call", source.run.model_calls),
+    })
+    if diagnostic.get("stage") == "scientific_record" and "Unscoped keys:" in diagnostic.get("why", ""):
+        owner = "commissioning_parent"
+        repair = "commission_required_premise_inputs; inspection alone cannot grant dependency permission"
+    elif diagnostic.get("stage") in {"reading_memory", "reading_memory_reference"}:
+        owner, repair = "originating_reader", "select_supplied_reference_or_correct_reading_memory"
+    else:
+        owner, repair = "originating_episode", "correct_the_reported_action_or_return_its_unresolved_requirement"
+    diagnostic.setdefault("repair_owner", owner)
+    diagnostic.setdefault("repair_action", repair)
+    return diagnostic
 
 
 def assessment_schema(fields):
@@ -156,8 +186,7 @@ def unit_result(source, changes):
         "grading_needs": evidence_needs(source.ledger.causal_sheet, [row["key"] for row in evidence]),
         "grading_outcomes": [public_receipt(row) for row in changes.grading_actions],
         "operation_findings": list(changes.findings),
-        "diagnostics": [{key: row.get(key) for key in ("stage", "category", "status", "why")}
-                        for row in changes.diagnostics],
+        "diagnostics": [public_diagnostic(row) for row in changes.diagnostics],
     }
     if source.last_proposal and source.last_proposal.get("action") == "calculate" and not changes.grading_actions:
         packet["calculation"] = deepcopy(source.last_calculation)
@@ -221,12 +250,15 @@ def job_report(source, result, completion=None):
     if source.completion_diagnostic:
         ended["failure"] = {key: source.completion_diagnostic.get(key)
                             for key in ("stage", "category", "status", "why")}
-    return {"job": {"question": index["question"], "responsibility": type(source).__name__},
+    report = {"job": {"question": index["question"], "responsibility": type(source).__name__},
         "completion": ended,
         "assessment": deepcopy(source.working_assessment),
         "selected_results": selected_results(source, result),
         "unreviewed_results": deepcopy([*source.unreviewed_children, *source.unreviewed_results]),
-        "details_ref": ref, "score_component_changes": score_changes(source, result)}
+        "details_ref": ref}
+    if source.parent_contract is None or "score_component_changes" in source.parent_contract.information:
+        report["score_component_changes"] = score_changes(source, result)
+    return report
 
 
 def recall(source, proposal):

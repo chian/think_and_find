@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import math
 from typing import Any, Mapping
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
@@ -57,18 +56,10 @@ def post_json(
     payload: Mapping[str, Any],
     *,
     api_key: str = "",
-    timeout: float = 300.0,
 ) -> dict[str, Any]:
     """Post one JSON request, preserving failures for the workflow reports."""
 
     url = http_url(url, "provider URL")
-    if (
-        isinstance(timeout, bool)
-        or not isinstance(timeout, (int, float))
-        or not math.isfinite(timeout)
-        or timeout <= 0
-    ):
-        raise ValueError("provider timeout must be positive and finite")
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
@@ -81,7 +72,7 @@ def post_json(
         method="POST",
     )
     try:
-        with urlopen(request, timeout=timeout) as response:
+        with urlopen(request, timeout=300) as response:
             raw = response.read()
     except HTTPError as exc:
         detail = _http_error_detail(exc, api_key)
