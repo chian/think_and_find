@@ -10,6 +10,12 @@ The episode chooses work from its available alternatives. The configured local
 yield estimator/controller observes completed own units and governs numerical
 continuation. Its observations do not prescribe which action to choose.
 
+Discovery and Scientific use signed scientific-score value-of-computation
+forecasts. The reusable statistical function is `value_of_computation.py`; the
+application binding lives in `case_reports/research/computation_yield.py`. All
+other episodes retain `joint_preferential_discovery_v1`. See
+[VOC measurement, continuation and limitations](../docs/VALUE_OF_COMPUTATION.md).
+
 Record outcomes before projecting credit. One completed child supplies one
 parent-level observation through its return. Internal child calls do not create
 extra parent turns, and child scores are not summed into parent progress.

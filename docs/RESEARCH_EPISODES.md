@@ -34,6 +34,10 @@ attempt has its own estimator and may repeatedly choose either scientific branch
 The root's own threshold may be zero so it remains open across attempts; this
 does not disable an attempt's estimator. An attempt's starting question is a
 seed for the generic objective, not a separate task mode or a prescribed case.
+Discovery and Scientific use signed scientific-score VOC for their own
+continuation and receive its forecasts in their next decisions. Every other
+episode retains `joint_preferential_discovery_v1`; see
+[VOC state and measurement semantics](VALUE_OF_COMPUTATION.md).
 Reasoning has fixed sheet operations: record,
 inspect, calculate and evaluate. First-principles deductions, repair arguments
 and critiques are logical assignments with those same decisions;

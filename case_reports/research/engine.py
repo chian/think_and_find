@@ -106,6 +106,7 @@ class ResearchRun:
         self.total_units = self.sequence = self.diagnostic_sequence = 0
         self.controller_specs, self.live_controllers, self.sources = {}, {}, {}
         self.handoff_details = {}
+        self.computation_models = {}
         self.root_source = self.root_key = None
         root = Path(__file__).resolve().parents[2]
         paths = list(root.glob("*.py"))
@@ -139,12 +140,23 @@ class ResearchRun:
 
     def controller(self, path):
         source = self.controller_specs[path[-1][1]]
-        controller = ResearchController(source.credit_columns, window=self.limits.yield_window,
-            root_window=self.limits.root_yield_window, initial=source.credit(source.ledger.result()), point_scores=True,
-            yield_threshold=self.limits.root_yield_threshold if len(path) == 1 else None,
-            scope_path=path)
+        if source.episode_grain in {"discovery", "scientific"}:
+            from .computation_yield import ScientificTransitionModel, ScientificVOCController
+            model = self.computation_models.setdefault(source.episode_grain, ScientificTransitionModel())
+            controller = ScientificVOCController(source, path, model)
+        else:
+            controller = ResearchController(source.credit_columns, window=self.limits.yield_window,
+                root_window=self.limits.root_yield_window, initial=source.credit(source.ledger.result()), point_scores=True,
+                yield_threshold=self.limits.root_yield_threshold if len(path) == 1 else None,
+                scope_path=path)
         self.live_controllers[path] = controller
         return controller
+
+    def computation_controller(self, source):
+        if source.episode_grain in {"discovery", "scientific"}:
+            return next((controller for path, controller in self.live_controllers.items()
+                         if path[-1][1] == source.controller_key), None)
+        return None
 
     def root_credit_projection(self, status=None):
         return (status or self.global_goal.preview())["total_score"]
@@ -459,6 +471,9 @@ class ResearchSource:
     def bounded_inputs(self, view, declared):
         from .episode_memory import learn_references
         steering = dict(declared)
+        controller = self.run.computation_controller(self)
+        if controller is not None:
+            steering["value_of_computation"] = controller.feedback()
         steering["working_assessment"] = self.working_assessment
         steering["new_results"] = self.unreviewed_results
         if self.assessment_error:
@@ -546,6 +561,9 @@ class ResearchSource:
             # alternatives; only matching record identities receive revisions.
             self.ledger.merge(self.run.global_goal.ledger.result())
             self.last_proposal = None
+            controller = self.run.computation_controller(self)
+            if controller is not None:
+                controller.begin()
             return self.propose(view)
         except (ProviderError, ValueError, TypeError, KeyError, OSError) as exc:
             result = self.failure_result(exc, "proposal")

@@ -71,9 +71,10 @@ files, caches and resource receipts stay beneath this checkout's `runs/`.
 It retains ownership until descendants have exited. Machine resource bounds are
 separate from the application's episode continuation decisions.
 
-Use `--root-yield-threshold 0` for a standing investigation. The estimator
-yields only when nonnegative recent gain is strictly below its threshold, so
-zero makes that cutoff unreachable. Child thresholds retain their normal values.
+Use `--root-yield-threshold 0` for a standing investigation. Discovery remains
+open regardless of its VOC forecast. Scientific attempts use VOC continuation;
+all other episodes retain their existing numerical yield estimators. See
+[VOC measurements and limitations](docs/VALUE_OF_COMPUTATION.md).
 Provider or input failures remain operational failures. Checkpoints retain the threshold.
 
 The default objective is defined in `case_reports/research/task.py`. Optional
