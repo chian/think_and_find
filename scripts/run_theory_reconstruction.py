@@ -70,6 +70,7 @@ def main(argv=None):
     from episodic_workflow.case_reports.research.theory_episodes import TheoryReconstructionSource
     from episodic_workflow.case_reports.research.theory_language import empty_fragment
     from episodic_workflow.case_reports.research.theory_runtime import COMPONENT_KINDS
+    from episodic_workflow.case_reports.research.records import Ledger
     from episodic_workflow.method_loop import Context, EpisodeCompletion, EpisodeGoal
     from episodic_workflow.method_loop.archive import iter_json, write_json
 
@@ -115,9 +116,11 @@ def main(argv=None):
         identifiers = tuple(dict.fromkeys((record.episode_id, record.goal.goal_id,
             *episode.request.message.audit_identifiers(), *result.audit_identifiers())))
         report = contract.admit(values, audit_identifiers=identifiers).as_record()
+        fragment_ref = report["theory_fragment"]
+        fragment = Ledger(result).causal_sheet.snapshot(fragment_ref)
         artifacts = {
             "parent-report.json": report,
-            "theory-graph.json": report["theory_fragment"],
+            "theory-graph.json": {**fragment_ref, "data": fragment["data"]},
             "research-state.json": result.as_record(),
             "controller.json": {"completion": completion.as_record(),
                                 "state": record.controller_state,

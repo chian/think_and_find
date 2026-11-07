@@ -21,6 +21,7 @@ from .episode_contracts import (SearchStrategyCommission, SearchCommission, Page
 from . import episode_credit
 from .theory_runtime import (
     theory_context, theory_credit, theory_report, integration_schema, integrate_theory,
+    deduplicate_theory_inputs,
 )
 
 
@@ -37,7 +38,7 @@ class LiteratureSource(ResearchSource):
             "commission": self.commission.as_record(), **self.context(),
             "local_yield": self.credit(self.ledger.result()).as_record(),
             **kwargs}
-        return self.bounded_inputs(view, declared)
+        return self.bounded_inputs(view, deduplicate_theory_inputs(self, declared))
 
     def child_contract(self, commission_type, question):
         keys = list(dict.fromkeys([*self.commission.inputs, *self.selected_keys]))

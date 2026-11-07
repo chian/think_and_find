@@ -86,8 +86,8 @@ class LiteratureCommission:
 
 
 THEORY_RETURN_FIELDS = {
-    "theory_fragment": "The shared typed reconstruction with its exact stored identity and version.",
-    "theory_contributions": "Typed additions addressing this request, deduplicated contribution identities, and unresolved validation repair."}
+    "theory_fragment": "Exact key/version reference to the shared typed reconstruction; full content is in the scientific sheet and available through recall.",
+    "theory_contributions": "Added component IDs grouped by entity, quantity, statement and gap within the referenced fragment, deduplicated contribution identities, and unresolved validation repair. Component definitions are not copied into the return."}
 
 
 @dataclass(frozen=True)

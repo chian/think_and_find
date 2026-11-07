@@ -36,8 +36,19 @@ remain fixed. A whole response can be replaced only after its original parsing
 or top-level shape failed. Failed corrective calls retain the current response
 and outstanding targets, while valid partial corrections become fixed.
 
-Search Strategy and Search translate evidence into the fragment and return its
-exact version plus their additions and unresolved requirements. Their credit is
+Search Strategy and Search translate evidence into the fragment and return an
+exact key/version reference, added component IDs and unresolved requirements.
+The current typed fragment is supplied once in the parent's decision context;
+child returns do not copy its component definitions. Full versions remain in
+the scientific sheet and can be retrieved through ordinary `recall` decisions.
+Raw source content is supplied for commissioned or selected records and evidence
+cited by rejected additions during format repair. Other acquired evidence is
+listed by exact key/version, source and locator, so the episode can select what
+to recall. It is not automatically copied into every subsequent prompt.
+Normalization reports give form identities, matching statement groups and
+unresolved operations; they do not serialize recursively expanded dependencies.
+These projections use no character, item or token quota. Final unreviewed
+outcomes remain part of the ordinary episode return. Request-relative credit is
 new source-grounded component identities within the commissioned reconstruction,
 requested component kinds and focus. Page and processing readers retain local
 extraction credit. Child scores are not summed; each parent recomputes its own

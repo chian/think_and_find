@@ -51,6 +51,43 @@ def evidence_lookup(sheet):
     return lookup
 
 
+def selected_source_evidence(source):
+    """Resolve commissioned, selected and repair-specific evidence, not history."""
+    sheet = source.ledger.causal_sheet
+    refs = {}
+
+    def select(ref):
+        row = sheet.snapshot(ref)
+        if row["kind"] == "evidence":
+            refs[(row["key"], row["version"])] = ref
+
+    for key in dict.fromkeys([*source.commission.inputs, *source.selected_keys]):
+        select(sheet.anchor(key))
+    for ref in [*source.scoped_snapshots(), *source.working_assessment["record_refs"]]:
+        select(ref)
+
+    # Format repair needs the actual evidence cited by the rejected additions.
+    # Invalid references stay in validator feedback; known ones supply their
+    # exact source content without copying every acquired source record.
+    def repair_references(value):
+        if isinstance(value, dict):
+            evidence = value.get("evidence", ())
+            for ref in evidence if isinstance(evidence, (list, tuple)) else ():
+                if (isinstance(ref, dict) and set(ref) == {"key", "version"}
+                        and isinstance(ref["key"], str) and isinstance(ref["version"], str)
+                        and (ref["key"], ref["version"]) in known):
+                    select(ref)
+            for child in value.values():
+                repair_references(child)
+        elif isinstance(value, (list, tuple)):
+            for child in value:
+                repair_references(child)
+
+    known = {(row["key"], row["version"]) for row in sheet.history if row["kind"] == "evidence"}
+    repair_references(getattr(source, "theory_repair", None))
+    return sheet.snapshot_view(list(refs.values()))
+
+
 def theory_context(source):
     from .theory_language import language_reference, normalization_report
     sheet = source.ledger.causal_sheet
@@ -58,14 +95,42 @@ def theory_context(source):
     fragment = fragment_from_sheet(sheet, request["reconstruction"])
     from .theory_language import evidence_references
     refs = {(ref["key"], ref["version"]): ref for ref in evidence_references(fragment)}
-    original = {row["version"] for row in source.initial.causal_sheet_updates}
+    selected = selected_source_evidence(source)
     for key, row in sheet.of_kind("evidence"):
-        if row["version"] not in original or key in source.commission.inputs or key in source.selected_keys:
-            refs[(key, row["version"])] = {"key": key, "version": row["version"]}
+        refs[(key, row["version"])] = {"key": key, "version": row["version"]}
+    for row in selected:
+        refs[(row["key"], row["version"])] = {"key": row["key"], "version": row["version"]}
+    available = []
+    for ref in refs.values():
+        row = sheet.snapshot(ref)
+        available.append({**ref, "kind": "evidence", "source": row["data"]["source"],
+                          "locator": row["data"]["locator"]})
     return {"theory_request": request, "theory_fragment": fragment,
-            "source_evidence": sheet.snapshot_view(list(refs.values())),
+            "source_evidence": selected, "available_source_evidence": available,
             "theory_language": language_reference(),
             "formal_comparisons": normalization_report(fragment, evidence_lookup=evidence_lookup(sheet))}
+
+
+def deduplicate_theory_inputs(source, inputs):
+    """Present each selected record body once across literature context fields."""
+    inputs = dict(inputs)
+    key = source.commission.theory_request["reconstruction"]
+    fragment = source.ledger.causal_sheet.rows[key]
+    shown = {(key, fragment["version"]): "theory_fragment"}
+    for field in ("source_evidence", "scientific_inputs", "historical_inputs"):
+        if field not in inputs:
+            continue
+        records = []
+        for row in inputs[field]:
+            ref = (row["key"], row["version"])
+            if ref in shown:
+                records.append({**{name: value for name, value in row.items() if name != "data"},
+                                "content_in": shown[ref]})
+            else:
+                records.append(row)
+                shown[ref] = field
+        inputs[field] = records
+    return inputs
 
 
 def reader_theory_context(source):
@@ -187,9 +252,9 @@ def theory_report(source, result):
     previous = Ledger(source.initial).causal_sheet
     before = (fragment_from_sheet(previous, request["reconstruction"])
               if request["reconstruction"] in previous.rows else {group: {} for group in COMPONENT_GROUPS})
-    additions = {group: {key: value for key, value in fragment[group].items()
-                         if key not in before[group]} for group in COMPONENT_GROUPS}
-    return {"theory_fragment": {"key": row["key"], "version": row["version"], "data": fragment},
-            "theory_contributions": {"request": deepcopy(request), "additions": additions,
+    additions = {group: [key for key in fragment[group] if key not in before[group]]
+                 for group in COMPONENT_GROUPS}
+    return {"theory_fragment": {"key": row["key"], "version": row["version"]},
+            "theory_contributions": {"request": deepcopy(request), "added_components": additions,
                 "identities": sorted(_contributions(sheet, request) - _contributions(previous, request)),
                 "repair": deepcopy(getattr(source, "theory_repair", None))}}

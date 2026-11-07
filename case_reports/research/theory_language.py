@@ -734,18 +734,23 @@ def contribution_identities(fragment, evidence_lookup=None):
 
 
 def normalization_report(fragment, evidence_lookup=None):
-    """Expose exact forms and unresolved operations instead of validity flags."""
+    """Report exact-form identities without serializing expanded dependencies."""
     fragment = validate_fragment(fragment, evidence_lookup=evidence_lookup)
-    reports = {}
+    reports, groups = {}, {}
     for key in fragment["statements"]:
         normalizer = _Normalizer(fragment, evidence_lookup)
         form = normalizer.component(key)
-        reports[key] = {"normal_form": form,
-                        "unresolved_equivalence": sorted(normalizer.unresolved),
-                        "comparison": "Matching forms establish only the represented identity on the retained domain. "
-                        "Different forms leave equivalence unresolved; general polynomial factorization, "
-                        "analytic identities and source fidelity are not decided here."}
-    return reports
+        identity = "normal-form:" + _digest(form)
+        reports[key] = {"normal_form_id": identity,
+                        "unresolved_equivalence": sorted(normalizer.unresolved)}
+        groups.setdefault(identity, []).append(key)
+    return {"statements": reports,
+            "matching_forms": [keys for keys in groups.values() if len(keys) > 1],
+            "comparison": "Matching forms establish only the represented identity on the retained domain. "
+                "Different forms leave equivalence unresolved; general polynomial factorization, "
+                "analytic identities and source fidelity are not decided here. The typed expressions "
+                "are in theory_fragment; normal_form_id identifies the calculated form without "
+                "repeating its recursively expanded dependencies."}
 
 
 def language_reference():
@@ -758,6 +763,14 @@ def language_reference():
                   "([{key,version}] immutable source-evidence snapshots), supersedes (older IDs or []). "
                   "Do not invent native IDs or evidence. Existing components cannot be overwritten. "
                   "Revise using a new ID and supersedes; old definitions remain available.",
+        "source_records": "source_evidence contains commissioned, selected and repair-specific source records. "
+                  "available_source_evidence is an exact key/version index with source and locator, not source content. "
+                  "Choose recall with kind=record and the exact key/version to examine other evidence. "
+                  "Child theory_fragment fields are exact record references; added_components lists component IDs "
+                  "within that version. The current theory_fragment supplies the typed account once. "
+                  "A record with content_in points to the context field holding that exact version's body; "
+                  "its remaining metadata is retained without another copy of data. "
+                  "Select needed evidence in working_assessment.record_refs rather than inheriting all prior extraction.",
         "entity": "An entity denotes what the theory models or explains. kind describes its scientific type; "
                   "definition declares its meaning. Citation records, cited publications and bibliographic "
                   "metadata belong in source leads and provenance, not in the theory's component maps.",
