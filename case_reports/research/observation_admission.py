@@ -80,7 +80,7 @@ def compare_observations(sheet, templates, evidence_keys):
                 staged.put(contribution_key, "support_contribution", {
                     "support": support_key, "applications": [],
                     "facts": [{"evidence": evidence_key, "observation": observation_key}],
-                    "argument": argument_key, "checks": [check_key]})
+                    "reasoning_key": argument_key, "checks": [check_key]})
     if not matched and not diagnostics:
         diagnostics.append({"stage": "observation_calculation", "status": "unresolved",
             "category": "no_matching_observation",

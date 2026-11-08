@@ -14,7 +14,7 @@ import math
 from ..case_reports.research.support_observations import observation_identity
 
 
-SUPPORT_FIELDS = ("support", "applications", "facts", "argument", "checks")
+SUPPORT_FIELDS = ("support", "applications", "facts", "reasoning_key", "checks")
 CHANGE_FIELDS = ("break", "source", "target", "importance", "argument", "assessment")
 
 
@@ -49,7 +49,7 @@ def claim_of(sheet, expectation):
 
 def references(kind, data):
     if kind == "support_contribution":
-        return [data["support"], data["argument"], *data["applications"],
+        return [data["support"], data["reasoning_key"], *data["applications"],
                 *(item["evidence"] for item in data["facts"]), *data["checks"]]
     return [data["break"], data["importance"], data["argument"], *([data["assessment"]] if data["assessment"] else [])]
 
@@ -72,11 +72,32 @@ def accepted_fields(kind, data):
     return required if isinstance(data, dict) and set(data) == required else set()
 
 
+def validate_reasoning_key(sheet, data, *, visible=None):
+    """Check the support argument reference before collecting dependencies."""
+    field = "support_contribution.data.reasoning_key"
+    guidance = ("Create a reasoning record earlier in this batch or use an accessible admitted "
+                "reasoning record. Put explanatory text in that record's steps and conclusion, "
+                "then reference its key here.")
+    reference = data.get("reasoning_key") if isinstance(data, dict) else None
+    if not isinstance(reference, str) or not reference.strip():
+        raise ValueError(f"{field} requires a nonempty reasoning-record key. {guidance}")
+    if reference not in sheet.rows:
+        raise ValueError(f"{field} requires an admitted reasoning-record key; {reference!r} "
+                         f"does not identify an admitted record. {guidance}")
+    if visible is not None and reference not in visible:
+        raise ValueError(f"{field} references {reference!r} outside this commission. "
+                         f"Ask the parent to supply it as an input. {guidance}")
+    if sheet.rows[reference]["kind"] != "reasoning":
+        raise ValueError(f"{field} requires a reasoning record; {reference!r} identifies "
+                         f"a {sheet.rows[reference]['kind']} record. {guidance}")
+    return reference
+
+
 def validate(sheet, key, kind, data):
     if not accepted_fields(kind, data):
         raise ValueError("Scientific credit record requires its exact executable operands")
-    sheet._require_kind(data["argument"], "reasoning")
     if kind == "support_contribution":
+        reasoning_key = validate_reasoning_key(sheet, data)
         sheet._require_kind(data["support"], "expectation_support")
         support = sheet.rows[data["support"]]["data"]
         if not isinstance(data["applications"], list) or not isinstance(data["facts"], list):
@@ -99,7 +120,7 @@ def validate(sheet, key, kind, data):
         for ref in selected:
             if not any(sheet._depends_on(ground, ref) for ground in support["grounds"]):
                 raise ValueError("Selected contribution must belong to the B_G support argument's grounds")
-            if not sheet._depends_on(data["argument"], ref):
+            if not sheet._depends_on(reasoning_key, ref):
                 raise ValueError("The support derivation must address every counted application/observation")
         previous = sheet.rows.get(key)
         if previous and previous["data"]["support"] != data["support"]:
@@ -112,10 +133,11 @@ def validate(sheet, key, kind, data):
             if sheet.rows[check]["data"]["support"] != data["support"]:
                 raise ValueError("Support contribution and subscoring assessments must share one exact B_G support claim")
             formalization = sheet.rows[check]["data"].get("source_formalization", "")
-            if formalization and not sheet._depends_on(data["argument"], formalization):
+            if formalization and not sheet._depends_on(reasoning_key, formalization):
                 raise ValueError("The public support derivation must address the formalized source statement")
         return
 
+    sheet._require_kind(data["argument"], "reasoning")
     sheet._require_kind(data["break"], "expectation_break")
     for name in ("source", "target"):
         if sheet.snapshot(data[name])["kind"] != "expectation":
@@ -214,7 +236,7 @@ def compile_support(sheet):
                     candidates[0]["hypothesis"]["status"] if candidates else "awaiting_executable_dependence"})
             for check in accepted:
                 identity = check["hypothesis"]["identity"]
-                dependencies = {key, data["support"], data["argument"], application,
+                dependencies = {key, data["support"], data["reasoning_key"], application,
                     check["assessment"], check["importance"], check["bounds_test"]}
                 dependencies.update(result_key(check["importance"], case) for case in check["hypothesis"]["witness_cases"])
                 units.append(("hypotheses", identity, {"application": application,
@@ -229,7 +251,7 @@ def compile_support(sheet):
                     "status": "stale_operands" if not current else
                     candidates[0][1]["status"] if candidates else "awaiting_executable_alignment"})
             for check, result in accepted:
-                dependencies = {key, data["support"], data["argument"], fact["evidence"],
+                dependencies = {key, data["support"], data["reasoning_key"], fact["evidence"],
                     check["assessment"], check["application"], check["importance"], check["bounds_test"],
                     result_key(check["importance"], result["case_id"])}
                 dependencies.update(result_key(check["importance"], case) for case in check["hypothesis"]["witness_cases"])
@@ -387,7 +409,8 @@ def record_schema(kind, snapshot_schema):
         properties = {"support": text, "applications": {"type": "array", "uniqueItems": True, "items": text},
                       "facts": {"type": "array", "items": {"type": "object", "additionalProperties": False,
                           "required": ["evidence", "observation"], "properties": {"evidence": text, "observation": text}}},
-                      "argument": text, "checks": {"type": "array", "maxItems": 16, "uniqueItems": True, "items": text}}
+                      "reasoning_key": {**text, "description": "Exact key of an accessible admitted reasoning record, or one created earlier in this batch. Put argument prose in that record's steps and conclusion; this field contains only its key."},
+                      "checks": {"type": "array", "maxItems": 16, "uniqueItems": True, "items": text}}
     else:
         properties = {"break": text, "source": snapshot_schema, "target": snapshot_schema,
                       "importance": text, "argument": text, "assessment": text}

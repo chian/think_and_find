@@ -15,6 +15,13 @@ exact equation, deterministic acyclic SCM and discrete-simulation evaluators are
 retained. The support ledger retains observation deduplication, original-G
 identity and post-break revaluation of an existing change.
 
+Dependencies on an append-only theory reconstruction resolve the exact recorded
+fragment snapshot. Adding components advances the reconstruction version without
+invalidating earlier assessments or withdrawing their support/change credit.
+The new material remains available for further scientific comparisons. Update
+admission still rejects stale writes; version advancement does not establish a
+scientific failure or change to G.
+
 Calculation receipts now reproduce their declared computation on admission.
 Digest or shape validation alone does not establish that a result was calculated.
 Support/change records require their declared executable operands.
@@ -86,6 +93,13 @@ Formal aliases additionally share an identity. This grouping is an explicit
 operational identity convention, not a solution to all scientific semantic equivalence.
 Source-established observation identities prevent copied citations, extraction
 renaming and metadata fields from becoming new facts.
+
+`support_contribution.reasoning_key` references the exact key of its public
+`reasoning` record. Create that record earlier in the same batch or select an
+accessible admitted record; its `steps` and `conclusion` contain the argument
+text. `expectation_support.argument` contains prose. Missing, inaccessible or
+wrong-kind reasoning references return a field-specific repair diagnostic through
+the existing episode feedback.
 
 `support_contribution.checks` selects these executed assessments. The ledger
 reports hypothesis and observation components separately and per exact B_G and G.

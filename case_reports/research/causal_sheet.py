@@ -84,8 +84,10 @@ class CausalSheet:
     """Candidate inferences with scoped theory applications and assessments.
 
     Updates use optimistic version checks: a stale child cannot overwrite a
-    changed premise or judgment. Old dependent judgments stay in the audit but
-    cease contributing until reconsidered against current inputs.
+    changed premise or judgment. Dependencies on an append-only reconstruction
+    resolve their recorded snapshots, so later additions leave earlier findings
+    and their credit intact. Changes to other unpinned inputs still require
+    dependent judgments to be reconsidered.
     """
 
     def __init__(self, updates=()):
@@ -153,6 +155,8 @@ class CausalSheet:
         self._snapshots = staged._snapshots
 
     def _references(self, kind, data):
+        if kind == "support_contribution":
+            causal_support.validate_reasoning_key(self, data)
         expected = set(FIELDS.get(kind, ()))
         if kind not in FIELDS or not isinstance(data, dict) or set(data) != expected:
             raise ValueError(f"{kind!r} requires exactly its declared sheet fields")
@@ -470,7 +474,16 @@ class CausalSheet:
         if version is not None and version in pins.get(key, set()):
             return self._snapshots[version]
         row = self.rows[key]
-        return row if version is None or row["version"] == version else None
+        if version is None or row["version"] == version:
+            return row
+        if row["kind"] == "theory_fragment":
+            # Integration can only append components; earlier definitions remain
+            # immutable. Assess a finding against the reconstruction it used,
+            # without making later additions prerequisites for its credit.
+            recorded = self._snapshots.get(version)
+            if recorded is not None and recorded["key"] == key:
+                return recorded
+        return None
 
     def _claim_pins(self, row, pins):
         additional = {}

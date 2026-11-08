@@ -117,8 +117,10 @@ Support is counted from explicit support_contribution operands linked to an expe
 argument for the exact G and expected generalizability bounds. Select applications whose
 hypotheses meaningfully depend on G and additional aligned observations from native source
 measurements. The public argument must address each selected operand. Reuse canonical theory,
-study and source observation identities across copies and paraphrases. Contexts of one theory
-are not new hypotheses; an additional observation can contribute separately. A citation or
+study and source observation identities across copies and paraphrases. support_contribution.reasoning_key
+contains the exact key of its public reasoning record, not argument prose. Create that record earlier
+in the batch or use an accessible admitted reasoning record; put its argument in steps and conclusion.
+Contexts of one theory are not new hypotheses; an additional observation can contribute separately. A citation or
 an arbitrary new measurement label is not an additional observation. Use typed native.observations
 with source-established observation IDs or precise source locators; units and uncertainty
 are attributes, not additional facts. Keep unresolved hypothesis identities pending. These counts are support
@@ -358,6 +360,8 @@ def read_sheet_result(sheet, commission, records, *, actor, owned_subjects=()):
                 raise ValueError("Child cannot define a protocol outside its scientific commission")
             if key in sheet.rows and key not in visible:
                 raise ValueError("Child cannot revise an uncommissioned scientific record")
+            if kind == "support_contribution":
+                causal_support.validate_reasoning_key(staged, data, visible=visible)
             references = staged._references(kind, data) | set(record["dependencies"])
             missing = references - visible
             if missing:
