@@ -31,8 +31,7 @@ Runs whose request directed the application to perform development reading are
 invalid research runs; retain them only as audit evidence, not resumable research
 or seed material. A corrected run starts from the generic runtime objective.
 
-A run launched with `--root-yield-threshold 0` keeps Discovery open across
-scientific attempts regardless of its VOC forecast, retaining the shared ledger.
-The threshold is stored with checkpoint limits and retained on resume. Scientific
-attempts use their own VOC continuation; other episodes preserve their existing
-numerical estimators and decision contracts.
+A run launched with `--root-yield-threshold 0` keeps Root open across Discovery
+and Scientific commissions regardless of its VOC forecast, retaining the shared
+ledger. The threshold is stored with checkpoint settings and retained on resume.
+Both arms and their children use their ordinary numerical yield estimators.

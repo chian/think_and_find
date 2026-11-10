@@ -1,0 +1,84 @@
+[
+  {
+    "call": 1144,
+    "key": "borghans_standard_closure_transfer_G",
+    "kind": "inference",
+    "data": {
+      "statement": "Candidate to test, NOT an unrestricted claim attributed to the authors: carrying the standard post-transient closure C_s=E_0 S/(K_m+S), S'=-k_2 C_s and unchanged reduced starting value S_0 from small E_0/(S_0+K_m) conditions into depletion with that smallness restriction relaxed remains a useful approximation to free-substrate evolution and catalytic product formation and their specified depletion endpoints.",
+      "variables": [
+        "time t",
+        "free substrate S",
+        "complex C",
+        "product P",
+        "total unconverted substrate T=S+C",
+        "total enzyme E_0",
+        "initial substrate S_0",
+        "association coefficient k_1",
+        "dissociation coefficient k_{-1}",
+        "catalytic coefficient k_2",
+        "K_m=(k_{-1}+k_2)/k_1",
+        "positive depletion endpoint"
+      ],
+      "intervention": "Increase E_0 at fixed S_0 and fixed rate coefficients, carrying the standard closure and unchanged initialization without an initial-layer correction.",
+      "outcome": "Post-transient S(t), P(t)=integral k_2 C dt and positive-threshold depletion times, with endpoint coordinate explicitly specified.",
+      "grain": "Deterministic homogeneous mass-action concentrations for one enzyme conversion mechanism; comparison to its full dynamical system, not experiments.",
+      "domain": "Nonnegative initial concentrations, S_0>0, E_0>0, k_1>0, k_2>0, k_{-1}>=0; standard low-enzyme use and attempted transfer beyond its source-estimated regime."
+    }
+  },
+  {
+    "call": 1144,
+    "key": "borghans_transfer_provisional_bounds",
+    "kind": "expectation",
+    "data": {
+      "inference": "borghans_standard_closure_transfer_G",
+      "bounds": "Provisional expectation: retain standard post-transient success when epsilon_s=E_0/(S_0+K_m)<<1, as in (11). Do not expect unchanged standard initialization to transfer uniformly when epsilon_s is not small; loss of this sufficient condition is not proof of failure at every such point. For the total-coordinate alternative, expect improvement where epsilon_T=k_2 E_0/[k_1(E_0+S_0+K_m)^2]<<1, the source estimate (23), while independently requiring small C_*/A for rational approximation (17), in connection with (18). Retain reported nonmonotonic total-QSSA performance at k_2=10: intermediate-enzyme failure and high-enzyme recovery, not monotonic deterioration or a universal repair.",
+      "basis": "provisional_judgment",
+      "rationale": "The bounds distinguish source analytical sufficiency estimates, independent algebraic rationalization error and reported phase-plane tracking. They impose no invented numerical tolerance and do not certify depletion-time accuracy.",
+      "grounds": [
+        "borghans_closure_initialization_public_assessment",
+        "evidence:5bab3471979aaf1bccb432b1",
+        "evidence:e84cae7bd9f137ad599b3aa2",
+        "evidence:11446b712ac0280d81cf076e",
+        "evidence:4597dbab02f45d3cd7d225eb",
+        "evidence:481767e3db8f6558a9451253"
+      ],
+      "revision": null
+    }
+  },
+  {
+    "call": 1168,
+    "key": "borghans_endpoint_tasks_selected",
+    "kind": "premise",
+    "data": {
+      "statement": "Investigator-selected deterministic tasks: S0=0.1, C0=P0=0, k1=10, km1=1, with cases A:(k2,E0)=(0.1,0.01), B:(0.1,1), C:(10,1), D:(10,100). Targets are the first downward crossing S=0.05 and first upward crossing P=0.05, measured from the prescribed initial time. For an existing positive reduced crossing, signed relative timing error is (t_reduced-t_full)/t_full; useful timing accuracy means its absolute value is at most 0.05. Standard reduction uses S(0)=0.1 and P=0.1-S. Both total reductions use T(0)=0.1, S=T-C(T), P=0.1-T. An algebraic reconstruction already below the free-S threshold is classified as already passed at initialization, not assigned a negative crossing time.",
+      "scope": "Four commissioned mathematical tasks within the existing mechanism and G; parameter units follow the supplied internally consistent rate convention, with physical unit names unspecified.",
+      "basis": "Commissioned investigator choices, not extracted measurements, source accuracy criteria, or experimental validation."
+    }
+  },
+  {
+    "call": 1190,
+    "key": "borghans_B_product_timing_layer_retained_certificate",
+    "kind": "reasoning",
+    "data": {
+      "author": "scientific_agent",
+      "premises": [
+        "borghans_endpoint_tasks_selected",
+        "borghans_kinetic_typed_reconstruction",
+        "borghans_endpoint_reduction_quadratures"
+      ],
+      "steps": [
+        "Specialize only to commissioned B: S0=0.1, C0=P0=0, E0=1, k1=10, km1=1, k2=0.1, Km=0.11. Write L=ln(2), t_f for full elapsed time to P=0.05, and t_q,t_r for the separately initialized quadratic-total and rational-total predictions. In full coordinates T=S+C, the equations are T'=-0.1*C, C'=10*((1-C)*(T-C)-0.11*C), S'=-10*(1-C)*S+C. Inventory gives P=0.1-T. Thus the product endpoint is T=0.05 in all three models. No clock reset or algebraic initialization is applied to the full IVP.",
+        "First establish an independent invariant bound, not a fitted relaxation estimate. Positivity gives 0<=C<=T<=0.1. At C=0.09, the largest possible C' occurs at T=0.1 and equals 10*(0.91*0.01-0.11*0.09)=-0.008<0. Because initially C=0, the full trajectory cannot cross C=0.09 upward. Therefore 0<=C<=0.09, and a(t)=10*(1-C) lies in [9.1,10] throughout the endpoint interval.",
+        "Define x=S/T, with 0<=x<=1 and actual x(0)=1. Direct differentiation, using C/T=1-x, gives x'=1-(a+0.9)*x-0.1*x^2. Consequently x'<=1-10*x because a>=9.1. Also x'>=1-11*x because a<=10 and x^2<=x. Integrating these scalar differential inequalities from the actual initial time yields 1/11+(10/11)*exp(-11*t)<=x(t)<=1/10+(9/10)*exp(-10*t). This explicitly retains the initial unbound-substrate relaxation.",
+        "Integrating the x bounds gives t/11<=integral_0^t x(u)du<=t/10+(9/100)*(1-exp(-10*t))<=t/10+9/100. The exact inventory identity is ln(0.1/T(t))=(1/10)*(t-integral_0^t x(u)du). Therefore at the endpoint L, one obtains 11*L<=t_f<=(100/9)*L+1/10. The additive 1/10 in the upper elapsed-time bound comes from retaining the transient contribution before solving for time; it is not inferred from a small product-loss estimate. The same upper x bound ensures eventual crossing: ln(0.1/T(t))>=(9/100)*t-9/1000 tends to infinity. Positivity and the nonzero binding input give the unique positive product endpoint.",
+        "For the quadratic-total reduction, let q(T) be the smaller physical root of (1-q)*(T-q)=0.11*q. Its root is positive and below 0.09 for 0.05<=T<=0.1: the complex rate polynomial is positive at C=0 and negative at C=0.09, and its physical branch is the smaller root. Rearrangement gives q/T=(1-q)/(1.11-q). This fraction decreases with q, since its derivative is -0.11/(1.11-q)^2. Thus 91/102<=q/T<=100/111. Integrating t_q=integral_0.05^0.1 10*dT/q(T), without numerical quadrature, gives (111/10)*L<=t_q<=(1020/91)*L.",
+        "Combine those independently established quadratic and full-time bounds: t_q/t_f >= [(111/10)*L]/[(100/9)*L+1/10] and t_q/t_f <=1020/1001. Since L>1/2, the lower bound exceeds 999/1018. Hence a convenient outward enclosure is 999/1018<=t_q/t_f<=1020/1001. It lies strictly inside [19/20,21/20]: 19980>19342 and 20400<21021. Quadratic-total product timing therefore passes the investigator-selected 5% criterion in B, conditional on the commissioned IVP.",
+        "For the separate rational-total reduction, r(T)=T/(1.11+T), its exact elapsed-time expression is t_r=1/2+(111/10)*L. The full-time upper bound gives t_r/t_f >= [1/2+(111/10)*L]/[(100/9)*L+1/10]. This last function decreases with L: the numerator in its derivative is 111/100-50/9<0. An elementary strict bound L<25/36 follows from L=2*sum_{n>=0}[(1/3)^(2*n+1)/(2*n+1)]: retain the first term 2/3 and bound every remaining denominator below by 3, obtaining a tail strictly smaller than 1/36. Substitution of L=25/36 therefore gives t_r/t_f>26595/25324. This lower bound already exceeds 21/20, because 20*26595=531900>531804=21*25324.",
+        "For an additional outward rational ratio upper bound, t_f>=11*L gives t_r/t_f<111/110+1/11=121/110, using L>1/2. Thus 26595/25324<t_r/t_f<121/110 is a valid conservative enclosure, and its entire interval is above 1.05. Rational-total product timing rigorously fails the selected criterion in B, with positive signed error greater than 1271/25324, which itself exceeds 1/20. This is an enclosure, not an exact timing error or an executed integration result.",
+        "The distinction is structural and endpoint-specific: quadratic-total passes B product timing whereas its extra rationalization fails B product timing, even though both use T(0)=0.1 and both have positive product endpoints. Neither finding restores their missing early free-S=0.05 crossing under algebraic initialization. Preserve original borghans_standard_closure_transfer_G and the admitted historical expectation revision unchanged. The completed binding-layer splice failure concerns that particular construction; other initialization alternatives remain candidates, and changing initialization already departs from literal original G. These certificates establish no necessity of changing G and no impossibility of other reductions. Any later expectation revision can use this independent argument as grounds without making this argument depend on that revision."
+      ],
+      "conclusion": "Conditional on the commissioned case-B mass-action IVP, with its actual C(0)=0 transient and physical elapsed time retained, quadratic-total product timing passes 5%: t_q/t_f lies in [999/1018,1020/1001]. Separately, rational-total product timing fails 5%: 26595/25324<t_r/t_f<121/110, with the lower bound strictly greater than 21/20. The full-time enclosure is 11*ln(2)<=t_f<=(100/9)*ln(2)+1/10. No numerical integration or numerical quadrature result is asserted.",
+      "limitations": "Public conditional analytical derivation, not a machine-checked proof, source-reported numerical comparison, or empirical validation of mass action. The rational failure margin in the conservative lower bound is narrow but decided by exact rational inequalities. These bounds concern only B at P=0.05, not full histories, other thresholds, or other parameter cases. Physical unit names remain unspecified. Original G and the admitted expectation revision are preserved; no support/change score or necessity claim is assigned."
+    }
+  }
+]

@@ -11,14 +11,17 @@ inference G into another explanatory task, and an account of why that particular
 transfer or repair fails. Questions, scales and observables may differ when their
 connection through G is justified. The task does not require proving fundamental
 incompatibility or the failure of all future reduction. The
-[current change score covers only part of this target](docs/CAUSAL_SCORING_SHEET.md#pragmatic-transfer-failures-and-current-scoring-limits).
+[graduated task-comparison score](docs/CAUSAL_SCORING_SHEET.md#graduated-task-differences-and-useful-alterations)
+rewards demonstrated applicability differences and partial improvements, with
+losses and useful extensions beyond original expected bounds kept explicit.
 
-The implementation foundation is the existing research composition in
-`case_reports/research/` and the shared `method_loop` runtime. The discarded
-parallel causal-discovery implementation is deleted. The launcher now runs this causal-inference research application. The scientific
-parent and Reasoning episodes assess the global scientific sheet. Theory
-Reconstruction builds a typed connected account through Search Strategy, Search,
-Page and source-reading episodes, with separate output and substantive-gap repairs.
+The implementation uses `case_reports/research/` and the shared `method_loop`
+runtime. Root uses VOC to coordinate sibling Discovery and Scientific jobs.
+Discovery acquires source-grounded information against explicit scientific
+criteria. Scientific commissions Theory Reconstruction, Theory Repair and Theory
+Comparison; all four scientific episodes can use scientific-record lookup,
+actual Lean equivalence checks and SCM/equation/simulation tools. Missing
+information goals and qualified findings travel between the arms through Root.
 
 ## Episode design
 
@@ -27,6 +30,7 @@ Page and source-reading episodes, with separate output and substantive-gap repai
 - [Task authority](docs/CURRENT_GOAL.md)
 - [Search and reading responsibilities](docs/SEARCH.md)
 - [Typed theory reconstruction and repair](docs/THEORY_RECONSTRUCTION.md)
+- [Scientific lookup, Lean and causal calculation tools](docs/SCIENTIFIC_TOOLS.md)
 - [Durable state and reconstruction](docs/CHECKPOINTS.md)
 - [Credit and numerical continuation](credit_assignment/README.md)
 - [Executable causal scoring sheet draft](docs/CAUSAL_SCORING_SHEET.md)
@@ -53,6 +57,11 @@ external repositories are design references, not runtime dependencies. Provider
 configuration is described in `.env.example`. Credentials and research artifacts
 belong outside tracked documentation.
 
+Numerical ODE task comparisons require SciPy (`requirements-scientific.txt`).
+Install it in the workflow's Python environment; run-owned dependencies can be
+supplied through `PYTHONPATH` inside the resource-managed command. Installation
+output and caches belong under `runs/`.
+
 ## Run
 
 ```sh
@@ -71,8 +80,8 @@ files, caches and resource receipts stay beneath this checkout's `runs/`.
 It retains ownership until descendants have exited. Machine resource bounds are
 separate from the application's episode continuation decisions.
 
-Use `--root-yield-threshold 0` for a standing investigation. Discovery remains
-open regardless of its VOC forecast. Scientific attempts use VOC continuation;
+Use `--root-yield-threshold 0` for a standing investigation. Root remains
+open regardless of its VOC forecast. Scientific and Discovery use regular yield;
 all other episodes retain their existing numerical yield estimators. See
 [VOC measurements and limitations](docs/VALUE_OF_COMPUTATION.md).
 Provider or input failures remain operational failures. Checkpoints retain the threshold.

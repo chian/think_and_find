@@ -28,7 +28,7 @@ def main(argv=None, *, stdout=None, stderr=None):
     parser.add_argument("--resume")
     parser.add_argument("--progress", action="store_true")
     parser.add_argument("--root-yield-threshold", type=float,
-                        help="Discovery VOC gain threshold; zero keeps the standing investigation open")
+                        help="Root VOC gain threshold; zero keeps the standing investigation open")
     parser.add_argument("--format", choices=("json", "markdown"), default="json")
     parser.add_argument("--trace-path")
     parser.add_argument("--report-path")

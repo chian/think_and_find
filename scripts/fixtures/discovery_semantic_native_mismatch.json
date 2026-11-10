@@ -1,0 +1,1767 @@
+{
+  "provenance": {
+    "run": "normal_live_20261108_06",
+    "call": 179,
+    "qualification": "Retained failed verifier input; original goal format is historical evidence, not an accepted API."
+  },
+  "original_goal": {
+    "answer_schema": {
+      "$defs": {
+        "account": {
+          "additionalProperties": false,
+          "properties": {
+            "assumptions_and_scope": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "evidence": {
+              "items": {
+                "$ref": "#/$defs/evidence"
+              },
+              "type": "array"
+            },
+            "name": {
+              "type": "string"
+            },
+            "native_equations": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "native_outcomes_and_success_criteria": {
+              "type": "string"
+            },
+            "symbol_definitions": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "task": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "task",
+            "native_equations",
+            "symbol_definitions",
+            "assumptions_and_scope",
+            "native_outcomes_and_success_criteria",
+            "evidence"
+          ],
+          "type": "object"
+        },
+        "evidence": {
+          "additionalProperties": false,
+          "properties": {
+            "evidence_type": {
+              "enum": [
+                "model_definition",
+                "derived_prediction",
+                "observation",
+                "author_interpretation"
+              ]
+            },
+            "exact_excerpt": {
+              "type": "string"
+            },
+            "locator": {
+              "type": "string"
+            },
+            "source": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source",
+            "locator",
+            "exact_excerpt",
+            "evidence_type"
+          ],
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "accounts": {
+          "items": {
+            "$ref": "#/$defs/account"
+          },
+          "type": "array"
+        },
+        "empirical_operands": {
+          "description": "Source-reported quantities, conditions, units and uncertainties usable for testing a prediction; explicitly report if none were obtained. Do not invent observation IDs.",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "conditions_units_uncertainty": {
+                "type": "string"
+              },
+              "evidence": {
+                "$ref": "#/$defs/evidence"
+              },
+              "quantity": {
+                "type": "string"
+              },
+              "reported_value": {
+                "type": [
+                  "number",
+                  "string"
+                ]
+              }
+            },
+            "required": [
+              "quantity",
+              "reported_value",
+              "conditions_units_uncertainty",
+              "evidence"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "repairs_and_information_costs": {
+          "type": "string"
+        },
+        "transfer_evidence": {
+          "items": {
+            "$ref": "#/$defs/evidence"
+          },
+          "type": "array"
+        },
+        "unresolved_correspondences": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "accounts",
+        "transfer_evidence",
+        "empirical_operands",
+        "repairs_and_information_costs",
+        "unresolved_correspondences"
+      ],
+      "type": "object"
+    },
+    "criteria": [
+      {
+        "check": {
+          "claim_schema": {
+            "properties": {
+              "kind": {
+                "const": "equation"
+              },
+              "relation": {
+                "const": "="
+              }
+            },
+            "required": [
+              "kind",
+              "relation",
+              "left",
+              "right",
+              "conditions",
+              "symbols",
+              "locator"
+            ],
+            "type": "object"
+          },
+          "kind": "source_claim"
+        },
+        "id": "quantity_based_model_equation",
+        "question": "Retain a source-defined equation from the Rosenzweig–MacArthur enrichment model, including its native symbol meanings and assumptions, sufficient to identify how producer carrying capacity enters the predator–prey dynamics."
+      },
+      {
+        "check": {
+          "claim_schema": {
+            "properties": {
+              "kind": {
+                "const": "equation"
+              },
+              "relation": {
+                "const": "="
+              }
+            },
+            "required": [
+              "kind",
+              "relation",
+              "left",
+              "right",
+              "conditions",
+              "symbols",
+              "locator"
+            ],
+            "type": "object"
+          },
+          "kind": "source_claim"
+        },
+        "id": "food_quality_model_equation",
+        "question": "Retain an actual equation from a producer–grazer model explicitly linking nutrient-dependent food quality or elemental stoichiometry to grazer production, assimilation or growth. Preserve native quantities rather than translating food quality into an unexplained fitted factor."
+      },
+      {
+        "check": {
+          "claim_schema": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "causal_relation",
+                  "boundary_condition"
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "left",
+              "relation",
+              "right",
+              "conditions",
+              "locator"
+            ],
+            "type": "object"
+          },
+          "kind": "source_claim"
+        },
+        "id": "reported_enrichment_scope",
+        "question": "Retain a source-native causal or boundary claim specifying how enrichment, nutrient limitation or food quality affects consumer dynamics, or when the quantity-based enrichment prediction applies or fails. Identify whether this is a theoretical result, observation or interpretation; a reported claim alone does not establish transfer failure."
+      }
+    ],
+    "inputs": [],
+    "key": "enrichment_food_quantity_quality",
+    "question": "Acquire a focused source-grounded comparison of nutrient enrichment in predator–prey systems: the Rosenzweig–MacArthur quantity-based account of enrichment and stability, and a producer–grazer account that explicitly represents nutrient-dependent food quality or stoichiometry. Recover the sources' actual equations, assumptions, predicted outcomes and any relevant empirical tests. Investigate whether transferring an enrichment inference between these explanatory tasks fails, succeeds or remains untested; do not presume failure. Identify concrete conditioning or added-variable repairs and their data requirements. Prefer primary theoretical papers and primary experiments, retaining exact passages and equation/table/figure locators. Preserve the distinction between population stability, consumer persistence, consumer biomass and producer biomass. Do not treat different outcomes on these quantities as contradictory without a justified mapping. Dependence on a shared generalized inference and distinct-theory status are questions for subsequent Scientific examination.",
+    "version": "ce645fa7a5efe3df416dba34ca7ab3b2c4b09d42c209e0091df3616d05b5a0d3"
+  },
+  "finding": {
+    "action": "submit_finding",
+    "key": "rosenzweig_1971_primary_enrichment_graphical_argument",
+    "answer": {
+      "accounts": [
+        {
+          "name": "Rosenzweig (1971): primary enrichment argument",
+          "task": "Determine how increased limiting-resource supply changes the stability of a two-species exploitation equilibrium.",
+          "native_equations": [
+            "V = J: the vertical exploiter isocline under the stated absence of direct exploiter interference.",
+            "rV (1 - V/K): the explicitly named Pearl–Verhulst logistic inherent-growth expression, not a complete predator–prey system."
+          ],
+          "symbol_definitions": {
+            "V": "Victim density.",
+            "P": "Exploiter density.",
+            "J": "Victim density locating the vertical exploiter isocline.",
+            "V*": "Victim density under the peak of the victim isocline in the usual hump-shaped case.",
+            "K": "Standing crop of V where P = 0; interpreted as increasing with limiting-nutrient flow.",
+            "R": "Nutrient flow rate to a lone victim individual.",
+            "Q": "Nutrient receipt rate required for a victim individual just to replace itself.",
+            "a": "Victim competition constant; readable range 1 > a > 0.",
+            "g": "Power of V generalizing Gause's square-root kill-rate curve. Only 0 < g is securely readable in the supplied range.",
+            "r": "Coefficient in the source's inherent-growth expressions; a more precise definition is not certified here."
+          },
+          "assumptions_and_scope": [
+            "Exploiters compete only by reducing one another's food supply. The vertical-isocline argument excludes direct interference such as battling over individual victims, cannibalism and territorial defense.",
+            "Both species' phenotypes are held constant; evolution is ignored.",
+            "Enrichment is increased supply of limiting nutrients or energy. The article operationalizes it as increasing K; in its resource-growth formulation, increasing K requires increasing R with a and Q constant.",
+            "The exploiter isocline's position is determined by phenotypes and is assumed not to change with nutrient flow or energy supply.",
+            "The usual single-hump graphical argument is not the complete scope of all six models. Model 3 can be humpless; models 1 and 6 have trough as well as peak boundaries.",
+            "These are theoretical premises and reported analytical results, not measured ecological responses."
+          ],
+          "native_outcomes_and_success_criteria": "For the usual hump-shaped victim isocline, the source contrasts equilibrium on its downslope side with equilibrium on its rising side. With the exploiter isocline fixed at V = J, raising the peak location V* past J changes which side contains the intersection. Public logical reconstruction: fixed J plus a peak moving from below J to above J moves the intersection from the downslope to the rising branch, provided the stated hump geometry continues to apply. Increasing V* locally alone does not prove a crossing for every possible intervention range. Fig. 1 compares model 4 at K = 34, 80, 140 and 200, with J = 25, and predicts a steady state only for K = 34. The endpoint is equilibrium/steady-state stability, not automatically extinction or biomass change. Fig. 2 separately reports simulated extinction for model 4. Model 3 explicitly qualifies a universal reading: the reported condition 1 - a - g < 0 is algebraically equivalent to a + g > 1, and is associated with a humpless isocline and the author's no-extinction-tendency interpretation. For a + g < 1, the author reports increased existing extinction threat; equality remains unresolved. Models 1 and 6 instead have an unstable interval between trough and peak that reportedly expands at both ends.",
+          "evidence": [
+            {
+              "source": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time",
+              "locator": "Article body, characters 19651–19821; exact printed-page placement not independently verified.",
+              "exact_excerpt": "If K represents the\n\nstanding crop of V where P = 0, then\n\nK must be directly proportional to the\n\nflow rates of limiting nutrients. Thus,\n\nenrichment implies K increase.",
+              "evidence_type": "model_definition"
+            },
+            {
+              "source": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time",
+              "locator": "Article body, characters 18496–18552, preceding printed marker 385.",
+              "exact_excerpt": "It does not change with\n\nnutrient flow or energy supply.",
+              "evidence_type": "model_definition"
+            },
+            {
+              "source": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time",
+              "locator": "Fig. 1 caption, characters 19123–19434; caption page placement requires image verification.",
+              "exact_excerpt": "From the slopes of the V isoclines at the\n\npoints where they intersect the P isocline,\n\none expects only the K- 34 system to\n\nhave a steady state.",
+              "evidence_type": "derived_prediction"
+            },
+            {
+              "source": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time",
+              "locator": "Prose preceding numbered models, characters 20729–20795; nearby printed marker 386.",
+              "exact_excerpt": "Hence, to increase K, R must\n\nbe increased (a and Q are constant),",
+              "evidence_type": "model_definition"
+            },
+            {
+              "source": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time",
+              "locator": "Model-3 discussion, characters 23453–23592; equation labels 3a and 3b.",
+              "exact_excerpt": "In fact V\\* is negative if and only\n\nif (1 \\- a \\- g) is also negative. The V\n\nisocline of Eq. 3a is humpless for such\n\nvalues of (a \\+ g).",
+              "evidence_type": "derived_prediction"
+            },
+            {
+              "source": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time",
+              "locator": "Model-3 continuation, characters 24125–24208.",
+              "exact_excerpt": "In such a system there is\n\nno tendency for extinction regardless\n\nof\n\nproductivity.",
+              "evidence_type": "author_interpretation"
+            },
+            {
+              "source": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time",
+              "locator": "Fig. 2 caption, characters 23761–23820.",
+              "exact_excerpt": "Enrichment causes the simulated extinction of both species.",
+              "evidence_type": "derived_prediction"
+            },
+            {
+              "source": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time",
+              "locator": "References and Notes, note 3, characters 25710–25788.",
+              "exact_excerpt": "Throughout, phenotypes of both species are\n\nheld constant, ignoring evolution.",
+              "evidence_type": "model_definition"
+            }
+          ]
+        }
+      ],
+      "transfer_evidence": [],
+      "empirical_operands": [],
+      "repairs_and_information_costs": "The representation contains primary article-body text and figure captions, not merely an abstract. It does not supply independently inspected page images. OCR damage prevents certification of several complete dynamical equations, exponential terms, the exponent printed after kPV in the introductory kill-rate sentence, and the upper bound on g. Repeated textual inspection resolved the prose meaning of g but did not resolve those glyphs; this is a limitation of this examined representation, not proof that the equations are unrecoverable. Page-image inspection is the appropriate repair. The offered PDF target is https://www.researchgate.net/profile/Michael-Rosenzweig/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time/links/5416f0e20cf2bb7347db80dd/Paradox-of-Enrichment-Destabilization-of-Exploitation-Ecosystems-in-Ecological-Time.pdf . Retrieval and image inspection remain unestablished. No empirical test operands were obtained; the figure's numerical K settings are simulation settings, not observations. Testing the graphical prediction would require intervention-specific resource supply, K, isocline geometry and equilibrium response data, while independently testing the assumed invariance of J.",
+      "unresolved_correspondences": [
+        "The complete Rosenzweig–MacArthur equations reproduced in LKE must retain their own source identity; they are not certified transcriptions of this article's six numbered models.",
+        "No nutrient-dependent food-quality equation or empirical comparison with a stoichiometric model is established by these primary passages. Transfer success, failure or reversal therefore remains untested here.",
+        "Instability, persistent oscillations, extinction risk, simulated extinction and changes in either species' biomass require distinct evidence and cannot be substituted for one another.",
+        "The equality case a + g = 1 is unresolved by the recovered strict branches.",
+        "Printed markers 385 and 386 are visible, but exact placement of individual captions and later paragraphs requires independent page-image verification."
+      ]
+    },
+    "source_claims": [
+      {
+        "evidence": {
+          "key": "evidence:f969947b6204b51450c89961",
+          "version": "02e1eb0d7028091e552464b9f854299366d77bcbe590a28b002dd958e7bb5aa0"
+        },
+        "claim": "enrichment_K"
+      },
+      {
+        "evidence": {
+          "key": "evidence:4b87958d1f27faf5b9d6e33c",
+          "version": "128e46f0782ac75a16616946e65656d1f0e5b2d9a97ca2148215b5926ae91a52"
+        },
+        "claim": "vertical_isocline"
+      },
+      {
+        "evidence": {
+          "key": "evidence:0c97121af4c15b44585125fc",
+          "version": "9174b5f4f45647d84fea8a73b5679365e472d560e56abc99dfb0c2ed8f3231fd"
+        },
+        "claim": "increase_K"
+      },
+      {
+        "evidence": {
+          "key": "evidence:a528a29f6eae1f4e8eb34087",
+          "version": "4ced6db5c5eefecdd8d62025084bb909a111cd9b9e5d20a5a29c6fbabdb37da4"
+        },
+        "claim": "negative_solution"
+      },
+      {
+        "evidence": {
+          "key": "evidence:5ecf301752e1aa806e668652",
+          "version": "82bb33f016b39856880eaaa93eb215a87fa5423ea96c7244d28e5f70c76cdea7"
+        },
+        "claim": "unstable_range"
+      }
+    ],
+    "source_observations": [],
+    "scientific_links": [],
+    "rationale": "The returned primary-text material resolves the commissioned intervention and graphical criterion, including important model-specific qualifications. Submission preserves OCR and empirical gaps rather than using remaining bibliographic leads to replace the recovered argument.",
+    "working_assessment": {
+      "query_answer": "Primary body text and captions establish enrichment as increasing K through limiting-resource supply, with R increased at fixed a and Q in the resource-growth formulation. The no-direct-interference premise fixes the exploiter isocline at V = J independently of supply; the usual graphical argument tracks the victim-isocline peak V* relative to J. Fig. 1 supplies the model-4 steady-state comparison. Fig. 2 is a separate simulation-extinction claim, not an empirical observation or consequence licensed by instability alone. Model 3 qualifies universal destabilization language: a + g > 1 corresponds to the reported humpless branch and no-extinction-tendency interpretation; a + g < 1 concerns an increased existing threat. Equality is unresolved. Models 1 and 6 have an expanding unstable trough-to-peak interval. The latest lexical reading identifies g's prose meaning but does not repair damaged formula glyphs.",
+      "source_comparison": "The publisher abstract supplies only the qualified broad result and practical decimation warning. The ResearchGate representation adds primary assumptions, graphical reasoning and model-specific qualifications. The later LKE Rosenzweig–MacArthur presentation remains a separately sourced formulation; its complete equations must not be attributed to this original article without a verified correspondence.",
+      "remaining_information_need": "Inspect original page images for exact equations, g's upper bound and caption page placement. No primary empirical test or stoichiometric transfer test was obtained in this query.",
+      "record_refs": [
+        {
+          "key": "evidence:f969947b6204b51450c89961",
+          "version": "02e1eb0d7028091e552464b9f854299366d77bcbe590a28b002dd958e7bb5aa0"
+        },
+        {
+          "key": "evidence:4b87958d1f27faf5b9d6e33c",
+          "version": "128e46f0782ac75a16616946e65656d1f0e5b2d9a97ca2148215b5926ae91a52"
+        },
+        {
+          "key": "evidence:5fd0e0c3a764cae5c231dee9",
+          "version": "61c6d45d924e613c11a5e5d142687721af2ff513d6442feebf70afbd5ed8e2b8"
+        },
+        {
+          "key": "evidence:a528a29f6eae1f4e8eb34087",
+          "version": "4ced6db5c5eefecdd8d62025084bb909a111cd9b9e5d20a5a29c6fbabdb37da4"
+        },
+        {
+          "key": "evidence:ce0c67abff1354e0cec101c5",
+          "version": "5ed31101048332c10cd96a2de767bc25f0fc74dad2ff35c4e384661c43f4349f"
+        }
+      ],
+      "receipt_refs": [],
+      "detail_refs": [
+        "job-details:8a4d7f5369ac57db03d17e31d751aaa6ae32c014453e98cef2b6fd04cc84ff37",
+        "job-details:ea68861f4183d72f5fc3a1ea7e15e70360edd4f678758136d6006b0ecd7c2a0b"
+      ]
+    }
+  },
+  "evidence": [
+    {
+      "audit_snapshot": true,
+      "data": {
+        "finding": "The primary-text definition linking enrichment to K is explicit: “If K represents the\\n\\nstanding crop of V where P = 0, then\\n\\nK must be directly proportional to the\\n\\nflow rates of limiting nutrients.” It immediately continues: “Thus,\\n\\nenrichment implies K increase.” V and P are the victim's and exploiter's densities, respectively. This is a model interpretation of enrichment and standing crop, not a measurement of biomass or a demonstrated nutrient-dependent food-quality mechanism. No full dynamical equation showing K inside dV/dt, and no stoichiometric or nutrient-dependent grazer-growth equation, is supplied in this window; neither should be reconstructed as a source quotation.",
+        "locator": "characters 19123:19911",
+        "measurements": {
+          "native": {
+            "claims": {
+              "enrichment_K": {
+                "conditions": "Theoretical interpretation: K represents the standing crop of V where P = 0 and is directly proportional to flow rates of limiting nutrients.",
+                "kind": "causal_relation",
+                "left": "enrichment",
+                "locator": "Article body, paragraph beginning “Briefly, the method is this,” immediately after the definition of K as standing crop of V where P = 0; printed page not independently visible for this paragraph",
+                "relation": "increases",
+                "right": "K",
+                "statement_id": "",
+                "symbols": {}
+              }
+            },
+            "observations": {}
+          },
+          "question": "Determine whether this ResearchGate representation contains Rosenzweig's actual 1971 article text and figure captions, not merely an abstract. Extract exact primary-text passages defining enrichment and the graphical criterion for steady-state stability/destabilization, preserving native symbols, printed page numbers and figure locators. Include surrounding explicit assumptions and distinguish stability results from warnings about decimation, oscillations, extinction or biomass. Identify OCR or figure-visibility limitations; do not substitute later citing articles for primary text.",
+          "quote": "ctim's density; P is exploiter's. The\n\ncurved lines are V isoclines, which peak\n\nover higher values of V at higher K. The\n\nvertical line, V= 25, is the P isocline.\n\nFrom the slopes of the V isoclines at the\n\npoints where they intersect the P isocline,\n\none expects only the K- 34 system to\n\nhave a steady state.\n\nally V\\* will be made greater than J.\n\nBriefly, the method is this. Set dV/dt\n\n\\- 0 and solve for P. This is the alge-\n\nbraic equation for the V isocline. Take\n\nOP/OV. The value of V that satisfies\n\nOP/OV 0 is V\\*. If K represents the\n\nstanding crop of V where P = 0, then\n\nK must be directly proportional to the\n\nflow rates of limiting nutrients. Thus,\n\nenrichment implies K increase. The\n\nfinal step, then, is to obtain OV\\*/OK.\n\nSince this is always positive, enrichment\n\n",
+          "source_anchors": {
+            "claims": {
+              "enrichment_K": {
+                "conditions": [
+                  {
+                    "end": 19783,
+                    "identity": {
+                      "end": 19783,
+                      "id": "source-mention:1629138fe58918011017e369306d2f9de1c25953553ed05c8b74c232e6e8be21",
+                      "occurrences": [
+                        [
+                          19651,
+                          19783
+                        ]
+                      ],
+                      "start": 19651
+                    },
+                    "quote": "If K represents the\n\nstanding crop of V where P = 0, then\n\nK must be directly proportional to the\n\nflow rates of limiting nutrients.",
+                    "span": {
+                      "end": 19911,
+                      "start": 19123
+                    },
+                    "start": 19651,
+                    "unit": {
+                      "end": 19783,
+                      "id": "source-unit:c0b01169024b71daed773c2fee3dd08600d9c3a1af5ececee6911faad0912cf9",
+                      "start": 19651
+                    }
+                  }
+                ],
+                "statement": {
+                  "end": 19821,
+                  "quote": "Thus,\n\nenrichment implies K increase.",
+                  "span": {
+                    "end": 19911,
+                    "start": 19123
+                  },
+                  "start": 19784,
+                  "unit": {
+                    "end": 19821,
+                    "id": "source-unit:5dce4f3b1da7e5da4912aa860dc33a9754ce6d7e62adc96ddf9dc6fa66cac115",
+                    "start": 19784
+                  }
+                },
+                "subjects": [
+                  {
+                    "end": 19801,
+                    "identity": {
+                      "end": 19801,
+                      "id": "source-mention:f7c494b069d7ffb68843f807d6f4afb7d1a85f7e9f10515a2596063eb1e837e4",
+                      "occurrences": [
+                        [
+                          19791,
+                          19801
+                        ]
+                      ],
+                      "start": 19791
+                    },
+                    "quote": "enrichment",
+                    "span": {
+                      "end": 19911,
+                      "start": 19123
+                    },
+                    "start": 19791,
+                    "unit": {
+                      "end": 19821,
+                      "id": "source-unit:5dce4f3b1da7e5da4912aa860dc33a9754ce6d7e62adc96ddf9dc6fa66cac115",
+                      "start": 19784
+                    }
+                  },
+                  {
+                    "end": 19811,
+                    "identity": {
+                      "end": 19811,
+                      "id": "source-mention:063da97b281794469cef3bf98b976ac43d74749811d93c3acd3fffd9f7c76cc9",
+                      "occurrences": [
+                        [
+                          19810,
+                          19811
+                        ]
+                      ],
+                      "start": 19810
+                    },
+                    "quote": "K",
+                    "span": {
+                      "end": 19911,
+                      "start": 19123
+                    },
+                    "start": 19810,
+                    "unit": {
+                      "end": 19821,
+                      "id": "source-unit:5dce4f3b1da7e5da4912aa860dc33a9754ce6d7e62adc96ddf9dc6fa66cac115",
+                      "start": 19784
+                    }
+                  }
+                ]
+              }
+            },
+            "finding": [
+              {
+                "end": 19783,
+                "quote": "If K represents the\n\nstanding crop of V where P = 0, then\n\nK must be directly proportional to the\n\nflow rates of limiting nutrients.",
+                "span": {
+                  "end": 19911,
+                  "start": 19123
+                },
+                "start": 19651,
+                "unit": {
+                  "end": 19783,
+                  "id": "source-unit:c0b01169024b71daed773c2fee3dd08600d9c3a1af5ececee6911faad0912cf9",
+                  "start": 19651
+                }
+              },
+              {
+                "end": 19821,
+                "quote": "Thus,\n\nenrichment implies K increase.",
+                "span": {
+                  "end": 19911,
+                  "start": 19123
+                },
+                "start": 19784,
+                "unit": {
+                  "end": 19821,
+                  "id": "source-unit:5dce4f3b1da7e5da4912aa860dc33a9754ce6d7e62adc96ddf9dc6fa66cac115",
+                  "start": 19784
+                }
+              },
+              {
+                "end": 17377,
+                "quote": "The\n\nvictim's density V is plotted against P,\n\nthe exploiter's density.",
+                "span": {
+                  "end": 17523,
+                  "start": 16723
+                },
+                "start": 17306,
+                "unit": {
+                  "end": 17377,
+                  "id": "source-unit:88160ad0a35a922e16da1d6e20437fa351642e4f7ac320b0ae8a0367fd707b70",
+                  "start": 17306
+                }
+              }
+            ],
+            "observations": {},
+            "pending": false,
+            "source_spans": [
+              {
+                "end": 17523,
+                "start": 16723,
+                "text": "xhibit any oscillations. Furthermore,\n\neven if there are oscillations, they do\n\nnot last under ordinary circumstances.\n\nIf the exploiter is quite proficient at\n\nreproducing in the presence of few of\n\nits victims, then the ecosystem does not\n\npersist. If, however, the victims are\n\nrelatively proficient at escape or their\n\nexploiters have a relatively poor repro-\n\nductive efficiency or digestive efficiency,\n\nthen the system will persist in ecologi-\n\ncal time (3).\n\nThe dividing line between persistent\n\nand explosive systems is definable from\n\na general graph of exploitation (2). The\n\nvictim's density V is plotted against P,\n\nthe exploiter's density. The collection\n\nof graph points at which dV/dt = 0 is\n\ncalled the victim's isocline. The collec-\n\ntion of points at which dP/dt = 0 is\n\ncalled th"
+              },
+              {
+                "end": 19911,
+                "start": 19123,
+                "text": "ctim's density; P is exploiter's. The\n\ncurved lines are V isoclines, which peak\n\nover higher values of V at higher K. The\n\nvertical line, V= 25, is the P isocline.\n\nFrom the slopes of the V isoclines at the\n\npoints where they intersect the P isocline,\n\none expects only the K- 34 system to\n\nhave a steady state.\n\nally V\\* will be made greater than J.\n\nBriefly, the method is this. Set dV/dt\n\n\\- 0 and solve for P. This is the alge-\n\nbraic equation for the V isocline. Take\n\nOP/OV. The value of V that satisfies\n\nOP/OV 0 is V\\*. If K represents the\n\nstanding crop of V where P = 0, then\n\nK must be directly proportional to the\n\nflow rates of limiting nutrients. Thus,\n\nenrichment implies K increase. The\n\nfinal step, then, is to obtain OV\\*/OK.\n\nSince this is always positive, enrichment\n\n"
+              }
+            ]
+          },
+          "source_version": "0eaa53e949226a3cd4c61c551c212e5e9b744545451691531adef79595b7320d"
+        },
+        "source": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time",
+        "study_id": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time"
+      },
+      "dependencies": {},
+      "is_latest_version": true,
+      "key": "evidence:f969947b6204b51450c89961",
+      "kind": "evidence",
+      "previous": null,
+      "version": "02e1eb0d7028091e552464b9f854299366d77bcbe590a28b002dd958e7bb5aa0"
+    },
+    {
+      "audit_snapshot": true,
+      "data": {
+        "finding": "The explicit assumption for a vertical exploiter isocline is absence of direct interference: the preceding fragment says “If the exploiters do not actually inter-\\n\\nfere with each other directly-if they\\n\\nnever battle over the same individual\\n\\nvictim or engage in cannibalism or\\n\\nter”; its continuation reads “ritorial defense-then the P isocline\\n\\nis a simple vertical line (V = J).” The line's position is said to be determined by exploiter and victim phenotypes and not to change with nutrient flow or energy supply. The enrichment test is “To discover the effect of enriching\\n\\na system, one needs to find how V\\*\\n\\nchanges as enrichment proceeds.” The next sentence is interrupted by duplicated text, page marker 385 and Fig. 1: “If en-\\n\\nrichment increases V\\*, then it is jeop-\\n\\nardizing the system, because eventu-” resumes after the caption as “ally V\\* will be made greater than J.” Thus this is a conditional theoretical destabilization argument, not an experimental extinction observation. In Fig. 1 the caption separately specifies “The\\n\\nvertical line, V= 25, is the P isocline.”",
+        "locator": "characters 18323:19123",
+        "measurements": {
+          "native": {
+            "claims": {
+              "vertical_isocline": {
+                "conditions": "P isocline when exploiters do not interfere directly: no battling over the same individual victim, cannibalism, or territorial defense. Its position is determined by exploiter and victim phenotypes and does not change with nutrient flow or energy supply.",
+                "kind": "equation",
+                "left": "V",
+                "locator": "Article body before printed-page marker 385, direct-interference assumption and P-isocline clause, split across parts 1600 and 2400",
+                "relation": "=",
+                "right": "J",
+                "statement_id": "",
+                "symbols": {
+                  "J": "value of V locating the simple vertical P isocline; the supplied text gives no further algebraic definition",
+                  "P": "exploiter's density",
+                  "V": "victim's density"
+                }
+              }
+            },
+            "observations": {}
+          },
+          "question": "Determine whether this ResearchGate representation contains Rosenzweig's actual 1971 article text and figure captions, not merely an abstract. Extract exact primary-text passages defining enrichment and the graphical criterion for steady-state stability/destabilization, preserving native symbols, printed page numbers and figure locators. Include surrounding explicit assumptions and distinguish stability results from warnings about decimation, oscillations, extinction or biomass. Identify OCR or figure-visibility limitations; do not substitute later citing articles for primary text.",
+          "quote": "ritorial defense-then the P isocline\n\nis a simple vertical line (V = J). The\n\nposition of this line is fully determined\n\nby the phenotypes of the exploiter and\n\nits victim. It does not change with\n\nnutrient flow or energy supply.\n\nTo discover the effect of enriching\n\na system, one needs to find how V\\*\n\nchanges as enrichment proceeds. If en-\n\nrichment increases V\\*, then it is jeop-\n\nardizing the system, because eventu-\n\n385\n\nTo discover the effect of enriching\n\na system, one needs to find how V\\*\n\nchanges as enrichment proceeds. If en-\n\nrichment increases V\\*, then it is jeop-\n\nardizing the system, because eventu-\n\n385\n\na- 80\n\n0\n\n40--- , \\\\0 120 10\n\n0 40 80 120 160 200\n\nV\n\nFig. 1\\. Isoclines at four levels of pro-\n\nductivity (K -34, 80, 140, and 200)\n\nwhen model 4 is used. Symbol V is\n\nvi",
+          "source_anchors": {
+            "claims": {
+              "vertical_isocline": {
+                "conditions": [
+                  {
+                    "end": 18323,
+                    "identity": {
+                      "end": 18323,
+                      "id": "source-mention:53fe937809a41714601d3b5ba9674eec8635ffa61e0f4c61c66a3928c89377b8",
+                      "occurrences": [
+                        [
+                          18164,
+                          18323
+                        ]
+                      ],
+                      "start": 18164
+                    },
+                    "quote": "If the exploiters do not actually inter-\n\nfere with each other directly-if they\n\nnever battle over the same individual\n\nvictim or engage in cannibalism or\n\nter",
+                    "span": {
+                      "end": 18323,
+                      "start": 17523
+                    },
+                    "start": 18164,
+                    "unit": {
+                      "end": 18395,
+                      "id": "source-unit:b0dd6eb1e080195929c2469a42063165a2eed63ec6de89047b967f6f41a7b9f5",
+                      "start": 18164
+                    }
+                  },
+                  {
+                    "end": 18552,
+                    "identity": {
+                      "end": 18552,
+                      "id": "source-mention:27667ade9c5575e91ea66ca2749892d59fbcaaf8f07d70f78e7f72c8403510e8",
+                      "occurrences": [
+                        [
+                          18496,
+                          18552
+                        ]
+                      ],
+                      "start": 18496
+                    },
+                    "quote": "It does not change with\n\nnutrient flow or energy supply.",
+                    "span": {
+                      "end": 19123,
+                      "start": 18323
+                    },
+                    "start": 18496,
+                    "unit": {
+                      "end": 18552,
+                      "id": "source-unit:bc0bebeade5f1be668027820b3291de15826002dfc28379fcfeac5c91ca5b032",
+                      "start": 18496
+                    }
+                  }
+                ],
+                "statement": {
+                  "end": 18395,
+                  "quote": "ritorial defense-then the P isocline\n\nis a simple vertical line (V = J).",
+                  "span": {
+                    "end": 19123,
+                    "start": 18323
+                  },
+                  "start": 18323,
+                  "unit": {
+                    "end": 18395,
+                    "id": "source-unit:b0dd6eb1e080195929c2469a42063165a2eed63ec6de89047b967f6f41a7b9f5",
+                    "start": 18164
+                  }
+                },
+                "subjects": [
+                  {
+                    "end": 18393,
+                    "identity": {
+                      "end": 18393,
+                      "id": "source-mention:dfa768e00db66d60100d5deba8ef6c6e546bca6c8fe3c90f460bb25b164647a7",
+                      "occurrences": [
+                        [
+                          18388,
+                          18393
+                        ]
+                      ],
+                      "start": 18388
+                    },
+                    "quote": "V = J",
+                    "span": {
+                      "end": 19123,
+                      "start": 18323
+                    },
+                    "start": 18388,
+                    "unit": {
+                      "end": 18395,
+                      "id": "source-unit:b0dd6eb1e080195929c2469a42063165a2eed63ec6de89047b967f6f41a7b9f5",
+                      "start": 18164
+                    }
+                  }
+                ]
+              }
+            },
+            "finding": [
+              {
+                "end": 18323,
+                "quote": "If the exploiters do not actually inter-\n\nfere with each other directly-if they\n\nnever battle over the same individual\n\nvictim or engage in cannibalism or\n\nter",
+                "span": {
+                  "end": 18323,
+                  "start": 17523
+                },
+                "start": 18164,
+                "unit": {
+                  "end": 18395,
+                  "id": "source-unit:b0dd6eb1e080195929c2469a42063165a2eed63ec6de89047b967f6f41a7b9f5",
+                  "start": 18164
+                }
+              },
+              {
+                "end": 18395,
+                "quote": "ritorial defense-then the P isocline\n\nis a simple vertical line (V = J).",
+                "span": {
+                  "end": 19123,
+                  "start": 18323
+                },
+                "start": 18323,
+                "unit": {
+                  "end": 18395,
+                  "id": "source-unit:b0dd6eb1e080195929c2469a42063165a2eed63ec6de89047b967f6f41a7b9f5",
+                  "start": 18164
+                }
+              },
+              {
+                "end": 18478,
+                "quote": "The\n\nposition of this line is fully determined\n\nby the phenotypes of the exploiter",
+                "span": {
+                  "end": 19123,
+                  "start": 18323
+                },
+                "start": 18396,
+                "unit": {
+                  "end": 18478,
+                  "id": "source-unit:8ab09e2b162dc8da3976185a50526d972bd4ce8f183502bda4b09caecc736499",
+                  "start": 18396
+                }
+              },
+              {
+                "end": 18495,
+                "quote": "and\n\nits victim.",
+                "span": {
+                  "end": 19123,
+                  "start": 18323
+                },
+                "start": 18479,
+                "unit": {
+                  "end": 18495,
+                  "id": "source-unit:6166230ef362dfe12166422ae7ff64125ab94fee470884e6997545e4496220f5",
+                  "start": 18479
+                }
+              },
+              {
+                "end": 18552,
+                "quote": "It does not change with\n\nnutrient flow or energy supply.",
+                "span": {
+                  "end": 19123,
+                  "start": 18323
+                },
+                "start": 18496,
+                "unit": {
+                  "end": 18552,
+                  "id": "source-unit:bc0bebeade5f1be668027820b3291de15826002dfc28379fcfeac5c91ca5b032",
+                  "start": 18496
+                }
+              },
+              {
+                "end": 18659,
+                "quote": "To discover the effect of enriching\n\na system, one needs to find how V\\*\n\nchanges as enrichment proceeds.",
+                "span": {
+                  "end": 19123,
+                  "start": 18323
+                },
+                "start": 18554,
+                "unit": {
+                  "end": 18659,
+                  "id": "source-unit:0bb36c46785da02250abd63881fcba55d60eb9f24e0f63ee23a6d833f10e7f99",
+                  "start": 18554
+                }
+              },
+              {
+                "end": 18746,
+                "quote": "If en-\n\nrichment increases V\\*, then it is jeop-\n\nardizing the system, because eventu-",
+                "span": {
+                  "end": 19123,
+                  "start": 18323
+                },
+                "start": 18660,
+                "unit": {
+                  "end": 18858,
+                  "id": "source-unit:11b36c628dc08fc7ef01ea5f0e5a5e30daccfe48443489408a9c2ad377aa3591",
+                  "start": 18660
+                }
+              },
+              {
+                "end": 19473,
+                "quote": "ally V\\* will be made greater than J.",
+                "span": {
+                  "end": 19911,
+                  "start": 19123
+                },
+                "start": 19436,
+                "unit": {
+                  "end": 19473,
+                  "id": "source-unit:7394d03401fdbae29f0e0231fbe292c12558f81d93dfa5c471e28f54c9eccfe2",
+                  "start": 19436
+                }
+              },
+              {
+                "end": 19286,
+                "quote": "The\n\nvertical line, V= 25, is the P isocline.",
+                "span": {
+                  "end": 19911,
+                  "start": 19123
+                },
+                "start": 19241,
+                "unit": {
+                  "end": 19286,
+                  "id": "source-unit:5e0083b8f8024040cbcf7078dc46f2563740e14118b5e19c74db52837f3121db",
+                  "start": 19241
+                }
+              }
+            ],
+            "observations": {},
+            "pending": false,
+            "source_spans": [
+              {
+                "end": 18323,
+                "start": 17523,
+                "text": "e exploiter's isocline. Any point\n\nof intersection between the two isoclines\n\nis an ecosystem equilibrium, but not all\n\nsuch equilibria will result in a steady\n\nstate. The usual form of the prey iso-\n\ncline is a hump (4). If the equilibrium\n\nis at a point on the left side of the\n\nhump, the predator is too proficient and\n\nthe system will ordinarily not persist.\n\nIf equilibrium is at a point on the right-\n\nhand (downslope) side of the hump, the\n\nsystem will persist. Thus, the hump's\n\npeak is over a critical value of V, V\\*.\n\nIf the equilibrium value of V is larger\n\nthan V\\*, the system is safe. If not, it is\n\nin danger of extinction.\n\nIf the exploiters do not actually inter-\n\nfere with each other directly-if they\n\nnever battle over the same individual\n\nvictim or engage in cannibalism or\n\nter"
+              },
+              {
+                "end": 19123,
+                "start": 18323,
+                "text": "ritorial defense-then the P isocline\n\nis a simple vertical line (V = J). The\n\nposition of this line is fully determined\n\nby the phenotypes of the exploiter and\n\nits victim. It does not change with\n\nnutrient flow or energy supply.\n\nTo discover the effect of enriching\n\na system, one needs to find how V\\*\n\nchanges as enrichment proceeds. If en-\n\nrichment increases V\\*, then it is jeop-\n\nardizing the system, because eventu-\n\n385\n\nTo discover the effect of enriching\n\na system, one needs to find how V\\*\n\nchanges as enrichment proceeds. If en-\n\nrichment increases V\\*, then it is jeop-\n\nardizing the system, because eventu-\n\n385\n\na- 80\n\n0\n\n40--- , \\\\0 120 10\n\n0 40 80 120 160 200\n\nV\n\nFig. 1\\. Isoclines at four levels of pro-\n\nductivity (K -34, 80, 140, and 200)\n\nwhen model 4 is used. Symbol V is\n\nvi"
+              },
+              {
+                "end": 19911,
+                "start": 19123,
+                "text": "ctim's density; P is exploiter's. The\n\ncurved lines are V isoclines, which peak\n\nover higher values of V at higher K. The\n\nvertical line, V= 25, is the P isocline.\n\nFrom the slopes of the V isoclines at the\n\npoints where they intersect the P isocline,\n\none expects only the K- 34 system to\n\nhave a steady state.\n\nally V\\* will be made greater than J.\n\nBriefly, the method is this. Set dV/dt\n\n\\- 0 and solve for P. This is the alge-\n\nbraic equation for the V isocline. Take\n\nOP/OV. The value of V that satisfies\n\nOP/OV 0 is V\\*. If K represents the\n\nstanding crop of V where P = 0, then\n\nK must be directly proportional to the\n\nflow rates of limiting nutrients. Thus,\n\nenrichment implies K increase. The\n\nfinal step, then, is to obtain OV\\*/OK.\n\nSince this is always positive, enrichment\n\n"
+              }
+            ]
+          },
+          "source_version": "0eaa53e949226a3cd4c61c551c212e5e9b744545451691531adef79595b7320d"
+        },
+        "source": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time",
+        "study_id": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time"
+      },
+      "dependencies": {},
+      "is_latest_version": true,
+      "key": "evidence:4b87958d1f27faf5b9d6e33c",
+      "kind": "evidence",
+      "previous": null,
+      "version": "128e46f0782ac75a16616946e65656d1f0e5b2d9a97ca2148215b5926ae91a52"
+    },
+    {
+      "audit_snapshot": true,
+      "data": {
+        "finding": "Victim growth is explicitly subject to intraspecific competition as V increases. The prose identifies a as \"the victim's competition con-\\n\\nstant\" and prints its range as \"1 \\> a \\> 0 (5)\"; (5) is retained as a citation marker, not assigned as an equation label. Effective feeding is assumed to diminish with increasing \"Va\" in the supplied text. The subsequent growth formulas and the flattened K expression are not certified here: the exact K fragment is \"ins K=\\n\\n(R/Q)1/a.\" Nevertheless, the readable prose explicitly says that increasing K requires increasing R while a and Q are constant. Thus the resource-supply interpretation of changing K is recoverable without restoring exponent typography. The prose also names alternative Pearl-Verhulst logistic and Gompertz growth expressions, in which K appears explicitly; their supplied excerpts are retained without silently correcting l/1 or In/ln glyphs.",
+        "locator": "characters 20711:21511",
+        "measurements": {
+          "native": {
+            "claims": {
+              "increase_K": {
+                "conditions": "a and Q are constant; source model statement, not an empirical measurement.",
+                "kind": "boundary_condition",
+                "left": "increase K",
+                "locator": "Prose preceding numbered models, positions 20729–20795: increasing K with a and Q constant.",
+                "relation": "requires",
+                "right": "R must be increased",
+                "statement_id": "",
+                "symbols": {}
+              }
+            },
+            "observations": {}
+          },
+          "question": "The primary model list was recovered but its formula glyphs are corrupted. Reexamine only the prose immediately preceding the numbered models to recover explicit definitions of native parameters and assumptions about resource requirement, victim growth, capture and exploiter competition. Preserve exact excerpts and equation labels where legible; distinguish readable prose from reconstructed mathematics. Do not certify corrupted exponential terms or repeat the already established figure-caption outcomes. Determine whether these definitions clarify how K enters the models without requiring an invented transcription.",
+          "quote": "ins K=\n\n(R/Q)1/a. Hence, to increase K, R must\n\nbe increased (a and Q are constant), and\n\ndOV\\*/K has the same sign as OV8/OR\n\n(6).\n\nIn addition to the above model, I\n\nhave used the traditional Pearl-Verhulst\n\nlogistic rV (1 \\- V/K) and the Gom-\n\npertz rV (ln K \\- In V).\n\n386\n\nKill rate models. Lotka and Volterra's\n\napproach was to treat the two popula-\n\ntions like molecules: kVP \\[see (7) and\\\n\\\nreferences therein\\]. This has been shown\n\nto 'be inadequate. Gause (7) obtained a\n\nreasonable fit to a kill rate curve by\n\ntaking the square root of V. We can\n\ngeneralize this procedure by taking V\n\nto the gth power 0 < g 1\\. Thus, a\n\nkill rate model is kPVa.\n\nAnother model is based on observa-\n\ntions (5, 8) that one lone exploiter will\n\nattack k(l \\- e-V) victims in a fixed\n\namount of time. Sinc",
+          "source_anchors": {
+            "claims": {
+              "increase_K": {
+                "conditions": [
+                  {
+                    "end": 20795,
+                    "identity": {
+                      "end": 20795,
+                      "id": "source-mention:db5cf1e36dfd0cbc5eef46f7811c496049a987ef319542141eea37c9ee2cbb55",
+                      "occurrences": [
+                        [
+                          20775,
+                          20795
+                        ]
+                      ],
+                      "start": 20775
+                    },
+                    "quote": "and Q are constant),",
+                    "span": {
+                      "end": 21511,
+                      "start": 20711
+                    },
+                    "start": 20775,
+                    "unit": {
+                      "end": 20795,
+                      "id": "source-unit:93bb365fccd02e6e239b7450434f8ad0f08a3cae57c79949a904c7b362676cee",
+                      "start": 20775
+                    }
+                  },
+                  {
+                    "end": 20774,
+                    "identity": {
+                      "end": 20774,
+                      "id": "source-mention:50e65d7d78d1f5e121570efad178bba92a97a8584b3870dbc18c00372b3ba300",
+                      "occurrences": [
+                        [
+                          20772,
+                          20774
+                        ]
+                      ],
+                      "start": 20772
+                    },
+                    "quote": "(a",
+                    "span": {
+                      "end": 21511,
+                      "start": 20711
+                    },
+                    "start": 20772,
+                    "unit": {
+                      "end": 20774,
+                      "id": "source-unit:11af4c90cb139eb2b1cc484fccc3e0233a2b0ff710dd6c0484dc234bf360b51e",
+                      "start": 20729
+                    }
+                  }
+                ],
+                "statement": {
+                  "end": 20774,
+                  "quote": "Hence, to increase K, R must\n\nbe increased (a",
+                  "span": {
+                    "end": 21511,
+                    "start": 20711
+                  },
+                  "start": 20729,
+                  "unit": {
+                    "end": 20774,
+                    "id": "source-unit:11af4c90cb139eb2b1cc484fccc3e0233a2b0ff710dd6c0484dc234bf360b51e",
+                    "start": 20729
+                  }
+                },
+                "subjects": [
+                  {
+                    "end": 20749,
+                    "identity": {
+                      "end": 20749,
+                      "id": "source-mention:65a2d2968f1cce9da425277ada3e21b922ec8f3a044bbbfc6de842b5b912881d",
+                      "occurrences": [
+                        [
+                          20739,
+                          20749
+                        ]
+                      ],
+                      "start": 20739
+                    },
+                    "quote": "increase K",
+                    "span": {
+                      "end": 21511,
+                      "start": 20711
+                    },
+                    "start": 20739,
+                    "unit": {
+                      "end": 20774,
+                      "id": "source-unit:11af4c90cb139eb2b1cc484fccc3e0233a2b0ff710dd6c0484dc234bf360b51e",
+                      "start": 20729
+                    }
+                  },
+                  {
+                    "end": 20771,
+                    "identity": {
+                      "end": 20771,
+                      "id": "source-mention:23ce5462e2975fea0a97a3654453c4e18d9c16fb574cca4a60298a54df42fa87",
+                      "occurrences": [
+                        [
+                          20751,
+                          20771
+                        ]
+                      ],
+                      "start": 20751
+                    },
+                    "quote": "R must\n\nbe increased",
+                    "span": {
+                      "end": 21511,
+                      "start": 20711
+                    },
+                    "start": 20751,
+                    "unit": {
+                      "end": 20774,
+                      "id": "source-unit:11af4c90cb139eb2b1cc484fccc3e0233a2b0ff710dd6c0484dc234bf360b51e",
+                      "start": 20729
+                    }
+                  }
+                ]
+              }
+            },
+            "finding": [
+              {
+                "end": 20419,
+                "quote": "As V increases, however,\n\neach individual V is subjected to intra-\n\nspecific competition.",
+                "span": {
+                  "end": 20711,
+                  "start": 19911
+                },
+                "start": 20330,
+                "unit": {
+                  "end": 20419,
+                  "id": "source-unit:ec130375565168895e18cac4946f4e0c15f440e1b5f392bf87ec06cc8c4c82b5",
+                  "start": 20330
+                }
+              },
+              {
+                "end": 20584,
+                "quote": "One may assume\n\nthat an individual V's effective \"feed-\n\ning\" rate diminishes with increasing Va,\n\nwhere a is the victim's competition con-\n\nstant, 1 \\> a \\> 0 (5).",
+                "span": {
+                  "end": 20711,
+                  "start": 19911
+                },
+                "start": 20420,
+                "unit": {
+                  "end": 20584,
+                  "id": "source-unit:ca00e9e0de1a49fdcd374ab066cdaa08f3b52eae74d42e5454869e801efdb2ed",
+                  "start": 20420
+                }
+              },
+              {
+                "end": 20728,
+                "quote": "ins K=\n\n(R/Q)1/a.",
+                "span": {
+                  "end": 21511,
+                  "start": 20711
+                },
+                "start": 20711,
+                "unit": {
+                  "end": 20728,
+                  "id": "source-unit:dba81e1f10ac97bc10f61522f78adaec0acc96e10d5a3937cfb47c2be3219c8f",
+                  "start": 20682
+                }
+              },
+              {
+                "end": 20943,
+                "quote": "In addition to the above model, I\n\nhave used the traditional Pearl-Verhulst\n\nlogistic rV (1 \\- V/K)",
+                "span": {
+                  "end": 21511,
+                  "start": 20711
+                },
+                "start": 20844,
+                "unit": {
+                  "end": 20943,
+                  "id": "source-unit:6101881ef1f169b78ff45890659924e64a78155a8e8ab4fcac866a057a9436fe",
+                  "start": 20844
+                }
+              },
+              {
+                "end": 20982,
+                "quote": "and the Gom-\n\npertz rV (ln K \\- In V).",
+                "span": {
+                  "end": 21511,
+                  "start": 20711
+                },
+                "start": 20944,
+                "unit": {
+                  "end": 20982,
+                  "id": "source-unit:0970e95710513a561a133c6cda4dd5915ca8892e6b4335136640d3a34a868ad2",
+                  "start": 20944
+                }
+              }
+            ],
+            "observations": {},
+            "pending": false,
+            "source_spans": [
+              {
+                "end": 20711,
+                "start": 19911,
+                "text": "leads toward system instability.\n\nEach analytical model used is the\n\ndifference between inherent rate of in-\n\ncrease of V and the number of V that\n\ndie (or are not born) owing to the activi-\n\nties of P.\n\nAssume that each V must receive a\n\nquota of nutrients at a rate Q in order\n\njust to replace itself. Nutrients flow to\n\nthe lone individual V at a rate R. Thus,\n\nthis individual reproduces at a net rate\n\nr (R \\- Q). As V increases, however,\n\neach individual V is subjected to intra-\n\nspecific competition. One may assume\n\nthat an individual V's effective \"feed-\n\ning\" rate diminishes with increasing Va,\n\nwhere a is the victim's competition con-\n\nstant, 1 \\> a \\> 0 (5). Thus the per capita\n\nreproductive rate is r (RV-a \\- Q) and\n\nthe inherent rate is rV (RV- --Q).\n\nFrom the parentheses one obta"
+              },
+              {
+                "end": 21511,
+                "start": 20711,
+                "text": "ins K=\n\n(R/Q)1/a. Hence, to increase K, R must\n\nbe increased (a and Q are constant), and\n\ndOV\\*/K has the same sign as OV8/OR\n\n(6).\n\nIn addition to the above model, I\n\nhave used the traditional Pearl-Verhulst\n\nlogistic rV (1 \\- V/K) and the Gom-\n\npertz rV (ln K \\- In V).\n\n386\n\nKill rate models. Lotka and Volterra's\n\napproach was to treat the two popula-\n\ntions like molecules: kVP \\[see (7) and\\\n\\\nreferences therein\\]. This has been shown\n\nto 'be inadequate. Gause (7) obtained a\n\nreasonable fit to a kill rate curve by\n\ntaking the square root of V. We can\n\ngeneralize this procedure by taking V\n\nto the gth power 0 < g 1\\. Thus, a\n\nkill rate model is kPVa.\n\nAnother model is based on observa-\n\ntions (5, 8) that one lone exploiter will\n\nattack k(l \\- e-V) victims in a fixed\n\namount of time. Sinc"
+              }
+            ]
+          },
+          "source_version": "0eaa53e949226a3cd4c61c551c212e5e9b744545451691531adef79595b7320d"
+        },
+        "source": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time",
+        "study_id": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time"
+      },
+      "dependencies": {},
+      "is_latest_version": true,
+      "key": "evidence:0c97121af4c15b44585125fc",
+      "kind": "evidence",
+      "previous": null,
+      "version": "9174b5f4f45647d84fea8a73b5679365e472d560e56abc99dfb0c2ed8f3231fd"
+    },
+    {
+      "audit_snapshot": true,
+      "data": {
+        "finding": "The readable model-3 antecedent is strictly negative: the source says that Eq. 3b does not always have a positive solution for V*, then states, across two source units, “In fact V\\* is negative if” / “and only\n\nif (1 \\- a \\- g) is also negative.” Thus the reported condition is 1 - a - g < 0, not ≤ 0. The following sentence identifies the V isocline of Eq. 3a as humpless “for such values of (a + g).” This supplies the preceding boundary and isocline context for the no-extinction continuation described in the question. The next readable prose begins exactly “Values this great im-”; the supplied passage does not contain the rest of the producer-competition clause or the continuation beginning “ply intense.” Neither the equality case 1 - a - g = 0 nor a strictly positive-case conclusion is resolved here. Equation labels 3a and 3b are readable, but their damaged displayed formulas are not reconstructed. A printed-page marker “386” is securely visible earlier in the supplied source sequence; no additional page number is visible beside this paragraph. These are reported analytical claims, not measured or simulated observations.",
+        "locator": "characters 23111:23905",
+        "measurements": {
+          "native": {
+            "claims": {
+              "humpless_isocline": {
+                "conditions": "Reported analytical characterization of model 3, connected by 'such values' to the preceding strict-negative condition; no equality-boundary claim is supplied.",
+                "kind": "boundary_condition",
+                "left": "The V isocline of Eq. 3a is humpless",
+                "locator": "chunk:6:part:3200, characters 23525–23592, sentence immediately after the Eq. 3b negative-solution condition.",
+                "relation": "applies_when",
+                "right": "such values of (a + g), referring to the preceding condition that (1 - a - g) is negative",
+                "statement_id": "",
+                "symbols": {}
+              },
+              "negative_solution": {
+                "conditions": "Reported analytical result for model 3; strict negativity, 1 - a - g < 0. The equality case is not stated.",
+                "kind": "boundary_condition",
+                "left": "V* in Eq. 3b is negative",
+                "locator": "chunk:6:part:3200, model-3 discussion, characters 23389–23524: Eq. 3b positive-solution caveat and the following split 'if and only if' sentence; printed marker 386 occurs earlier in chunk:6:part:800.",
+                "relation": "applies_when",
+                "right": "(1 - a - g) is negative, if and only if",
+                "statement_id": "",
+                "symbols": {}
+              }
+            },
+            "observations": {}
+          },
+          "question": "Resolve the missing antecedent of the model-3 no-extinction passage. The continuation says no extinction tendency regardless of productivity, but begins mid-word ('ply intense'). Reexamine the preceding model-3 discussion for the exact readable sign condition on 1 - a - g, its connection to the humpless isocline of Eq. 3a and Eq. 3b, and the beginning of the producer-competition clause. Distinguish strict inequalities from an unresolved equality case; do not infer the equality boundary or reconstruct damaged formulas. Retain equation labels and any securely visible printed-page locator. This rereading asks for the missing boundary and cross-window connection, not another extraction of Fig. 2.",
+          "quote": "c'- 1--cV-c2 V2/2)\n\nV':\n\n\\-\\- (e-; -C-(4c)\n\n(e\\*v \\- 1 \\- cV)2\n\nOlnK 1\n\naV\\* -V\\* (5c)\n\nEquation 4c is always positive be-\n\ncause the MacLaurin series for ecV is\n\n1 \\+ cV \\+ c2V2/2 \\+ c3V3/6 \\+ \\\\* (see\n\nFigs. 1 and 2).\n\nThe other three cases are not quite\n\nso readily handled. Equation 3b does\n\nnot always have a positive solution for\n\nV\\*. In fact V\\* is negative if and only\n\nif (1 \\- a \\- g) is also negative. The V\n\nisocline of Eq. 3a is humpless for such\n\nvalues of (a \\+ g). Values this great im-\n\nK = 200\n\na 2 \\*4 ' 6\n\nTime x 10-2\n\nFig. 2\\. Iteration of the model 4 exploitation at K = 34 and K = 200\\. Solid curve is\n\nV; dashed curved is P. Enrichment causes the simulated extinction of both species.\n\nThe exploiter equation used was dP/dt \\- AkP (e'J \\- e-C). Time units are in cal-\n\n",
+          "source_anchors": {
+            "claims": {
+              "humpless_isocline": {
+                "conditions": [
+                  {
+                    "end": 23591,
+                    "identity": {
+                      "end": 23591,
+                      "id": "source-mention:ab2fa958a6c1eb7af83ce0a1246d496f0cab53f39691bb3add57a604cd86932b",
+                      "occurrences": [
+                        [
+                          23563,
+                          23591
+                        ]
+                      ],
+                      "start": 23563
+                    },
+                    "quote": "for such\n\nvalues of (a \\+ g)",
+                    "span": {
+                      "end": 23905,
+                      "start": 23111
+                    },
+                    "start": 23563,
+                    "unit": {
+                      "end": 23592,
+                      "id": "source-unit:5d17a585972f65f0d1c773f20c9987c6c25f8daf38837ff1809e0640a6224743",
+                      "start": 23548
+                    }
+                  },
+                  {
+                    "end": 23524,
+                    "identity": {
+                      "end": 23524,
+                      "id": "source-mention:7a3a213ed392a58857c1f80afe4e9139e41d32239c9187a35dcbafaa173d3b2f",
+                      "occurrences": [
+                        [
+                          23480,
+                          23524
+                        ],
+                        [
+                          23493,
+                          23524
+                        ]
+                      ],
+                      "start": 23480
+                    },
+                    "quote": "(1 \\- a \\- g) is also negative.",
+                    "span": {
+                      "end": 23905,
+                      "start": 23111
+                    },
+                    "start": 23493,
+                    "unit": {
+                      "end": 23524,
+                      "id": "source-unit:7ab3f44ce41f48f2d500b0343896c82a72bb0c9668e6c833440fce0775fdc3d7",
+                      "start": 23480
+                    }
+                  }
+                ],
+                "statement": {
+                  "end": 23592,
+                  "quote": "3a is humpless for such\n\nvalues of (a \\+ g).",
+                  "span": {
+                    "end": 23905,
+                    "start": 23111
+                  },
+                  "start": 23548,
+                  "unit": {
+                    "end": 23592,
+                    "id": "source-unit:5d17a585972f65f0d1c773f20c9987c6c25f8daf38837ff1809e0640a6224743",
+                    "start": 23548
+                  }
+                },
+                "subjects": [
+                  {
+                    "end": 23547,
+                    "identity": {
+                      "end": 23547,
+                      "id": "source-mention:4b379d6f17fb82c73abd1352e5f77900f611d555bd036dea01518a94e2c523a1",
+                      "occurrences": [
+                        [
+                          23525,
+                          23547
+                        ]
+                      ],
+                      "start": 23525
+                    },
+                    "quote": "The V\n\nisocline of Eq.",
+                    "span": {
+                      "end": 23905,
+                      "start": 23111
+                    },
+                    "start": 23525,
+                    "unit": {
+                      "end": 23547,
+                      "id": "source-unit:a6f6ce9ce2d613fad7a8a51830e309049ed4631445ac6b1257c3e102843adcdb",
+                      "start": 23525
+                    }
+                  },
+                  {
+                    "end": 23550,
+                    "identity": {
+                      "end": 23550,
+                      "id": "source-mention:00bd72fb26d9527efa06f2ec75377032c08f213e07f80d31a38f6e97d903707a",
+                      "occurrences": [
+                        [
+                          23548,
+                          23550
+                        ]
+                      ],
+                      "start": 23548
+                    },
+                    "quote": "3a",
+                    "span": {
+                      "end": 23905,
+                      "start": 23111
+                    },
+                    "start": 23548,
+                    "unit": {
+                      "end": 23592,
+                      "id": "source-unit:5d17a585972f65f0d1c773f20c9987c6c25f8daf38837ff1809e0640a6224743",
+                      "start": 23548
+                    }
+                  }
+                ]
+              },
+              "negative_solution": {
+                "conditions": [
+                  {
+                    "end": 23524,
+                    "identity": {
+                      "end": 23524,
+                      "id": "source-mention:7a3a213ed392a58857c1f80afe4e9139e41d32239c9187a35dcbafaa173d3b2f",
+                      "occurrences": [
+                        [
+                          23480,
+                          23524
+                        ]
+                      ],
+                      "start": 23480
+                    },
+                    "quote": "and only\n\nif (1 \\- a \\- g) is also negative.",
+                    "span": {
+                      "end": 23905,
+                      "start": 23111
+                    },
+                    "start": 23480,
+                    "unit": {
+                      "end": 23524,
+                      "id": "source-unit:7ab3f44ce41f48f2d500b0343896c82a72bb0c9668e6c833440fce0775fdc3d7",
+                      "start": 23480
+                    }
+                  }
+                ],
+                "statement": {
+                  "end": 23479,
+                  "quote": "In fact V\\* is negative if",
+                  "span": {
+                    "end": 23905,
+                    "start": 23111
+                  },
+                  "start": 23453,
+                  "unit": {
+                    "end": 23479,
+                    "id": "source-unit:add12d74da3565ba8816cb170295748c1f1179e9ae52584a23eced984d5199c6",
+                    "start": 23453
+                  }
+                },
+                "subjects": [
+                  {
+                    "end": 23464,
+                    "identity": {
+                      "end": 23464,
+                      "id": "source-mention:a4e28f9cce5b3a54a54bf4500ea1cb012a6c37bedd92c186d81d11119aae196f",
+                      "occurrences": [
+                        [
+                          23461,
+                          23464
+                        ]
+                      ],
+                      "start": 23461
+                    },
+                    "quote": "V\\*",
+                    "span": {
+                      "end": 23905,
+                      "start": 23111
+                    },
+                    "start": 23461,
+                    "unit": {
+                      "end": 23479,
+                      "id": "source-unit:add12d74da3565ba8816cb170295748c1f1179e9ae52584a23eced984d5199c6",
+                      "start": 23453
+                    }
+                  },
+                  {
+                    "end": 23400,
+                    "identity": {
+                      "end": 23400,
+                      "id": "source-mention:56cf9f27ecb5f3e055e3d111ad4bc58fddc24017b1fcfaac0c563e103563666c",
+                      "occurrences": [
+                        [
+                          23389,
+                          23400
+                        ]
+                      ],
+                      "start": 23389
+                    },
+                    "quote": "Equation 3b",
+                    "span": {
+                      "end": 23905,
+                      "start": 23111
+                    },
+                    "start": 23389,
+                    "unit": {
+                      "end": 23452,
+                      "id": "source-unit:8fc0c395358e20622b3bdfc753a6ce27510014d0ca31a97ddf992f907e65c9f2",
+                      "start": 23389
+                    }
+                  }
+                ]
+              }
+            },
+            "finding": [
+              {
+                "end": 23452,
+                "quote": "Equation 3b does\n\nnot always have a positive solution for\n\nV\\*.",
+                "span": {
+                  "end": 23905,
+                  "start": 23111
+                },
+                "start": 23389,
+                "unit": {
+                  "end": 23452,
+                  "id": "source-unit:8fc0c395358e20622b3bdfc753a6ce27510014d0ca31a97ddf992f907e65c9f2",
+                  "start": 23389
+                }
+              },
+              {
+                "end": 23614,
+                "quote": "Values this great im-",
+                "span": {
+                  "end": 23905,
+                  "start": 23111
+                },
+                "start": 23593,
+                "unit": {
+                  "end": 23655,
+                  "id": "source-unit:e5e24d02845a2ceda162c3a1b0afd9ab43e68055cf6301f5481f078271765f0b",
+                  "start": 23593
+                }
+              },
+              {
+                "end": 20987,
+                "quote": "386",
+                "span": {
+                  "end": 21511,
+                  "start": 20711
+                },
+                "start": 20984,
+                "unit": {
+                  "end": 21006,
+                  "id": "source-unit:b3046fc65144e4eb60efab99d0325831975b76dde0475506c06f946b702207c4",
+                  "start": 20984
+                }
+              }
+            ],
+            "observations": {},
+            "pending": false,
+            "source_spans": [
+              {
+                "end": 21511,
+                "start": 20711,
+                "text": "ins K=\n\n(R/Q)1/a. Hence, to increase K, R must\n\nbe increased (a and Q are constant), and\n\ndOV\\*/K has the same sign as OV8/OR\n\n(6).\n\nIn addition to the above model, I\n\nhave used the traditional Pearl-Verhulst\n\nlogistic rV (1 \\- V/K) and the Gom-\n\npertz rV (ln K \\- In V).\n\n386\n\nKill rate models. Lotka and Volterra's\n\napproach was to treat the two popula-\n\ntions like molecules: kVP \\[see (7) and\\\n\\\nreferences therein\\]. This has been shown\n\nto 'be inadequate. Gause (7) obtained a\n\nreasonable fit to a kill rate curve by\n\ntaking the square root of V. We can\n\ngeneralize this procedure by taking V\n\nto the gth power 0 < g 1\\. Thus, a\n\nkill rate model is kPVa.\n\nAnother model is based on observa-\n\ntions (5, 8) that one lone exploiter will\n\nattack k(l \\- e-V) victims in a fixed\n\namount of time. Sinc"
+              },
+              {
+                "end": 23905,
+                "start": 23111,
+                "text": "c'- 1--cV-c2 V2/2)\n\nV':\n\n\\-\\- (e-; -C-(4c)\n\n(e\\*v \\- 1 \\- cV)2\n\nOlnK 1\n\naV\\* -V\\* (5c)\n\nEquation 4c is always positive be-\n\ncause the MacLaurin series for ecV is\n\n1 \\+ cV \\+ c2V2/2 \\+ c3V3/6 \\+ \\\\* (see\n\nFigs. 1 and 2).\n\nThe other three cases are not quite\n\nso readily handled. Equation 3b does\n\nnot always have a positive solution for\n\nV\\*. In fact V\\* is negative if and only\n\nif (1 \\- a \\- g) is also negative. The V\n\nisocline of Eq. 3a is humpless for such\n\nvalues of (a \\+ g). Values this great im-\n\nK = 200\n\na 2 \\*4 ' 6\n\nTime x 10-2\n\nFig. 2\\. Iteration of the model 4 exploitation at K = 34 and K = 200\\. Solid curve is\n\nV; dashed curved is P. Enrichment causes the simulated extinction of both species.\n\nThe exploiter equation used was dP/dt \\- AkP (e'J \\- e-C). Time units are in cal-\n\n"
+              }
+            ]
+          },
+          "source_version": "0eaa53e949226a3cd4c61c551c212e5e9b744545451691531adef79595b7320d"
+        },
+        "source": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time",
+        "study_id": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time"
+      },
+      "dependencies": {},
+      "is_latest_version": true,
+      "key": "evidence:a528a29f6eae1f4e8eb34087",
+      "kind": "evidence",
+      "previous": null,
+      "version": "4ced6db5c5eefecdd8d62025084bb909a111cd9b9e5d20a5a29c6fbabdb37da4"
+    },
+    {
+      "audit_snapshot": true,
+      "data": {
+        "finding": "Models 1 and 6 require two boundaries rather than a single hump threshold. In the preceding discussion Eq. 6b is satisfied by two values of V: V* and a very small V over a trough in the V isocline. The following damaged displayed equation, set to zero, likewise holds for both. The author identifies unstable equilibrium values as those between V (trough) and V*. 'Model 6c' is positive for V* and negative for V (trough), so enrichment increases the unstable range at both ends. The author concludes that enrichment tends to weaken the steady state and says model 1 has the same characteristics, citing (9). These are reported mathematical stability results, not measurements of extinction. Neither damaged formula is reconstructed.",
+        "locator": "characters 24705:25505",
+        "measurements": {
+          "native": {
+            "claims": {
+              "unstable_range": {
+                "conditions": "Theoretical models 6 and 1. Unstable equilibrium values of V lie between V (trough) and V*. Model 6c is positive for V* and negative for V (trough); model 1 is stated to have the same characteristics (9).",
+                "kind": "causal_relation",
+                "left": "Enrichment",
+                "locator": "chunk:7:part:800, characters 24889–25244, unstable interval, Model 6c signs, enrichment conclusion and model-1 extension",
+                "relation": "increases",
+                "right": "The range of unstable V at both ends",
+                "statement_id": "",
+                "symbols": {}
+              }
+            },
+            "observations": {}
+          },
+          "question": "Resolve the model-specific scope of the destabilization argument, rather than repeating the usual hump criterion or Fig. 2. Examine the discussion following the model-3 humpless case and the models 1 and 6 trough cases: recover exact readable conditions under which enrichment poses no extinction tendency, increases an existing threat, or changes the unstable range. Preserve equation labels and native parameter meanings, but do not reconstruct damaged formulas. Distinguish the author's mathematical stability claims from persistence/extinction interpretations. Identify any qualification to the claim that all six models destabilize with enrichment; report printed-page placement only if securely visible.",
+          "quote": "biguity in the\n\nfollowing:\n\na In K\n\nV\\* \\-\n\n(e?v \\- 1) (e' \\- 1 \\- cV\\* \\- csV2)\n\n(e v'\\_\n\n\\- cV\\* \\- 1)2\n\nThis equation, set to zero, holds for\n\nboth V\\* and the V under the trough.\n\nThe unstable equilibrium values of V\n\nare those between V (trough) and V\\*.\n\nModel 6c is positive for V\\* and nega-\n\ntive for V (trough) (9). Hence, as en-\n\nrichment\n\nproceeds,\n\nthe range\n\nof unstable\n\nV is increasing at both ends. Therefore\n\nagain, enrichment\n\nunambiguously\n\ntends\n\nto weaken the steady state. Model 1 has\n\nthe same characteristics\n\n(9).\n\nUntil we are confident that the con-\n\nclusions based on these systems do not\n\napply to natural ecosystems, we must\n\nremain aware of the danger in setting\n\nenrichment as a human goal.\n\nMICHAEL L. ROSENZWEIG\n\nDepartment of Biological Sciences,\n\nState University",
+          "source_anchors": {
+            "claims": {
+              "unstable_range": {
+                "conditions": [
+                  {
+                    "end": 24955,
+                    "identity": {
+                      "end": 24955,
+                      "id": "source-mention:2aca5536ec2fd1e49ae3d35a5312903fc484b2315f2584aea8ddda9cbf4a3c04",
+                      "occurrences": [
+                        [
+                          24889,
+                          24955
+                        ]
+                      ],
+                      "start": 24889
+                    },
+                    "quote": "The unstable equilibrium values of V\n\nare those between V (trough)",
+                    "span": {
+                      "end": 25505,
+                      "start": 24705
+                    },
+                    "start": 24889,
+                    "unit": {
+                      "end": 24955,
+                      "id": "source-unit:41f605bec247d70ffbe1cc654befa7332c0629ce94d21e2c6f6399b608d1c27b",
+                      "start": 24889
+                    }
+                  },
+                  {
+                    "end": 24964,
+                    "identity": {
+                      "end": 24964,
+                      "id": "source-mention:16c331fd48dc89fe9252a2de765f2291825def2dba1734e7344b272187cf76de",
+                      "occurrences": [
+                        [
+                          24956,
+                          24964
+                        ]
+                      ],
+                      "start": 24956
+                    },
+                    "quote": "and V\\*.",
+                    "span": {
+                      "end": 25505,
+                      "start": 24705
+                    },
+                    "start": 24956,
+                    "unit": {
+                      "end": 24964,
+                      "id": "source-unit:f9e2e01f645adaecce8488a27905c52c979f6920c4be94c92f7f254b83987a2d",
+                      "start": 24956
+                    }
+                  },
+                  {
+                    "end": 24994,
+                    "identity": {
+                      "end": 24994,
+                      "id": "source-mention:d18fbbcdf2ea88bb8367093d905b9b8662293f04ae3b8242d304f1f4330cab68",
+                      "occurrences": [
+                        [
+                          24966,
+                          24994
+                        ]
+                      ],
+                      "start": 24966
+                    },
+                    "quote": "Model 6c is positive for V\\*",
+                    "span": {
+                      "end": 25505,
+                      "start": 24705
+                    },
+                    "start": 24966,
+                    "unit": {
+                      "end": 24994,
+                      "id": "source-unit:14d597b43bb6126fdab68f46a76a5ce6ff0a7024abc22b940881fa89a050d46c",
+                      "start": 24966
+                    }
+                  },
+                  {
+                    "end": 25030,
+                    "identity": {
+                      "end": 25030,
+                      "id": "source-mention:29054464b82ac717b59eb34e3f761aa36998d45d57c040682ecc67888c57ed0b",
+                      "occurrences": [
+                        [
+                          24995,
+                          25030
+                        ]
+                      ],
+                      "start": 24995
+                    },
+                    "quote": "and nega-\n\ntive for V (trough) (9).",
+                    "span": {
+                      "end": 25505,
+                      "start": 24705
+                    },
+                    "start": 24995,
+                    "unit": {
+                      "end": 25030,
+                      "id": "source-unit:c61c47369fae2aecacd07bdf13e3753fdf2a63c8ec1f4c5689b787aa1b5bc01e",
+                      "start": 24995
+                    }
+                  },
+                  {
+                    "end": 25244,
+                    "identity": {
+                      "end": 25244,
+                      "id": "source-mention:38c252bda231168b8ce566f4a914bce11fa8e68f04220573c2c48c3a21f0dc49",
+                      "occurrences": [
+                        [
+                          25201,
+                          25244
+                        ]
+                      ],
+                      "start": 25201
+                    },
+                    "quote": "Model 1 has\n\nthe same characteristics\n\n(9).",
+                    "span": {
+                      "end": 25505,
+                      "start": 24705
+                    },
+                    "start": 25201,
+                    "unit": {
+                      "end": 25244,
+                      "id": "source-unit:033b4ea51519d9f233aad417f11a1ed2ea91ac6876398be8efca602e15bffe3e",
+                      "start": 25201
+                    }
+                  }
+                ],
+                "statement": {
+                  "end": 25120,
+                  "quote": "Hence, as en-\n\nrichment\n\nproceeds,\n\nthe range\n\nof unstable\n\nV is increasing at both ends.",
+                  "span": {
+                    "end": 25505,
+                    "start": 24705
+                  },
+                  "start": 25031,
+                  "unit": {
+                    "end": 25120,
+                    "id": "source-unit:1229e5f6fe36042e4ba8e26b420468bc72b7cbabd89c73b3c3fbd8409f7d88fe",
+                    "start": 25031
+                  }
+                },
+                "subjects": [
+                  {
+                    "end": 25092,
+                    "identity": {
+                      "end": 25092,
+                      "id": "source-mention:808737c95fe3f06b0cf43bcd9458ee6a90d89d04eaa52b3b53fc56c2cc67d80b",
+                      "occurrences": [
+                        [
+                          25067,
+                          25092
+                        ]
+                      ],
+                      "start": 25067
+                    },
+                    "quote": "the range\n\nof unstable\n\nV",
+                    "span": {
+                      "end": 25505,
+                      "start": 24705
+                    },
+                    "start": 25067,
+                    "unit": {
+                      "end": 25120,
+                      "id": "source-unit:1229e5f6fe36042e4ba8e26b420468bc72b7cbabd89c73b3c3fbd8409f7d88fe",
+                      "start": 25031
+                    }
+                  }
+                ]
+              }
+            },
+            "finding": [
+              {
+                "end": 24590,
+                "quote": "6b is\n\nsatisfied\n\nby two values of V.",
+                "span": {
+                  "end": 24705,
+                  "start": 23905
+                },
+                "start": 24553,
+                "unit": {
+                  "end": 24590,
+                  "id": "source-unit:c00df430ab707db01a361b5b9c34f12cd509f517f4bc48cb7b6348979058ddc4",
+                  "start": 24553
+                }
+              },
+              {
+                "end": 24602,
+                "quote": "One is V\\*.",
+                "span": {
+                  "end": 24705,
+                  "start": 23905
+                },
+                "start": 24591,
+                "unit": {
+                  "end": 24602,
+                  "id": "source-unit:7d04d8c38b3d5c9d8f021b24c5d9110530e6571258c5015e5312b34910b6a568",
+                  "start": 24591
+                }
+              },
+              {
+                "end": 24687,
+                "quote": "Another is a very small value of V\n\nthat occurs over a trough in the V iso-\n\ncline.",
+                "span": {
+                  "end": 24705,
+                  "start": 23905
+                },
+                "start": 24604,
+                "unit": {
+                  "end": 24687,
+                  "id": "source-unit:e729ae0f11c0dafb1e38a33dbb28e33d8cfd9c5f38e66b6f49580328139922df",
+                  "start": 24604
+                }
+              },
+              {
+                "end": 24859,
+                "quote": "This equation, set to zero, holds for\n\nboth V\\*",
+                "span": {
+                  "end": 25505,
+                  "start": 24705
+                },
+                "start": 24812,
+                "unit": {
+                  "end": 24859,
+                  "id": "source-unit:d0b820139076bb6a79107c865ba3f98d7c44f3924eb1e22c7303d30761ad3fb4",
+                  "start": 24733
+                }
+              },
+              {
+                "end": 24887,
+                "quote": "and the V under the trough.",
+                "span": {
+                  "end": 25505,
+                  "start": 24705
+                },
+                "start": 24860,
+                "unit": {
+                  "end": 24887,
+                  "id": "source-unit:45b825c073b4d8b17e5c292298b250c037e0bc8197f38290fd02b5150ee57d03",
+                  "start": 24860
+                }
+              },
+              {
+                "end": 25200,
+                "quote": "Therefore\n\nagain, enrichment\n\nunambiguously\n\ntends\n\nto weaken the steady state.",
+                "span": {
+                  "end": 25505,
+                  "start": 24705
+                },
+                "start": 25121,
+                "unit": {
+                  "end": 25200,
+                  "id": "source-unit:b945b2f5c069e98724f590743705f94b0d510f782073d4bb19bfed38c7d88a00",
+                  "start": 25121
+                }
+              }
+            ],
+            "observations": {},
+            "pending": false,
+            "source_spans": [
+              {
+                "end": 24705,
+                "start": 23905,
+                "text": "culator cycles (10).\n\nSCIENCE, VOL. 171\n\nply intense intraspecific\n\nproducer com-\n\npetition and also a relatively low tend-\n\nency for exploiters\n\nto become hungry\n\nor\n\nsatiated and to modify their behavior\n\naccordingly. In such a system there is\n\nno tendency for extinction regardless\n\nof\n\nproductivity.\n\nHowever, if (a+ g) is less than 1,\n\nthere is a positive V\\* and\n\nOR aQ(l \\- g) (V\\*)a-\n\nV\\* \\- l(1 -g a \\- g)\n\nClearly Eq. 3c is always positive if V\\*\n\nis biologically real. Hence, in model 3,\n\nif there is any threat of system extinc-\n\ntion, it is increased by enrichment.\n\nModels 1 and 6 are similar and most\n\ncomplex. It turns out that Eq. 6b is\n\nsatisfied\n\nby two values of V. One is V\\*.\n\nAnother is a very small value of V\n\nthat occurs over a trough in the V iso-\n\ncline. Thus, there is am"
+              },
+              {
+                "end": 25505,
+                "start": 24705,
+                "text": "biguity in the\n\nfollowing:\n\na In K\n\nV\\* \\-\n\n(e?v \\- 1) (e' \\- 1 \\- cV\\* \\- csV2)\n\n(e v'\\_\n\n\\- cV\\* \\- 1)2\n\nThis equation, set to zero, holds for\n\nboth V\\* and the V under the trough.\n\nThe unstable equilibrium values of V\n\nare those between V (trough) and V\\*.\n\nModel 6c is positive for V\\* and nega-\n\ntive for V (trough) (9). Hence, as en-\n\nrichment\n\nproceeds,\n\nthe range\n\nof unstable\n\nV is increasing at both ends. Therefore\n\nagain, enrichment\n\nunambiguously\n\ntends\n\nto weaken the steady state. Model 1 has\n\nthe same characteristics\n\n(9).\n\nUntil we are confident that the con-\n\nclusions based on these systems do not\n\napply to natural ecosystems, we must\n\nremain aware of the danger in setting\n\nenrichment as a human goal.\n\nMICHAEL L. ROSENZWEIG\n\nDepartment of Biological Sciences,\n\nState University"
+              }
+            ]
+          },
+          "source_version": "0eaa53e949226a3cd4c61c551c212e5e9b744545451691531adef79595b7320d"
+        },
+        "source": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time",
+        "study_id": "https://www.researchgate.net/publication/17644856_Paradox_of_Enrichment_Destabilization_of_Exploitation_Ecosystems_in_Ecological_Time"
+      },
+      "dependencies": {},
+      "is_latest_version": true,
+      "key": "evidence:5ecf301752e1aa806e668652",
+      "kind": "evidence",
+      "previous": null,
+      "version": "82bb33f016b39856880eaaa93eb215a87fa5423ea96c7244d28e5f70c76cdea7"
+    }
+  ]
+}

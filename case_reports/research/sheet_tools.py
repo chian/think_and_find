@@ -14,7 +14,7 @@ def _records_schema(kinds):
         for kind in kinds]}}
 
 
-SCIENTIFIC_KINDS = ["inference", "premise", "theory", "application", "reasoning", "comparison", "repair", "importance", "source_formalization",
+SCIENTIFIC_KINDS = ["inference", "premise", "theory", "application", "reasoning", "comparison", "repair", "examination", "importance", "source_formalization",
     "expectation", "expectation_break", "expectation_support", "support_contribution", "causal_change", *GRADING_FIELDS]
 
 
@@ -58,6 +58,9 @@ def _sheet_tool_contract(source, kinds):
 
 
 SHEET_TOOLS = ("Use the following scientific sheet tools within your assigned responsibility. "
+        "An examination records the first source-grounded public assessment of a G: exact inference/theory snapshots, "
+        "its question, a reasoning-record argument and source-linked grounds. It earns one progress point per G "
+        "independently of supported, challenged or unresolved conclusions. It does not establish support or a useful change. "
         "Registering G earns 1 point, recording its expected generalizability bounds earns 1 point, "
         "and registering a theory/context application earns 1 point, each once per scored identity. "
         "Support earns 0.1 per qualifying unit. Executing calculations, extracting source claims or observations, "
@@ -126,16 +129,23 @@ SHEET_TOOLS = ("Use the following scientific sheet tools within your assigned re
         "Use repair_assessment to compare complete candidate and alternative protocols against the original test, including the target expectation_test. "
         "Keep original circumstances, targets and weights; shrinking bounds must leave excluded failures visible. Separate declared construction and test cases. "
         "The original G relation and intervention are frozen from the source test, not inferred from a new label or different equation text. "
-        "Use causal_change.assessment to reference the repair comparison. Numerical change credit uses support for original G and the measured restored "
-        "original-scope fraction requiring a G change among the compared preserving alternatives. Empty or unexecuted alternatives leave necessity unresolved. "
-        "This calculator does not measure the broader usefulness of a transfer or repair. Any fitting "
-        "G-preserving alternative defeats its scoped necessity even if costs or losses on other tasks remain. "
-        "Retain those consequences in repair.costs and public reasoning; do not turn prose judgments "
-        "into numeric grades. Failure without a restored prediction is also outside this change score. "
-        "A zero or unresolved score does not refute such a scientific finding. Keep numerical comparators "
-        "fixed within a test without imposing identical tasks or observables on discovery generally. "
-        "The component aggregation and restoration scaling convention is exposed in policy_details; do not enter numerical merit grades. "
-        "Later support for original G increases that existing change's value; never rediscover its break to claim the gain. "
+        "repair_assessment can investigate the narrower necessity question; it is not required for alteration credit. "
+        "For task-specific differences and useful alterations, record causal_change with exact inference and original expectation snapshots, "
+        "original/candidate/reference source-bound mathematical models, one declared task, fixed cases and a public reasoning argument. "
+        "Keep the original expected generalizability bounds: scope is their Boolean membership expression, or empty if not numerically classified. "
+        "A useful extension outside them earns credit without pretending the original expectation was violated. "
+        "Use scientific_tool name=compare_tasks to execute declared case_ids. Models use kind=equations with equations and answer, "
+        "or kind=ode with derivatives, initial values, directional event, physical experiment time interval and numerical solver tolerances. "
+        "Use mathematical expressions, not Python code. Each model.source references its scientific definition. "
+        "task declares quantity, units, absolute_tolerance and relative_tolerance before comparison; tolerances are accuracy requirements, not merit grades. "
+        "The reference may be a full model or a source-grounded explicit prediction. A failed original prediction earns one applicability-difference unit "
+        "per distinct task/circumstance; improvement earns max(0,1-candidate_error_upper/original_error_lower) additional credit. "
+        "Numerical refinement estimates qualify these comparisons; they are not rigorous error enclosures. "
+        "Original-G support stays separate. Full repair, relation reversal and failure of competing alternatives are not prerequisites. "
+        "Aliases, repeated cases, solver refinements and alternative labels do not mint points; only improved best-known task error adds alteration credit. "
+        "Retain original successes, lost successes, still-failing improvements and unrepresented early events. Use separate task comparisons "
+        "for different observables, units or success requirements, with justified mappings in the public argument. "
+        "Do not equate a lack of support/change operands with a negative scientific result, or enter a model-authored numerical merit grade. "
         "A result receipt, including one with an execution error, is final for that immutable protocol and case. "
         "Repeating the same case returns that receipt. A changed expression requires a corrected protocol under a new key. "
         "Use calculate for summary results; calculation_offset and calculation_limit retrieve bounded detail pages. "

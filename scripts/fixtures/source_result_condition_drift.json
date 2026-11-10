@@ -1,0 +1,2101 @@
+[
+  {
+    "call": 274,
+    "request": {
+      "source": "https://www.pnas.org/doi/10.1073/pnas.96.18.10098",
+      "source_version": "1f1a920cbeb7022eb33fe80f32104ec55128f753559ee4667e55d0e16ffc94f3",
+      "question": "Resolve the remaining calculation-specific gap, not the already verified Figure 5 symbols: extract the readable original inhibition equation and symbol definitions in this passage, including the apparent-Km relation, measured kinetic operands, and conditions used to calculate transporter activity. Quote exact text and locators. Distinguish an equation actually readable in the source from flattened or missing mathematical typography; do not reconstruct an inhibited-transport formula if it is absent. Explain whether this passage establishes only competitive zero-trans inhibition kinetics or also supplies the full calculation used for Figure 5. Do not treat this inhibitor-analysis equation as an added dependency in the glycolysis pathway model.",
+      "passages": {
+        "chunk:8:part:0": {
+          "key": "chunk:8:part:0",
+          "start": 22606,
+          "end": 23406,
+          "source_units": [
+            {
+              "unit": "source-unit:0be30e3e60b34534e5f112b6805aa43c7a00015180b928d661c142f698fb52b1",
+              "start": 22606,
+              "end": 22747,
+              "text": "The activity of the glucose transporter was modulated by titration with phloretin, a general inhibitor of facilitated diffusion transporters."
+            },
+            {
+              "unit": "source-unit:ae1d4c04213f51f5b1d9dbbcc5803260539f13cf65d0ec7047552d52fc164022",
+              "start": 22748,
+              "end": 22897,
+              "text": "This compound inhibited the erythrocyte glucose carrier competitively ( [34](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#core-collateral-B34))."
+            },
+            {
+              "unit": "source-unit:8300ef0e83df0ad40ac31aebe3a03c35c1ecd78c985d7902a7aff01046eb2a9c",
+              "start": 22898,
+              "end": 23020,
+              "text": "On the contrary, phloretin has been reported to be a noncompetitive inhibitor of glucose transport in bloodstream form _T."
+            },
+            {
+              "unit": "source-unit:351b47803070ac9355cfc7d5ea7d4482490b6174465659ec54693518cc0a439d",
+              "start": 23021,
+              "end": 23029,
+              "text": "brucei_."
+            },
+            {
+              "unit": "source-unit:5d7ef55b3ddbb1fafbae932a4ada3e096459a0be035d16830270b7e17bb73b63",
+              "start": 23030,
+              "end": 23139,
+              "text": "However, this conclusion was based on steady-state measurements rather than on initial transport experiments,"
+            },
+            {
+              "unit": "source-unit:c9628330ed4139c819d706df2b21d5e79659ce5bad330e60d79c436673782c9e",
+              "start": 23140,
+              "end": 23248,
+              "text": "and no numbers were reported ( [15](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#core-collateral-B15))."
+            },
+            {
+              "unit": "source-unit:a1f6f85555a30f7a637e34343e6b103853d6ea96ad99c3f41bb08f44d84a8e54",
+              "start": 23249,
+              "end": 23320,
+              "text": "We reexamined this issue by using the 5-second glucose transport assay."
+            },
+            {
+              "unit": "source-unit:01657296bdeb034844d3c0e5ae12ef50591584bf40dc86e7bb5a8909d04eed55",
+              "start": 23321,
+              "end": 23406,
+              "text": "Phloretin increased the apparent K_m_ for glucose without any effect on the V_max_ (F"
+            }
+          ]
+        },
+        "chunk:8:part:800": {
+          "key": "chunk:8:part:800",
+          "start": 23406,
+          "end": 24206,
+          "source_units": [
+            {
+              "unit": "source-unit:01657296bdeb034844d3c0e5ae12ef50591584bf40dc86e7bb5a8909d04eed55",
+              "start": 23406,
+              "end": 23409,
+              "text": "ig."
+            },
+            {
+              "unit": "source-unit:3dc6d40f40aac6a695e0ad104b64230a8dbdbf25538a7e844fee93023a008067",
+              "start": 23410,
+              "end": 23469,
+              "text": "[1](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#F1))."
+            },
+            {
+              "unit": "source-unit:7755d61295ad2661c6ac56fdae7edafe0dad67e17b3e89b912ada0f63c771be7",
+              "start": 23470,
+              "end": 23590,
+              "text": "We conclude that phloretin is a competitive inhibitor of the trypanosome glucose transporter, with a K_i_ of 21 μM (Fig."
+            },
+            {
+              "unit": "source-unit:3f71d0a19ca5fa99300d5d23fdd0f1617205f72e52073c8e4f34d45103443ba4",
+              "start": 23591,
+              "end": 23650,
+              "text": "[2](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#F2))."
+            },
+            {
+              "unit": "source-unit:7fd939550d1c3d0f7fc98040c9099b94e13b44d101ea17f56134a4db608d2111",
+              "start": 23652,
+              "end": 23841,
+              "text": "![](https://www.pnas.org/cms/10.1073/pnas.96.18.10098/asset/39783acf-deb8-469b-a841-efa6a79ec950/assets/graphic/pq1792494001.jpeg)Phloretin inhibits zero-trans-glucose influx competitively."
+            },
+            {
+              "unit": "source-unit:7d376c7023121600772b94bd4a7b9dd431f9e0e46c591adc0e22a4c54e8fa0f0",
+              "start": 23842,
+              "end": 23911,
+              "text": "Glucose transport was measured rapidly (5 seconds) in the absence (●)"
+            },
+            {
+              "unit": "source-unit:ab8a25cd84d72601cf1c8ffd19f44812e0b6bda901aad2718118f1cb7bf76677",
+              "start": 23912,
+              "end": 23971,
+              "text": "and presence (■) of 45 μM ( _A_) or 91 μM ( _B_) phloretin."
+            },
+            {
+              "unit": "source-unit:80e3062a442236d9f51bc3a437cd9cc45302a7180b1eda37e85f7ce04f1f5550",
+              "start": 23972,
+              "end": 24032,
+              "text": "The full lines represent the fitted Michaelis–Menten curves."
+            },
+            {
+              "unit": "source-unit:6248b21663266342d9e8b053339b20e62233ff7abfc1c0c2900b4ec1d390665a",
+              "start": 24033,
+              "end": 24051,
+              "text": "_A_, no phloretin:"
+            },
+            {
+              "unit": "source-unit:4c52bea0401373639213e43e2dda0d39c4dbbceb6127e03c823f4b70a1c7da42",
+              "start": 24052,
+              "end": 24092,
+              "text": "V_max_ = 169 ± 2 nmol⋅min−1⋅mg⋅protein−1"
+            },
+            {
+              "unit": "source-unit:d26330db55571cca7d53f9b2382cce3724a6f84dd1950125c80d1a0ec61afc6b",
+              "start": 24093,
+              "end": 24119,
+              "text": "and K_m_ = 0.73 ± 0.01 mM."
+            },
+            {
+              "unit": "source-unit:c4a4addd2a63da088b0be630f550c5518f48eac81f2cd9831213876f07e96795",
+              "start": 24120,
+              "end": 24140,
+              "text": "_A_, with phloretin:"
+            },
+            {
+              "unit": "source-unit:f21fab05eca50dcdae5749ed3b29ade5e395dea86bf7ee853597b31cc595c296",
+              "start": 24141,
+              "end": 24181,
+              "text": "V_max_ = 169 ± 9 nmol⋅min−1⋅mg⋅protein−1"
+            },
+            {
+              "unit": "source-unit:392004be6676978f5db55103d9610e6464370e5cd66b17e069ea26f51fb7cf3f",
+              "start": 24182,
+              "end": 24206,
+              "text": "and K_m_ ± 2.99 ± 0.36 m"
+            }
+          ]
+        },
+        "chunk:8:part:1600": {
+          "key": "chunk:8:part:1600",
+          "start": 24206,
+          "end": 25006,
+          "source_units": [
+            {
+              "unit": "source-unit:392004be6676978f5db55103d9610e6464370e5cd66b17e069ea26f51fb7cf3f",
+              "start": 24206,
+              "end": 24208,
+              "text": "M."
+            },
+            {
+              "unit": "source-unit:ec06b223edd5648e27016fc2f8c7f68989936521ce29114a5c450ad8569a4733",
+              "start": 24209,
+              "end": 24227,
+              "text": "_B_, no phloretin:"
+            },
+            {
+              "unit": "source-unit:a7a4fced272d7615b413f5a2a90a479541b56d56ad654704f3689737f02f9f4d",
+              "start": 24228,
+              "end": 24269,
+              "text": "V_max_ = 198 ± 12 nmol⋅min−1⋅mg⋅protein−1"
+            },
+            {
+              "unit": "source-unit:7d2f58aa2ca937672bb0695ec6a3d19bacf35790db56d70ee90dd3d8c15b1386",
+              "start": 24270,
+              "end": 24298,
+              "text": "and K_m_ = 1.85 ± 0.38 _mM_."
+            },
+            {
+              "unit": "source-unit:482c43f64ef5adea30af6ca5c491cc33ffbf2b5127531f0aacb75ad04c3814df",
+              "start": 24299,
+              "end": 24319,
+              "text": "_B_, with phloretin:"
+            },
+            {
+              "unit": "source-unit:8fd03f2a2f3d3db7d8e9d8c03fe86dae0d7b9e1ecbb5834906785833bfd20a46",
+              "start": 24320,
+              "end": 24360,
+              "text": "V_max_ = 193 ± 5 nmol⋅min−1⋅mg⋅protein−1"
+            },
+            {
+              "unit": "source-unit:9eb18562d378ed09eab0a734a58efd4e07732051c8da57b81ec334114131a404",
+              "start": 24361,
+              "end": 24387,
+              "text": "and K_m_ = 6.35 ± 0.39 mM."
+            },
+            {
+              "unit": "source-unit:1bb5cfb8e481a5db4cef7c69ba74b6b6fff48969caa7dcf3bde725c6436e3dad",
+              "start": 24388,
+              "end": 24469,
+              "text": "In the absence of phloretin, ethanol was added to correct for any solvent effect."
+            },
+            {
+              "unit": "source-unit:d5f58fe1c2d527807407c05fdbaefd180de2526dd3807f17e923f1d451731228",
+              "start": 24470,
+              "end": 24552,
+              "text": "The data in _A_ were obtained with one batch of cells, isolated from a single rat."
+            },
+            {
+              "unit": "source-unit:a9009625584810ddb56dd07b6c3b34799d96638f770f9c39bfa19037616de5b5",
+              "start": 24553,
+              "end": 24642,
+              "text": "The data in _B_ were measured with another batch of cells, obtained from a different rat."
+            },
+            {
+              "unit": "source-unit:5ae822d0a9fd893848bbe752ca4b15178bf7f0f48023804fee90526a5e8aca12",
+              "start": 24644,
+              "end": 24819,
+              "text": "![](https://www.pnas.org/cms/10.1073/pnas.96.18.10098/asset/c58b6491-136b-4dc3-ba79-73bdc151920f/assets/graphic/pq1792494002.jpeg)The inhibitor constant of phloretin is 21 μM."
+            },
+            {
+              "unit": "source-unit:95136499e820da078fb72a743dd7d11accc72e6fe3fe32246c2aa881ce9bfa4e",
+              "start": 24820,
+              "end": 24916,
+              "text": "The apparent K_m_ of zero-trans-glucose influx depended linearly on the inhibitor concentration."
+            },
+            {
+              "unit": "source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b",
+              "start": 24917,
+              "end": 25006,
+              "text": "The inhibitor constant K_i_ was derived from this curve by using the equation K_m__app_ ="
+            }
+          ]
+        },
+        "chunk:8:part:2400": {
+          "key": "chunk:8:part:2400",
+          "start": 25006,
+          "end": 25806,
+          "source_units": [
+            {
+              "unit": "source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b",
+              "start": 25006,
+              "end": 25036,
+              "text": " K_m_(1 + \\[phloretin\\]/K_i_)."
+            },
+            {
+              "unit": "source-unit:c488f994b48cda9ce3f5f9ea8a20f7dc8c72f3302ecc6e3f20ccae38bb5b3dac",
+              "start": 25037,
+              "end": 25165,
+              "text": "Each data point was obtained by linear regression of a complete Michaelis–Menten curve, containing at least 6 points between 0.1"
+            },
+            {
+              "unit": "source-unit:0e0cae8fe9978c0bfc66bd13643a76e5ac8933bdb88c84da211a556f274dff24",
+              "start": 25166,
+              "end": 25255,
+              "text": "and 20 mM glucose (or 40 mM glucose in the presence of phloretin), measured in duplicate."
+            },
+            {
+              "unit": "source-unit:71192e30246bf6a931a6df75b414392739bf767471295ffb8318d62942692a59",
+              "start": 25256,
+              "end": 25332,
+              "text": "The standard deviation was obtained from the nonlinear regression procedure."
+            },
+            {
+              "unit": "source-unit:da96a7ebec112d9206bf86c7aa664ccca82d5bb0ee40b6d21d28acf55efca9f2",
+              "start": 25333,
+              "end": 25420,
+              "text": "Independent experiments with different isolates were treated as individual data points."
+            },
+            {
+              "unit": "source-unit:8adfaf8ee12bca1164895e730dd6bfd01c8e60cd0e318aab10bf58ef4254c3d8",
+              "start": 25422,
+              "end": 25473,
+              "text": "### Inhibition of the Glycolytic Flux by Phloretin."
+            },
+            {
+              "unit": "source-unit:c384e811faca406ca97f99dde4308d7a60b293be4b49c17f1d4fa135697050aa",
+              "start": 25475,
+              "end": 25584,
+              "text": "Subsequently, the effect of modulation of the glucose transport activity on the glycolytic flux was measured."
+            },
+            {
+              "unit": "source-unit:db306f95cb0b5dfd48b8b15a54b3cea508e602ffdc5383c188972691a84b9fdf",
+              "start": 25585,
+              "end": 25700,
+              "text": "Already low concentrations of phloretin decreased the steady-state rate at which trypanosomes consumed oxygen (Fig."
+            },
+            {
+              "unit": "source-unit:ddca0e0e0df5e06a668ea0e2d6794056db1380a22e36f087b1195fc3a4b70c63",
+              "start": 25701,
+              "end": 25760,
+              "text": "[3](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#F3))."
+            },
+            {
+              "unit": "source-unit:92c0f51b0fb8d0334d4053bb86a54b2b121f9bee0dfaa0e9a5388493fd202081",
+              "start": 25761,
+              "end": 25806,
+              "text": "Under aerobic conditions, bloodstream-form tr"
+            }
+          ]
+        },
+        "chunk:8:part:3200": {
+          "key": "chunk:8:part:3200",
+          "start": 25806,
+          "end": 26409,
+          "source_units": [
+            {
+              "unit": "source-unit:92c0f51b0fb8d0334d4053bb86a54b2b121f9bee0dfaa0e9a5388493fd202081",
+              "start": 25806,
+              "end": 26012,
+              "text": "ypanosomes convert all glucose to pyruvate, with the concomitant consumption of one molecule of oxygen per molecule of glucose ( [33](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#core-collateral-B33))."
+            },
+            {
+              "unit": "source-unit:1fbd8d53016fc5991eede29f125c35beec4185efc3e4e599b344991ee6a751a8",
+              "start": 26013,
+              "end": 26104,
+              "text": "Therefore, the rate of oxygen consumption is a measure of the steady-state glycolytic flux."
+            },
+            {
+              "unit": "source-unit:43703ff466a0b6d25461757d5e3671345927d81297180ad37a72bf47dabfc22f",
+              "start": 26105,
+              "end": 26193,
+              "text": "Trypanosomes can, however, convert part of the glucose to glycerol without using oxygen."
+            },
+            {
+              "unit": "source-unit:678e09be80f610d257077151b853c5be21a25836300adeb64483575d33eb3285",
+              "start": 26194,
+              "end": 26248,
+              "text": "Normally this only happens under anaerobic conditions."
+            },
+            {
+              "unit": "source-unit:4ad0a49485e6435a7cbf899e7691943bb1bc19ee3f96f4b33ce4e812ec673131",
+              "start": 26249,
+              "end": 26347,
+              "text": "Indeed, also in the presence of phloretin, the glucose was still fully converted to pyruvate (Fig."
+            },
+            {
+              "unit": "source-unit:5e11b15e06f6624c9def642ca95a2081f8817372dac95cdda44fb3a8d8a71f82",
+              "start": 26348,
+              "end": 26407,
+              "text": "[4](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#F4))."
+            }
+          ]
+        }
+      },
+      "units": [
+        {
+          "id": "source-unit:0be30e3e60b34534e5f112b6805aa43c7a00015180b928d661c142f698fb52b1",
+          "start": 22606,
+          "end": 22747
+        },
+        {
+          "id": "source-unit:ae1d4c04213f51f5b1d9dbbcc5803260539f13cf65d0ec7047552d52fc164022",
+          "start": 22748,
+          "end": 22897
+        },
+        {
+          "id": "source-unit:8300ef0e83df0ad40ac31aebe3a03c35c1ecd78c985d7902a7aff01046eb2a9c",
+          "start": 22898,
+          "end": 23020
+        },
+        {
+          "id": "source-unit:351b47803070ac9355cfc7d5ea7d4482490b6174465659ec54693518cc0a439d",
+          "start": 23021,
+          "end": 23029
+        },
+        {
+          "id": "source-unit:5d7ef55b3ddbb1fafbae932a4ada3e096459a0be035d16830270b7e17bb73b63",
+          "start": 23030,
+          "end": 23139
+        },
+        {
+          "id": "source-unit:c9628330ed4139c819d706df2b21d5e79659ce5bad330e60d79c436673782c9e",
+          "start": 23140,
+          "end": 23248
+        },
+        {
+          "id": "source-unit:a1f6f85555a30f7a637e34343e6b103853d6ea96ad99c3f41bb08f44d84a8e54",
+          "start": 23249,
+          "end": 23320
+        },
+        {
+          "id": "source-unit:01657296bdeb034844d3c0e5ae12ef50591584bf40dc86e7bb5a8909d04eed55",
+          "start": 23321,
+          "end": 23409
+        },
+        {
+          "id": "source-unit:3dc6d40f40aac6a695e0ad104b64230a8dbdbf25538a7e844fee93023a008067",
+          "start": 23410,
+          "end": 23469
+        },
+        {
+          "id": "source-unit:7755d61295ad2661c6ac56fdae7edafe0dad67e17b3e89b912ada0f63c771be7",
+          "start": 23470,
+          "end": 23590
+        },
+        {
+          "id": "source-unit:3f71d0a19ca5fa99300d5d23fdd0f1617205f72e52073c8e4f34d45103443ba4",
+          "start": 23591,
+          "end": 23650
+        },
+        {
+          "id": "source-unit:7fd939550d1c3d0f7fc98040c9099b94e13b44d101ea17f56134a4db608d2111",
+          "start": 23652,
+          "end": 23841
+        },
+        {
+          "id": "source-unit:7d376c7023121600772b94bd4a7b9dd431f9e0e46c591adc0e22a4c54e8fa0f0",
+          "start": 23842,
+          "end": 23911
+        },
+        {
+          "id": "source-unit:ab8a25cd84d72601cf1c8ffd19f44812e0b6bda901aad2718118f1cb7bf76677",
+          "start": 23912,
+          "end": 23971
+        },
+        {
+          "id": "source-unit:80e3062a442236d9f51bc3a437cd9cc45302a7180b1eda37e85f7ce04f1f5550",
+          "start": 23972,
+          "end": 24032
+        },
+        {
+          "id": "source-unit:6248b21663266342d9e8b053339b20e62233ff7abfc1c0c2900b4ec1d390665a",
+          "start": 24033,
+          "end": 24051
+        },
+        {
+          "id": "source-unit:4c52bea0401373639213e43e2dda0d39c4dbbceb6127e03c823f4b70a1c7da42",
+          "start": 24052,
+          "end": 24092
+        },
+        {
+          "id": "source-unit:d26330db55571cca7d53f9b2382cce3724a6f84dd1950125c80d1a0ec61afc6b",
+          "start": 24093,
+          "end": 24119
+        },
+        {
+          "id": "source-unit:c4a4addd2a63da088b0be630f550c5518f48eac81f2cd9831213876f07e96795",
+          "start": 24120,
+          "end": 24140
+        },
+        {
+          "id": "source-unit:f21fab05eca50dcdae5749ed3b29ade5e395dea86bf7ee853597b31cc595c296",
+          "start": 24141,
+          "end": 24181
+        },
+        {
+          "id": "source-unit:392004be6676978f5db55103d9610e6464370e5cd66b17e069ea26f51fb7cf3f",
+          "start": 24182,
+          "end": 24208
+        },
+        {
+          "id": "source-unit:ec06b223edd5648e27016fc2f8c7f68989936521ce29114a5c450ad8569a4733",
+          "start": 24209,
+          "end": 24227
+        },
+        {
+          "id": "source-unit:a7a4fced272d7615b413f5a2a90a479541b56d56ad654704f3689737f02f9f4d",
+          "start": 24228,
+          "end": 24269
+        },
+        {
+          "id": "source-unit:7d2f58aa2ca937672bb0695ec6a3d19bacf35790db56d70ee90dd3d8c15b1386",
+          "start": 24270,
+          "end": 24298
+        },
+        {
+          "id": "source-unit:482c43f64ef5adea30af6ca5c491cc33ffbf2b5127531f0aacb75ad04c3814df",
+          "start": 24299,
+          "end": 24319
+        },
+        {
+          "id": "source-unit:8fd03f2a2f3d3db7d8e9d8c03fe86dae0d7b9e1ecbb5834906785833bfd20a46",
+          "start": 24320,
+          "end": 24360
+        },
+        {
+          "id": "source-unit:9eb18562d378ed09eab0a734a58efd4e07732051c8da57b81ec334114131a404",
+          "start": 24361,
+          "end": 24387
+        },
+        {
+          "id": "source-unit:1bb5cfb8e481a5db4cef7c69ba74b6b6fff48969caa7dcf3bde725c6436e3dad",
+          "start": 24388,
+          "end": 24469
+        },
+        {
+          "id": "source-unit:d5f58fe1c2d527807407c05fdbaefd180de2526dd3807f17e923f1d451731228",
+          "start": 24470,
+          "end": 24552
+        },
+        {
+          "id": "source-unit:a9009625584810ddb56dd07b6c3b34799d96638f770f9c39bfa19037616de5b5",
+          "start": 24553,
+          "end": 24642
+        },
+        {
+          "id": "source-unit:5ae822d0a9fd893848bbe752ca4b15178bf7f0f48023804fee90526a5e8aca12",
+          "start": 24644,
+          "end": 24819
+        },
+        {
+          "id": "source-unit:95136499e820da078fb72a743dd7d11accc72e6fe3fe32246c2aa881ce9bfa4e",
+          "start": 24820,
+          "end": 24916
+        },
+        {
+          "id": "source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b",
+          "start": 24917,
+          "end": 25036
+        },
+        {
+          "id": "source-unit:c488f994b48cda9ce3f5f9ea8a20f7dc8c72f3302ecc6e3f20ccae38bb5b3dac",
+          "start": 25037,
+          "end": 25165
+        },
+        {
+          "id": "source-unit:0e0cae8fe9978c0bfc66bd13643a76e5ac8933bdb88c84da211a556f274dff24",
+          "start": 25166,
+          "end": 25255
+        },
+        {
+          "id": "source-unit:71192e30246bf6a931a6df75b414392739bf767471295ffb8318d62942692a59",
+          "start": 25256,
+          "end": 25332
+        },
+        {
+          "id": "source-unit:da96a7ebec112d9206bf86c7aa664ccca82d5bb0ee40b6d21d28acf55efca9f2",
+          "start": 25333,
+          "end": 25420
+        },
+        {
+          "id": "source-unit:8adfaf8ee12bca1164895e730dd6bfd01c8e60cd0e318aab10bf58ef4254c3d8",
+          "start": 25422,
+          "end": 25473
+        },
+        {
+          "id": "source-unit:c384e811faca406ca97f99dde4308d7a60b293be4b49c17f1d4fa135697050aa",
+          "start": 25475,
+          "end": 25584
+        },
+        {
+          "id": "source-unit:db306f95cb0b5dfd48b8b15a54b3cea508e602ffdc5383c188972691a84b9fdf",
+          "start": 25585,
+          "end": 25700
+        },
+        {
+          "id": "source-unit:ddca0e0e0df5e06a668ea0e2d6794056db1380a22e36f087b1195fc3a4b70c63",
+          "start": 25701,
+          "end": 25760
+        },
+        {
+          "id": "source-unit:92c0f51b0fb8d0334d4053bb86a54b2b121f9bee0dfaa0e9a5388493fd202081",
+          "start": 25761,
+          "end": 26012
+        },
+        {
+          "id": "source-unit:1fbd8d53016fc5991eede29f125c35beec4185efc3e4e599b344991ee6a751a8",
+          "start": 26013,
+          "end": 26104
+        },
+        {
+          "id": "source-unit:43703ff466a0b6d25461757d5e3671345927d81297180ad37a72bf47dabfc22f",
+          "start": 26105,
+          "end": 26193
+        },
+        {
+          "id": "source-unit:678e09be80f610d257077151b853c5be21a25836300adeb64483575d33eb3285",
+          "start": 26194,
+          "end": 26248
+        },
+        {
+          "id": "source-unit:4ad0a49485e6435a7cbf899e7691943bb1bc19ee3f96f4b33ce4e812ec673131",
+          "start": 26249,
+          "end": 26347
+        },
+        {
+          "id": "source-unit:5e11b15e06f6624c9def642ca95a2081f8817372dac95cdda44fb3a8d8a71f82",
+          "start": 26348,
+          "end": 26407
+        }
+      ]
+    },
+    "response": {
+      "findings": [
+        {
+          "span": "chunk:8:part:1600",
+          "study_id": "https://www.pnas.org/doi/10.1073/pnas.96.18.10098",
+          "finding": "The Figure 2 caption supplies a readable apparent-Km equation, not an inhibited transport-rate equation. Its exact text crosses two supplied fragments of the same source unit: “The inhibitor constant K_i_ was derived from this curve by using the equation K_m__app_ =” (24917–25006), followed by “ K_m_(1 + \\[phloretin\\]/K_i_).” (25006–25036). Thus the readable relation is K_m__app_ = K_m_(1 + [phloretin]/K_i_); the backslashes in the quoted fragment escape square brackets in the supplied representation. The preceding sentence identifies K_m__app_ as the apparent K_m_ of zero-trans-glucose influx, and K_i_ is explicitly called the inhibitor constant. [phloretin] denotes inhibitor concentration in this context. K_m_ is the glucose kinetic parameter reported in the Michaelis–Menten fits; the passage provides no separate formal definition of it or V_max_. The reported K_i_ is derived from the curve, not a separately measured transport rate.",
+          "measurements": {
+            "observations": {
+              "ki": {
+                "source_id": "",
+                "locator": "Figure 2 caption, 24644–24819, sentence following the image: inhibitor constant of phloretin",
+                "quantity": "inhibitor constant of phloretin",
+                "conditions": "Derived from the linear dependence of the apparent K_m_ of zero-trans-glucose influx on inhibitor concentration using the caption's apparent-Km equation.",
+                "value": 21,
+                "units": "μM",
+                "uncertainty": "not reported",
+                "kind": "fit_parameter"
+              }
+            },
+            "claims": {
+              "apparent_km_equation": {
+                "kind": "equation",
+                "statement_id": "",
+                "locator": "Figure 2 caption, source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b, 24917–25036; split between chunk:8:part:1600 and chunk:8:part:2400",
+                "left": "K_m__app_",
+                "relation": "=",
+                "right": "K_m_(1 + [phloretin]/K_i_)",
+                "conditions": "Derivation of the inhibitor constant from the linear dependence of apparent K_m_ of zero-trans-glucose influx on inhibitor concentration.",
+                "symbols": {
+                  "K_m__app_": "Apparent K_m_ of zero-trans-glucose influx.",
+                  "K_m_": "Glucose K_m_ reported in the Michaelis–Menten fits; no separate formal definition is given in this passage.",
+                  "[phloretin]": "Phloretin concentration, identified contextually by the preceding sentence's inhibitor concentration.",
+                  "K_i_": "Inhibitor constant of phloretin."
+                }
+              }
+            }
+          },
+          "source_anchors": {
+            "observations": {
+              "ki": {
+                "statement": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:5ae822d0a9fd893848bbe752ca4b15178bf7f0f48023804fee90526a5e8aca12",
+                  "quote": "The inhibitor constant of phloretin is 21 μM."
+                },
+                "quantity": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:5ae822d0a9fd893848bbe752ca4b15178bf7f0f48023804fee90526a5e8aca12",
+                  "quote": "inhibitor constant of phloretin"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:1600",
+                    "unit": "source-unit:95136499e820da078fb72a743dd7d11accc72e6fe3fe32246c2aa881ce9bfa4e",
+                    "quote": "The apparent K_m_ of zero-trans-glucose influx depended linearly on the inhibitor concentration."
+                  }
+                ]
+              }
+            },
+            "claims": {
+              "apparent_km_equation": {
+                "statement": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b",
+                  "quote": "The inhibitor constant K_i_ was derived from this curve by using the equation K_m__app_ ="
+                },
+                "subjects": [
+                  {
+                    "span": "chunk:8:part:1600",
+                    "unit": "source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b",
+                    "quote": "K_m__app_"
+                  },
+                  {
+                    "span": "chunk:8:part:2400",
+                    "unit": "source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b",
+                    "quote": "K_m_(1 + \\[phloretin\\]/K_i_)."
+                  }
+                ],
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:1600",
+                    "unit": "source-unit:95136499e820da078fb72a743dd7d11accc72e6fe3fe32246c2aa881ce9bfa4e",
+                    "quote": "The apparent K_m_ of zero-trans-glucose influx depended linearly on the inhibitor concentration."
+                  }
+                ]
+              }
+            },
+            "finding": [
+              {
+                "span": "chunk:8:part:2400",
+                "unit": "source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b",
+                "quote": " K_m_(1 + \\[phloretin\\]/K_i_)."
+              }
+            ]
+          }
+        },
+        {
+          "span": "chunk:8:part:800",
+          "study_id": "https://www.pnas.org/doi/10.1073/pnas.96.18.10098",
+          "finding": "Figure 1 reports fitted kinetic operands for rapid, 5-second zero-trans-glucose transport measurements: panel A compares no phloretin with 45 μM phloretin; panel B compares no phloretin with 91 μM phloretin. Exact parameter text is quoted in the observation anchors. Panel A with phloretin has a typography defect: the supplied text reads “and K_m_ ± 2.99 ± 0.36 m” followed by “M.”, not “K_m_ =”. The numeric parameter and uncertainty are retained below without silently repairing that operator. The authors report that phloretin increased apparent K_m_ without affecting V_max_ and conclude competitive inhibition; these are experimental fit results and an author interpretation, not simulations.",
+          "measurements": {
+            "observations": {
+              "a_control_vmax": {
+                "source_id": "",
+                "locator": "Figure 1 caption, panel A, no phloretin, V_max_ clause, 24052–24092",
+                "quantity": "V_max_",
+                "conditions": "Panel A; no phloretin; 5-second glucose transport measurement.",
+                "value": 169,
+                "units": "nmol⋅min−1⋅mg⋅protein−1",
+                "uncertainty": "± 2",
+                "kind": "fit_parameter"
+              },
+              "a_control_km": {
+                "source_id": "",
+                "locator": "Figure 1 caption, panel A, no phloretin, K_m_ clause, 24093–24119",
+                "quantity": "K_m_",
+                "conditions": "Panel A; no phloretin; 5-second glucose transport measurement.",
+                "value": 0.73,
+                "units": "mM",
+                "uncertainty": "± 0.01",
+                "kind": "fit_parameter"
+              },
+              "a_phloretin_vmax": {
+                "source_id": "",
+                "locator": "Figure 1 caption, panel A, with phloretin, V_max_ clause, 24141–24181",
+                "quantity": "V_max_",
+                "conditions": "Panel A; 45 μM phloretin; 5-second glucose transport measurement.",
+                "value": 169,
+                "units": "nmol⋅min−1⋅mg⋅protein−1",
+                "uncertainty": "± 9",
+                "kind": "fit_parameter"
+              },
+              "a_phloretin_km": {
+                "source_id": "",
+                "locator": "Figure 1 caption, panel A, with phloretin, K_m_ clause, 24182–24208; operator printed as ± before 2.99 in supplied text",
+                "quantity": "K_m_",
+                "conditions": "Panel A; 45 μM phloretin; 5-second glucose transport measurement; supplied parameter typography is defective.",
+                "value": 2.99,
+                "units": "mM",
+                "uncertainty": "± 0.36",
+                "kind": "fit_parameter"
+              },
+              "b_control_vmax": {
+                "source_id": "",
+                "locator": "Figure 1 caption, panel B, no phloretin, V_max_ clause, 24228–24269",
+                "quantity": "V_max_",
+                "conditions": "Panel B; no phloretin; 5-second glucose transport measurement.",
+                "value": 198,
+                "units": "nmol⋅min−1⋅mg⋅protein−1",
+                "uncertainty": "± 12",
+                "kind": "fit_parameter"
+              },
+              "b_control_km": {
+                "source_id": "",
+                "locator": "Figure 1 caption, panel B, no phloretin, K_m_ clause, 24270–24298",
+                "quantity": "K_m_",
+                "conditions": "Panel B; no phloretin; 5-second glucose transport measurement.",
+                "value": 1.85,
+                "units": "mM",
+                "uncertainty": "± 0.38",
+                "kind": "fit_parameter"
+              },
+              "b_phloretin_vmax": {
+                "source_id": "",
+                "locator": "Figure 1 caption, panel B, with phloretin, V_max_ clause, 24320–24360",
+                "quantity": "V_max_",
+                "conditions": "Panel B; 91 μM phloretin; 5-second glucose transport measurement.",
+                "value": 193,
+                "units": "nmol⋅min−1⋅mg⋅protein−1",
+                "uncertainty": "± 5",
+                "kind": "fit_parameter"
+              },
+              "b_phloretin_km": {
+                "source_id": "",
+                "locator": "Figure 1 caption, panel B, with phloretin, K_m_ clause, 24361–24387",
+                "quantity": "K_m_",
+                "conditions": "Panel B; 91 μM phloretin; 5-second glucose transport measurement.",
+                "value": 6.35,
+                "units": "mM",
+                "uncertainty": "± 0.39",
+                "kind": "fit_parameter"
+              }
+            },
+            "claims": {}
+          },
+          "source_anchors": {
+            "observations": {
+              "a_control_vmax": {
+                "statement": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:4c52bea0401373639213e43e2dda0d39c4dbbceb6127e03c823f4b70a1c7da42",
+                  "quote": "V_max_ = 169 ± 2 nmol⋅min−1⋅mg⋅protein−1"
+                },
+                "quantity": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:4c52bea0401373639213e43e2dda0d39c4dbbceb6127e03c823f4b70a1c7da42",
+                  "quote": "V_max_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:6248b21663266342d9e8b053339b20e62233ff7abfc1c0c2900b4ec1d390665a",
+                    "quote": "_A_, no phloretin:"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:7d376c7023121600772b94bd4a7b9dd431f9e0e46c591adc0e22a4c54e8fa0f0",
+                    "quote": "Glucose transport was measured rapidly (5 seconds)"
+                  }
+                ]
+              },
+              "a_control_km": {
+                "statement": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:d26330db55571cca7d53f9b2382cce3724a6f84dd1950125c80d1a0ec61afc6b",
+                  "quote": "and K_m_ = 0.73 ± 0.01 mM."
+                },
+                "quantity": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:d26330db55571cca7d53f9b2382cce3724a6f84dd1950125c80d1a0ec61afc6b",
+                  "quote": "K_m_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:6248b21663266342d9e8b053339b20e62233ff7abfc1c0c2900b4ec1d390665a",
+                    "quote": "_A_, no phloretin:"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:7d376c7023121600772b94bd4a7b9dd431f9e0e46c591adc0e22a4c54e8fa0f0",
+                    "quote": "Glucose transport was measured rapidly (5 seconds)"
+                  }
+                ]
+              },
+              "a_phloretin_vmax": {
+                "statement": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:f21fab05eca50dcdae5749ed3b29ade5e395dea86bf7ee853597b31cc595c296",
+                  "quote": "V_max_ = 169 ± 9 nmol⋅min−1⋅mg⋅protein−1"
+                },
+                "quantity": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:f21fab05eca50dcdae5749ed3b29ade5e395dea86bf7ee853597b31cc595c296",
+                  "quote": "V_max_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:c4a4addd2a63da088b0be630f550c5518f48eac81f2cd9831213876f07e96795",
+                    "quote": "_A_, with phloretin:"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:ab8a25cd84d72601cf1c8ffd19f44812e0b6bda901aad2718118f1cb7bf76677",
+                    "quote": "45 μM ( _A_)"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:7d376c7023121600772b94bd4a7b9dd431f9e0e46c591adc0e22a4c54e8fa0f0",
+                    "quote": "Glucose transport was measured rapidly (5 seconds)"
+                  }
+                ]
+              },
+              "a_phloretin_km": {
+                "statement": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:392004be6676978f5db55103d9610e6464370e5cd66b17e069ea26f51fb7cf3f",
+                  "quote": "and K_m_ ± 2.99 ± 0.36 m"
+                },
+                "quantity": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:392004be6676978f5db55103d9610e6464370e5cd66b17e069ea26f51fb7cf3f",
+                  "quote": "K_m_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:c4a4addd2a63da088b0be630f550c5518f48eac81f2cd9831213876f07e96795",
+                    "quote": "_A_, with phloretin:"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:ab8a25cd84d72601cf1c8ffd19f44812e0b6bda901aad2718118f1cb7bf76677",
+                    "quote": "45 μM ( _A_)"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:7d376c7023121600772b94bd4a7b9dd431f9e0e46c591adc0e22a4c54e8fa0f0",
+                    "quote": "Glucose transport was measured rapidly (5 seconds)"
+                  }
+                ]
+              },
+              "b_control_vmax": {
+                "statement": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:a7a4fced272d7615b413f5a2a90a479541b56d56ad654704f3689737f02f9f4d",
+                  "quote": "V_max_ = 198 ± 12 nmol⋅min−1⋅mg⋅protein−1"
+                },
+                "quantity": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:a7a4fced272d7615b413f5a2a90a479541b56d56ad654704f3689737f02f9f4d",
+                  "quote": "V_max_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:1600",
+                    "unit": "source-unit:ec06b223edd5648e27016fc2f8c7f68989936521ce29114a5c450ad8569a4733",
+                    "quote": "_B_, no phloretin:"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:7d376c7023121600772b94bd4a7b9dd431f9e0e46c591adc0e22a4c54e8fa0f0",
+                    "quote": "Glucose transport was measured rapidly (5 seconds)"
+                  }
+                ]
+              },
+              "b_control_km": {
+                "statement": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:7d2f58aa2ca937672bb0695ec6a3d19bacf35790db56d70ee90dd3d8c15b1386",
+                  "quote": "and K_m_ = 1.85 ± 0.38 _mM_."
+                },
+                "quantity": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:7d2f58aa2ca937672bb0695ec6a3d19bacf35790db56d70ee90dd3d8c15b1386",
+                  "quote": "K_m_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:1600",
+                    "unit": "source-unit:ec06b223edd5648e27016fc2f8c7f68989936521ce29114a5c450ad8569a4733",
+                    "quote": "_B_, no phloretin:"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:7d376c7023121600772b94bd4a7b9dd431f9e0e46c591adc0e22a4c54e8fa0f0",
+                    "quote": "Glucose transport was measured rapidly (5 seconds)"
+                  }
+                ]
+              },
+              "b_phloretin_vmax": {
+                "statement": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:8fd03f2a2f3d3db7d8e9d8c03fe86dae0d7b9e1ecbb5834906785833bfd20a46",
+                  "quote": "V_max_ = 193 ± 5 nmol⋅min−1⋅mg⋅protein−1"
+                },
+                "quantity": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:8fd03f2a2f3d3db7d8e9d8c03fe86dae0d7b9e1ecbb5834906785833bfd20a46",
+                  "quote": "V_max_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:1600",
+                    "unit": "source-unit:482c43f64ef5adea30af6ca5c491cc33ffbf2b5127531f0aacb75ad04c3814df",
+                    "quote": "_B_, with phloretin:"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:ab8a25cd84d72601cf1c8ffd19f44812e0b6bda901aad2718118f1cb7bf76677",
+                    "quote": "91 μM ( _B_) phloretin."
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:7d376c7023121600772b94bd4a7b9dd431f9e0e46c591adc0e22a4c54e8fa0f0",
+                    "quote": "Glucose transport was measured rapidly (5 seconds)"
+                  }
+                ]
+              },
+              "b_phloretin_km": {
+                "statement": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:9eb18562d378ed09eab0a734a58efd4e07732051c8da57b81ec334114131a404",
+                  "quote": "and K_m_ = 6.35 ± 0.39 mM."
+                },
+                "quantity": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:9eb18562d378ed09eab0a734a58efd4e07732051c8da57b81ec334114131a404",
+                  "quote": "K_m_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:1600",
+                    "unit": "source-unit:482c43f64ef5adea30af6ca5c491cc33ffbf2b5127531f0aacb75ad04c3814df",
+                    "quote": "_B_, with phloretin:"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:ab8a25cd84d72601cf1c8ffd19f44812e0b6bda901aad2718118f1cb7bf76677",
+                    "quote": "91 μM ( _B_) phloretin."
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:7d376c7023121600772b94bd4a7b9dd431f9e0e46c591adc0e22a4c54e8fa0f0",
+                    "quote": "Glucose transport was measured rapidly (5 seconds)"
+                  }
+                ]
+              }
+            },
+            "claims": {},
+            "finding": [
+              {
+                "span": "chunk:8:part:800",
+                "unit": "source-unit:7fd939550d1c3d0f7fc98040c9099b94e13b44d101ea17f56134a4db608d2111",
+                "quote": "Phloretin inhibits zero-trans-glucose influx competitively."
+              },
+              {
+                "span": "chunk:8:part:0",
+                "unit": "source-unit:01657296bdeb034844d3c0e5ae12ef50591584bf40dc86e7bb5a8909d04eed55",
+                "quote": "Phloretin increased the apparent K_m_ for glucose without any effect on the V_max_"
+              },
+              {
+                "span": "chunk:8:part:800",
+                "unit": "source-unit:80e3062a442236d9f51bc3a437cd9cc45302a7180b1eda37e85f7ce04f1f5550",
+                "quote": "The full lines represent the fitted Michaelis–Menten curves."
+              },
+              {
+                "span": "chunk:8:part:1600",
+                "unit": "source-unit:392004be6676978f5db55103d9610e6464370e5cd66b17e069ea26f51fb7cf3f",
+                "quote": "M."
+              }
+            ]
+          }
+        },
+        {
+          "span": "chunk:8:part:2400",
+          "study_id": "https://www.pnas.org/doi/10.1073/pnas.96.18.10098",
+          "finding": "The passage supplies assay/fitting conditions for inhibitor analysis, not a complete Figure 5 transporter-activity calculation. Figure 2 says each data point came from “linear regression of a complete Michaelis–Menten curve,” with at least 6 points spanning 0.1–20 mM glucose, or up to 40 mM with phloretin, measured in duplicate (25037–25255). It separately says the standard deviation came from the nonlinear regression procedure (25256–25332); this wording is retained rather than harmonized. Independent isolates were individual data points (25333–25420). Figure 1 specifies ethanol solvent controls and separate rat-derived cell batches for A and B (24388–24642). These premises, together with the explicitly stated use of the apparent-Km relation to derive K_i_, establish competitive zero-trans inhibition kinetics and kinetic operands. They do not identify a transport-rate formula, substrate conditions, normalization, or parameter selection used specifically for Figure 5: no Figure 5 calculation appears in these supplied units. No absent inhibited-transport formula is reconstructed, and this inhibitor-analysis relation is not evidence of an added dependency in a glycolysis pathway model. The passage also qualifies the earlier noncompetitive report as based on steady-state rather than initial transport measurements, with no numbers reported.",
+          "measurements": {
+            "observations": {},
+            "claims": {}
+          },
+          "source_anchors": {
+            "observations": {},
+            "claims": {},
+            "finding": [
+              {
+                "span": "chunk:8:part:2400",
+                "unit": "source-unit:c488f994b48cda9ce3f5f9ea8a20f7dc8c72f3302ecc6e3f20ccae38bb5b3dac",
+                "quote": "Each data point was obtained by linear regression of a complete Michaelis–Menten curve, containing at least 6 points between 0.1"
+              },
+              {
+                "span": "chunk:8:part:2400",
+                "unit": "source-unit:0e0cae8fe9978c0bfc66bd13643a76e5ac8933bdb88c84da211a556f274dff24",
+                "quote": "and 20 mM glucose (or 40 mM glucose in the presence of phloretin), measured in duplicate."
+              },
+              {
+                "span": "chunk:8:part:2400",
+                "unit": "source-unit:71192e30246bf6a931a6df75b414392739bf767471295ffb8318d62942692a59",
+                "quote": "The standard deviation was obtained from the nonlinear regression procedure."
+              },
+              {
+                "span": "chunk:8:part:2400",
+                "unit": "source-unit:da96a7ebec112d9206bf86c7aa664ccca82d5bb0ee40b6d21d28acf55efca9f2",
+                "quote": "Independent experiments with different isolates were treated as individual data points."
+              },
+              {
+                "span": "chunk:8:part:1600",
+                "unit": "source-unit:1bb5cfb8e481a5db4cef7c69ba74b6b6fff48969caa7dcf3bde725c6436e3dad",
+                "quote": "In the absence of phloretin, ethanol was added to correct for any solvent effect."
+              },
+              {
+                "span": "chunk:8:part:1600",
+                "unit": "source-unit:d5f58fe1c2d527807407c05fdbaefd180de2526dd3807f17e923f1d451731228",
+                "quote": "The data in _A_ were obtained with one batch of cells, isolated from a single rat."
+              },
+              {
+                "span": "chunk:8:part:1600",
+                "unit": "source-unit:a9009625584810ddb56dd07b6c3b34799d96638f770f9c39bfa19037616de5b5",
+                "quote": "The data in _B_ were measured with another batch of cells, obtained from a different rat."
+              },
+              {
+                "span": "chunk:8:part:0",
+                "unit": "source-unit:5d7ef55b3ddbb1fafbae932a4ada3e096459a0be035d16830270b7e17bb73b63",
+                "quote": "However, this conclusion was based on steady-state measurements rather than on initial transport experiments,"
+              },
+              {
+                "span": "chunk:8:part:0",
+                "unit": "source-unit:c9628330ed4139c819d706df2b21d5e79659ce5bad330e60d79c436673782c9e",
+                "quote": "and no numbers were reported"
+              },
+              {
+                "span": "chunk:8:part:1600",
+                "unit": "source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b",
+                "quote": "The inhibitor constant K_i_ was derived from this curve"
+              }
+            ]
+          }
+        }
+      ],
+      "reading_memory": {
+        "summary": "Extracted readable Figure 2 apparent-Km equation from source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b, 24917–25036, split across part:1600 and part:2400: K_m__app_ = K_m_(1 + [phloretin]/K_i_). Derived K_i_ = 21 μM. Figure 1 provides eight fitted V_max_/K_m_ operands for controls and 45 μM (A) or 91 μM (B) phloretin, using 5-second zero-trans measurements. A-with-phloretin K_m_ text has a defective ± before 2.99; retained and flagged, not repaired. Recorded curve sampling, duplicates, regression wording, solvent controls and separate cell batches. Passage supports competitive zero-trans inhibition analysis, not the full Figure 5 activity calculation; no inhibited transport-rate formula reconstructed or glycolysis-model dependency added.",
+        "unresolved_links": [
+          "The supplied passage does not give the explicit transporter-activity formula and Figure 5-specific substrate conditions, normalization, or parameter selection; a source passage containing that calculation remains needed.",
+          "The original typography of Figure 1 panel A with-phloretin K_m_ should be checked against a readable original if its defective operator matters."
+        ],
+        "anchors": [
+          {
+            "span": "chunk:8:part:0"
+          },
+          {
+            "span": "chunk:8:part:800"
+          },
+          {
+            "span": "chunk:8:part:1600"
+          },
+          {
+            "span": "chunk:8:part:2400"
+          }
+        ],
+        "retained_evidence": []
+      }
+    }
+  },
+  {
+    "call": 396,
+    "request": {
+      "source": "https://www.pnas.org/doi/10.1073/pnas.96.18.10098",
+      "source_version": "1f1a920cbeb7022eb33fe80f32104ec55128f753559ee4667e55d0e16ffc94f3",
+      "question": "Resolve only the still-incomplete transport-kinetic fitting provenance: reread Figure 1, Figure 2 and adjoining transport-kinetics results to quote exactly what curves or parameters were fitted, how Ki = 21 μM was obtained, and any stated uncertainty. Distinguish measured uptake data, fitted Michaelis–Menten parameters, regression-derived Ki, and Figure 5 control slopes. Do not reconstruct flattened equations or claim pathway-model fitting. The Figure 5 symbol mapping and intracellular-glucose estimator correction are already resolved; do not re-extract them.",
+      "passages": {
+        "chunk:8:part:0": {
+          "key": "chunk:8:part:0",
+          "start": 22606,
+          "end": 23406,
+          "source_units": [
+            {
+              "unit": "source-unit:0be30e3e60b34534e5f112b6805aa43c7a00015180b928d661c142f698fb52b1",
+              "start": 22606,
+              "end": 22747,
+              "text": "The activity of the glucose transporter was modulated by titration with phloretin, a general inhibitor of facilitated diffusion transporters."
+            },
+            {
+              "unit": "source-unit:ae1d4c04213f51f5b1d9dbbcc5803260539f13cf65d0ec7047552d52fc164022",
+              "start": 22748,
+              "end": 22897,
+              "text": "This compound inhibited the erythrocyte glucose carrier competitively ( [34](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#core-collateral-B34))."
+            },
+            {
+              "unit": "source-unit:8300ef0e83df0ad40ac31aebe3a03c35c1ecd78c985d7902a7aff01046eb2a9c",
+              "start": 22898,
+              "end": 23020,
+              "text": "On the contrary, phloretin has been reported to be a noncompetitive inhibitor of glucose transport in bloodstream form _T."
+            },
+            {
+              "unit": "source-unit:351b47803070ac9355cfc7d5ea7d4482490b6174465659ec54693518cc0a439d",
+              "start": 23021,
+              "end": 23029,
+              "text": "brucei_."
+            },
+            {
+              "unit": "source-unit:5d7ef55b3ddbb1fafbae932a4ada3e096459a0be035d16830270b7e17bb73b63",
+              "start": 23030,
+              "end": 23139,
+              "text": "However, this conclusion was based on steady-state measurements rather than on initial transport experiments,"
+            },
+            {
+              "unit": "source-unit:c9628330ed4139c819d706df2b21d5e79659ce5bad330e60d79c436673782c9e",
+              "start": 23140,
+              "end": 23248,
+              "text": "and no numbers were reported ( [15](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#core-collateral-B15))."
+            },
+            {
+              "unit": "source-unit:a1f6f85555a30f7a637e34343e6b103853d6ea96ad99c3f41bb08f44d84a8e54",
+              "start": 23249,
+              "end": 23320,
+              "text": "We reexamined this issue by using the 5-second glucose transport assay."
+            },
+            {
+              "unit": "source-unit:01657296bdeb034844d3c0e5ae12ef50591584bf40dc86e7bb5a8909d04eed55",
+              "start": 23321,
+              "end": 23406,
+              "text": "Phloretin increased the apparent K_m_ for glucose without any effect on the V_max_ (F"
+            }
+          ]
+        },
+        "chunk:8:part:800": {
+          "key": "chunk:8:part:800",
+          "start": 23406,
+          "end": 24206,
+          "source_units": [
+            {
+              "unit": "source-unit:01657296bdeb034844d3c0e5ae12ef50591584bf40dc86e7bb5a8909d04eed55",
+              "start": 23406,
+              "end": 23409,
+              "text": "ig."
+            },
+            {
+              "unit": "source-unit:3dc6d40f40aac6a695e0ad104b64230a8dbdbf25538a7e844fee93023a008067",
+              "start": 23410,
+              "end": 23469,
+              "text": "[1](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#F1))."
+            },
+            {
+              "unit": "source-unit:7755d61295ad2661c6ac56fdae7edafe0dad67e17b3e89b912ada0f63c771be7",
+              "start": 23470,
+              "end": 23590,
+              "text": "We conclude that phloretin is a competitive inhibitor of the trypanosome glucose transporter, with a K_i_ of 21 μM (Fig."
+            },
+            {
+              "unit": "source-unit:3f71d0a19ca5fa99300d5d23fdd0f1617205f72e52073c8e4f34d45103443ba4",
+              "start": 23591,
+              "end": 23650,
+              "text": "[2](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#F2))."
+            },
+            {
+              "unit": "source-unit:7fd939550d1c3d0f7fc98040c9099b94e13b44d101ea17f56134a4db608d2111",
+              "start": 23652,
+              "end": 23841,
+              "text": "![](https://www.pnas.org/cms/10.1073/pnas.96.18.10098/asset/39783acf-deb8-469b-a841-efa6a79ec950/assets/graphic/pq1792494001.jpeg)Phloretin inhibits zero-trans-glucose influx competitively."
+            },
+            {
+              "unit": "source-unit:7d376c7023121600772b94bd4a7b9dd431f9e0e46c591adc0e22a4c54e8fa0f0",
+              "start": 23842,
+              "end": 23911,
+              "text": "Glucose transport was measured rapidly (5 seconds) in the absence (●)"
+            },
+            {
+              "unit": "source-unit:ab8a25cd84d72601cf1c8ffd19f44812e0b6bda901aad2718118f1cb7bf76677",
+              "start": 23912,
+              "end": 23971,
+              "text": "and presence (■) of 45 μM ( _A_) or 91 μM ( _B_) phloretin."
+            },
+            {
+              "unit": "source-unit:80e3062a442236d9f51bc3a437cd9cc45302a7180b1eda37e85f7ce04f1f5550",
+              "start": 23972,
+              "end": 24032,
+              "text": "The full lines represent the fitted Michaelis–Menten curves."
+            },
+            {
+              "unit": "source-unit:6248b21663266342d9e8b053339b20e62233ff7abfc1c0c2900b4ec1d390665a",
+              "start": 24033,
+              "end": 24051,
+              "text": "_A_, no phloretin:"
+            },
+            {
+              "unit": "source-unit:4c52bea0401373639213e43e2dda0d39c4dbbceb6127e03c823f4b70a1c7da42",
+              "start": 24052,
+              "end": 24092,
+              "text": "V_max_ = 169 ± 2 nmol⋅min−1⋅mg⋅protein−1"
+            },
+            {
+              "unit": "source-unit:d26330db55571cca7d53f9b2382cce3724a6f84dd1950125c80d1a0ec61afc6b",
+              "start": 24093,
+              "end": 24119,
+              "text": "and K_m_ = 0.73 ± 0.01 mM."
+            },
+            {
+              "unit": "source-unit:c4a4addd2a63da088b0be630f550c5518f48eac81f2cd9831213876f07e96795",
+              "start": 24120,
+              "end": 24140,
+              "text": "_A_, with phloretin:"
+            },
+            {
+              "unit": "source-unit:f21fab05eca50dcdae5749ed3b29ade5e395dea86bf7ee853597b31cc595c296",
+              "start": 24141,
+              "end": 24181,
+              "text": "V_max_ = 169 ± 9 nmol⋅min−1⋅mg⋅protein−1"
+            },
+            {
+              "unit": "source-unit:392004be6676978f5db55103d9610e6464370e5cd66b17e069ea26f51fb7cf3f",
+              "start": 24182,
+              "end": 24206,
+              "text": "and K_m_ ± 2.99 ± 0.36 m"
+            }
+          ]
+        },
+        "chunk:8:part:1600": {
+          "key": "chunk:8:part:1600",
+          "start": 24206,
+          "end": 25006,
+          "source_units": [
+            {
+              "unit": "source-unit:392004be6676978f5db55103d9610e6464370e5cd66b17e069ea26f51fb7cf3f",
+              "start": 24206,
+              "end": 24208,
+              "text": "M."
+            },
+            {
+              "unit": "source-unit:ec06b223edd5648e27016fc2f8c7f68989936521ce29114a5c450ad8569a4733",
+              "start": 24209,
+              "end": 24227,
+              "text": "_B_, no phloretin:"
+            },
+            {
+              "unit": "source-unit:a7a4fced272d7615b413f5a2a90a479541b56d56ad654704f3689737f02f9f4d",
+              "start": 24228,
+              "end": 24269,
+              "text": "V_max_ = 198 ± 12 nmol⋅min−1⋅mg⋅protein−1"
+            },
+            {
+              "unit": "source-unit:7d2f58aa2ca937672bb0695ec6a3d19bacf35790db56d70ee90dd3d8c15b1386",
+              "start": 24270,
+              "end": 24298,
+              "text": "and K_m_ = 1.85 ± 0.38 _mM_."
+            },
+            {
+              "unit": "source-unit:482c43f64ef5adea30af6ca5c491cc33ffbf2b5127531f0aacb75ad04c3814df",
+              "start": 24299,
+              "end": 24319,
+              "text": "_B_, with phloretin:"
+            },
+            {
+              "unit": "source-unit:8fd03f2a2f3d3db7d8e9d8c03fe86dae0d7b9e1ecbb5834906785833bfd20a46",
+              "start": 24320,
+              "end": 24360,
+              "text": "V_max_ = 193 ± 5 nmol⋅min−1⋅mg⋅protein−1"
+            },
+            {
+              "unit": "source-unit:9eb18562d378ed09eab0a734a58efd4e07732051c8da57b81ec334114131a404",
+              "start": 24361,
+              "end": 24387,
+              "text": "and K_m_ = 6.35 ± 0.39 mM."
+            },
+            {
+              "unit": "source-unit:1bb5cfb8e481a5db4cef7c69ba74b6b6fff48969caa7dcf3bde725c6436e3dad",
+              "start": 24388,
+              "end": 24469,
+              "text": "In the absence of phloretin, ethanol was added to correct for any solvent effect."
+            },
+            {
+              "unit": "source-unit:d5f58fe1c2d527807407c05fdbaefd180de2526dd3807f17e923f1d451731228",
+              "start": 24470,
+              "end": 24552,
+              "text": "The data in _A_ were obtained with one batch of cells, isolated from a single rat."
+            },
+            {
+              "unit": "source-unit:a9009625584810ddb56dd07b6c3b34799d96638f770f9c39bfa19037616de5b5",
+              "start": 24553,
+              "end": 24642,
+              "text": "The data in _B_ were measured with another batch of cells, obtained from a different rat."
+            },
+            {
+              "unit": "source-unit:5ae822d0a9fd893848bbe752ca4b15178bf7f0f48023804fee90526a5e8aca12",
+              "start": 24644,
+              "end": 24819,
+              "text": "![](https://www.pnas.org/cms/10.1073/pnas.96.18.10098/asset/c58b6491-136b-4dc3-ba79-73bdc151920f/assets/graphic/pq1792494002.jpeg)The inhibitor constant of phloretin is 21 μM."
+            },
+            {
+              "unit": "source-unit:95136499e820da078fb72a743dd7d11accc72e6fe3fe32246c2aa881ce9bfa4e",
+              "start": 24820,
+              "end": 24916,
+              "text": "The apparent K_m_ of zero-trans-glucose influx depended linearly on the inhibitor concentration."
+            },
+            {
+              "unit": "source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b",
+              "start": 24917,
+              "end": 25006,
+              "text": "The inhibitor constant K_i_ was derived from this curve by using the equation K_m__app_ ="
+            }
+          ]
+        },
+        "chunk:8:part:2400": {
+          "key": "chunk:8:part:2400",
+          "start": 25006,
+          "end": 25806,
+          "source_units": [
+            {
+              "unit": "source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b",
+              "start": 25006,
+              "end": 25036,
+              "text": " K_m_(1 + \\[phloretin\\]/K_i_)."
+            },
+            {
+              "unit": "source-unit:c488f994b48cda9ce3f5f9ea8a20f7dc8c72f3302ecc6e3f20ccae38bb5b3dac",
+              "start": 25037,
+              "end": 25165,
+              "text": "Each data point was obtained by linear regression of a complete Michaelis–Menten curve, containing at least 6 points between 0.1"
+            },
+            {
+              "unit": "source-unit:0e0cae8fe9978c0bfc66bd13643a76e5ac8933bdb88c84da211a556f274dff24",
+              "start": 25166,
+              "end": 25255,
+              "text": "and 20 mM glucose (or 40 mM glucose in the presence of phloretin), measured in duplicate."
+            },
+            {
+              "unit": "source-unit:71192e30246bf6a931a6df75b414392739bf767471295ffb8318d62942692a59",
+              "start": 25256,
+              "end": 25332,
+              "text": "The standard deviation was obtained from the nonlinear regression procedure."
+            },
+            {
+              "unit": "source-unit:da96a7ebec112d9206bf86c7aa664ccca82d5bb0ee40b6d21d28acf55efca9f2",
+              "start": 25333,
+              "end": 25420,
+              "text": "Independent experiments with different isolates were treated as individual data points."
+            },
+            {
+              "unit": "source-unit:8adfaf8ee12bca1164895e730dd6bfd01c8e60cd0e318aab10bf58ef4254c3d8",
+              "start": 25422,
+              "end": 25473,
+              "text": "### Inhibition of the Glycolytic Flux by Phloretin."
+            },
+            {
+              "unit": "source-unit:c384e811faca406ca97f99dde4308d7a60b293be4b49c17f1d4fa135697050aa",
+              "start": 25475,
+              "end": 25584,
+              "text": "Subsequently, the effect of modulation of the glucose transport activity on the glycolytic flux was measured."
+            },
+            {
+              "unit": "source-unit:db306f95cb0b5dfd48b8b15a54b3cea508e602ffdc5383c188972691a84b9fdf",
+              "start": 25585,
+              "end": 25700,
+              "text": "Already low concentrations of phloretin decreased the steady-state rate at which trypanosomes consumed oxygen (Fig."
+            },
+            {
+              "unit": "source-unit:ddca0e0e0df5e06a668ea0e2d6794056db1380a22e36f087b1195fc3a4b70c63",
+              "start": 25701,
+              "end": 25760,
+              "text": "[3](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#F3))."
+            },
+            {
+              "unit": "source-unit:92c0f51b0fb8d0334d4053bb86a54b2b121f9bee0dfaa0e9a5388493fd202081",
+              "start": 25761,
+              "end": 25806,
+              "text": "Under aerobic conditions, bloodstream-form tr"
+            }
+          ]
+        },
+        "chunk:8:part:3200": {
+          "key": "chunk:8:part:3200",
+          "start": 25806,
+          "end": 26409,
+          "source_units": [
+            {
+              "unit": "source-unit:92c0f51b0fb8d0334d4053bb86a54b2b121f9bee0dfaa0e9a5388493fd202081",
+              "start": 25806,
+              "end": 26012,
+              "text": "ypanosomes convert all glucose to pyruvate, with the concomitant consumption of one molecule of oxygen per molecule of glucose ( [33](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#core-collateral-B33))."
+            },
+            {
+              "unit": "source-unit:1fbd8d53016fc5991eede29f125c35beec4185efc3e4e599b344991ee6a751a8",
+              "start": 26013,
+              "end": 26104,
+              "text": "Therefore, the rate of oxygen consumption is a measure of the steady-state glycolytic flux."
+            },
+            {
+              "unit": "source-unit:43703ff466a0b6d25461757d5e3671345927d81297180ad37a72bf47dabfc22f",
+              "start": 26105,
+              "end": 26193,
+              "text": "Trypanosomes can, however, convert part of the glucose to glycerol without using oxygen."
+            },
+            {
+              "unit": "source-unit:678e09be80f610d257077151b853c5be21a25836300adeb64483575d33eb3285",
+              "start": 26194,
+              "end": 26248,
+              "text": "Normally this only happens under anaerobic conditions."
+            },
+            {
+              "unit": "source-unit:4ad0a49485e6435a7cbf899e7691943bb1bc19ee3f96f4b33ce4e812ec673131",
+              "start": 26249,
+              "end": 26347,
+              "text": "Indeed, also in the presence of phloretin, the glucose was still fully converted to pyruvate (Fig."
+            },
+            {
+              "unit": "source-unit:5e11b15e06f6624c9def642ca95a2081f8817372dac95cdda44fb3a8d8a71f82",
+              "start": 26348,
+              "end": 26407,
+              "text": "[4](https://www.pnas.org/doi/10.1073/pnas.96.18.10098#F4))."
+            }
+          ]
+        }
+      },
+      "units": [
+        {
+          "id": "source-unit:0be30e3e60b34534e5f112b6805aa43c7a00015180b928d661c142f698fb52b1",
+          "start": 22606,
+          "end": 22747
+        },
+        {
+          "id": "source-unit:ae1d4c04213f51f5b1d9dbbcc5803260539f13cf65d0ec7047552d52fc164022",
+          "start": 22748,
+          "end": 22897
+        },
+        {
+          "id": "source-unit:8300ef0e83df0ad40ac31aebe3a03c35c1ecd78c985d7902a7aff01046eb2a9c",
+          "start": 22898,
+          "end": 23020
+        },
+        {
+          "id": "source-unit:351b47803070ac9355cfc7d5ea7d4482490b6174465659ec54693518cc0a439d",
+          "start": 23021,
+          "end": 23029
+        },
+        {
+          "id": "source-unit:5d7ef55b3ddbb1fafbae932a4ada3e096459a0be035d16830270b7e17bb73b63",
+          "start": 23030,
+          "end": 23139
+        },
+        {
+          "id": "source-unit:c9628330ed4139c819d706df2b21d5e79659ce5bad330e60d79c436673782c9e",
+          "start": 23140,
+          "end": 23248
+        },
+        {
+          "id": "source-unit:a1f6f85555a30f7a637e34343e6b103853d6ea96ad99c3f41bb08f44d84a8e54",
+          "start": 23249,
+          "end": 23320
+        },
+        {
+          "id": "source-unit:01657296bdeb034844d3c0e5ae12ef50591584bf40dc86e7bb5a8909d04eed55",
+          "start": 23321,
+          "end": 23409
+        },
+        {
+          "id": "source-unit:3dc6d40f40aac6a695e0ad104b64230a8dbdbf25538a7e844fee93023a008067",
+          "start": 23410,
+          "end": 23469
+        },
+        {
+          "id": "source-unit:7755d61295ad2661c6ac56fdae7edafe0dad67e17b3e89b912ada0f63c771be7",
+          "start": 23470,
+          "end": 23590
+        },
+        {
+          "id": "source-unit:3f71d0a19ca5fa99300d5d23fdd0f1617205f72e52073c8e4f34d45103443ba4",
+          "start": 23591,
+          "end": 23650
+        },
+        {
+          "id": "source-unit:7fd939550d1c3d0f7fc98040c9099b94e13b44d101ea17f56134a4db608d2111",
+          "start": 23652,
+          "end": 23841
+        },
+        {
+          "id": "source-unit:7d376c7023121600772b94bd4a7b9dd431f9e0e46c591adc0e22a4c54e8fa0f0",
+          "start": 23842,
+          "end": 23911
+        },
+        {
+          "id": "source-unit:ab8a25cd84d72601cf1c8ffd19f44812e0b6bda901aad2718118f1cb7bf76677",
+          "start": 23912,
+          "end": 23971
+        },
+        {
+          "id": "source-unit:80e3062a442236d9f51bc3a437cd9cc45302a7180b1eda37e85f7ce04f1f5550",
+          "start": 23972,
+          "end": 24032
+        },
+        {
+          "id": "source-unit:6248b21663266342d9e8b053339b20e62233ff7abfc1c0c2900b4ec1d390665a",
+          "start": 24033,
+          "end": 24051
+        },
+        {
+          "id": "source-unit:4c52bea0401373639213e43e2dda0d39c4dbbceb6127e03c823f4b70a1c7da42",
+          "start": 24052,
+          "end": 24092
+        },
+        {
+          "id": "source-unit:d26330db55571cca7d53f9b2382cce3724a6f84dd1950125c80d1a0ec61afc6b",
+          "start": 24093,
+          "end": 24119
+        },
+        {
+          "id": "source-unit:c4a4addd2a63da088b0be630f550c5518f48eac81f2cd9831213876f07e96795",
+          "start": 24120,
+          "end": 24140
+        },
+        {
+          "id": "source-unit:f21fab05eca50dcdae5749ed3b29ade5e395dea86bf7ee853597b31cc595c296",
+          "start": 24141,
+          "end": 24181
+        },
+        {
+          "id": "source-unit:392004be6676978f5db55103d9610e6464370e5cd66b17e069ea26f51fb7cf3f",
+          "start": 24182,
+          "end": 24208
+        },
+        {
+          "id": "source-unit:ec06b223edd5648e27016fc2f8c7f68989936521ce29114a5c450ad8569a4733",
+          "start": 24209,
+          "end": 24227
+        },
+        {
+          "id": "source-unit:a7a4fced272d7615b413f5a2a90a479541b56d56ad654704f3689737f02f9f4d",
+          "start": 24228,
+          "end": 24269
+        },
+        {
+          "id": "source-unit:7d2f58aa2ca937672bb0695ec6a3d19bacf35790db56d70ee90dd3d8c15b1386",
+          "start": 24270,
+          "end": 24298
+        },
+        {
+          "id": "source-unit:482c43f64ef5adea30af6ca5c491cc33ffbf2b5127531f0aacb75ad04c3814df",
+          "start": 24299,
+          "end": 24319
+        },
+        {
+          "id": "source-unit:8fd03f2a2f3d3db7d8e9d8c03fe86dae0d7b9e1ecbb5834906785833bfd20a46",
+          "start": 24320,
+          "end": 24360
+        },
+        {
+          "id": "source-unit:9eb18562d378ed09eab0a734a58efd4e07732051c8da57b81ec334114131a404",
+          "start": 24361,
+          "end": 24387
+        },
+        {
+          "id": "source-unit:1bb5cfb8e481a5db4cef7c69ba74b6b6fff48969caa7dcf3bde725c6436e3dad",
+          "start": 24388,
+          "end": 24469
+        },
+        {
+          "id": "source-unit:d5f58fe1c2d527807407c05fdbaefd180de2526dd3807f17e923f1d451731228",
+          "start": 24470,
+          "end": 24552
+        },
+        {
+          "id": "source-unit:a9009625584810ddb56dd07b6c3b34799d96638f770f9c39bfa19037616de5b5",
+          "start": 24553,
+          "end": 24642
+        },
+        {
+          "id": "source-unit:5ae822d0a9fd893848bbe752ca4b15178bf7f0f48023804fee90526a5e8aca12",
+          "start": 24644,
+          "end": 24819
+        },
+        {
+          "id": "source-unit:95136499e820da078fb72a743dd7d11accc72e6fe3fe32246c2aa881ce9bfa4e",
+          "start": 24820,
+          "end": 24916
+        },
+        {
+          "id": "source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b",
+          "start": 24917,
+          "end": 25036
+        },
+        {
+          "id": "source-unit:c488f994b48cda9ce3f5f9ea8a20f7dc8c72f3302ecc6e3f20ccae38bb5b3dac",
+          "start": 25037,
+          "end": 25165
+        },
+        {
+          "id": "source-unit:0e0cae8fe9978c0bfc66bd13643a76e5ac8933bdb88c84da211a556f274dff24",
+          "start": 25166,
+          "end": 25255
+        },
+        {
+          "id": "source-unit:71192e30246bf6a931a6df75b414392739bf767471295ffb8318d62942692a59",
+          "start": 25256,
+          "end": 25332
+        },
+        {
+          "id": "source-unit:da96a7ebec112d9206bf86c7aa664ccca82d5bb0ee40b6d21d28acf55efca9f2",
+          "start": 25333,
+          "end": 25420
+        },
+        {
+          "id": "source-unit:8adfaf8ee12bca1164895e730dd6bfd01c8e60cd0e318aab10bf58ef4254c3d8",
+          "start": 25422,
+          "end": 25473
+        },
+        {
+          "id": "source-unit:c384e811faca406ca97f99dde4308d7a60b293be4b49c17f1d4fa135697050aa",
+          "start": 25475,
+          "end": 25584
+        },
+        {
+          "id": "source-unit:db306f95cb0b5dfd48b8b15a54b3cea508e602ffdc5383c188972691a84b9fdf",
+          "start": 25585,
+          "end": 25700
+        },
+        {
+          "id": "source-unit:ddca0e0e0df5e06a668ea0e2d6794056db1380a22e36f087b1195fc3a4b70c63",
+          "start": 25701,
+          "end": 25760
+        },
+        {
+          "id": "source-unit:92c0f51b0fb8d0334d4053bb86a54b2b121f9bee0dfaa0e9a5388493fd202081",
+          "start": 25761,
+          "end": 26012
+        },
+        {
+          "id": "source-unit:1fbd8d53016fc5991eede29f125c35beec4185efc3e4e599b344991ee6a751a8",
+          "start": 26013,
+          "end": 26104
+        },
+        {
+          "id": "source-unit:43703ff466a0b6d25461757d5e3671345927d81297180ad37a72bf47dabfc22f",
+          "start": 26105,
+          "end": 26193
+        },
+        {
+          "id": "source-unit:678e09be80f610d257077151b853c5be21a25836300adeb64483575d33eb3285",
+          "start": 26194,
+          "end": 26248
+        },
+        {
+          "id": "source-unit:4ad0a49485e6435a7cbf899e7691943bb1bc19ee3f96f4b33ce4e812ec673131",
+          "start": 26249,
+          "end": 26347
+        },
+        {
+          "id": "source-unit:5e11b15e06f6624c9def642ca95a2081f8817372dac95cdda44fb3a8d8a71f82",
+          "start": 26348,
+          "end": 26407
+        }
+      ]
+    },
+    "response": {
+      "findings": [
+        {
+          "span": "chunk:8:part:800",
+          "study_id": "https://www.pnas.org/doi/10.1073/pnas.96.18.10098",
+          "finding": "Figure 1 distinguishes measured rapid glucose uptake from fitted transport curves: “Glucose transport was measured rapidly (5 seconds) in the absence (●)” and “and presence (■) of 45 μM ( _A_) or 91 μM ( _B_) phloretin.” It explicitly states: “The full lines represent the fitted Michaelis–Menten curves.” The reported V_max_ and K_m_ values below are fitted transport-kinetic parameters, not individual measured uptake points. The supplied caption does not tabulate individual uptake values. Panel A used one batch of cells from a single rat; panel B used another batch from a different rat. In the absence of phloretin, ethanol was added to correct for solvent effects. The panel-A inhibited K_m_ text is malformed in the supplied source (“and K_m_ ± 2.99 ± 0.36 m” followed by “M.”); its numerical value and reported ± term are retained without silently repairing that text.",
+          "measurements": {
+            "observations": {
+              "a_no_vmax": {
+                "source_id": "",
+                "locator": "Figure 1 caption, A, no phloretin, V_max_ clause",
+                "quantity": "fitted V_max_",
+                "conditions": "Figure 1A; no phloretin; rapid 5-second glucose transport assay; full line is a fitted Michaelis–Menten curve",
+                "value": 169,
+                "units": "nmol⋅min−1⋅mg⋅protein−1",
+                "uncertainty": "± 2; uncertainty type not specified in the supplied Figure 1 caption",
+                "kind": "fit_parameter"
+              },
+              "a_no_km": {
+                "source_id": "",
+                "locator": "Figure 1 caption, A, no phloretin, K_m_ clause",
+                "quantity": "fitted K_m_",
+                "conditions": "Figure 1A; no phloretin; rapid 5-second glucose transport assay; full line is a fitted Michaelis–Menten curve",
+                "value": 0.73,
+                "units": "mM",
+                "uncertainty": "± 0.01; uncertainty type not specified in the supplied Figure 1 caption",
+                "kind": "fit_parameter"
+              },
+              "a_with_vmax": {
+                "source_id": "",
+                "locator": "Figure 1 caption, A, with phloretin, V_max_ clause",
+                "quantity": "fitted V_max_",
+                "conditions": "Figure 1A; 45 μM phloretin; rapid 5-second glucose transport assay; full line is a fitted Michaelis–Menten curve",
+                "value": 169,
+                "units": "nmol⋅min−1⋅mg⋅protein−1",
+                "uncertainty": "± 9; uncertainty type not specified in the supplied Figure 1 caption",
+                "kind": "fit_parameter"
+              },
+              "a_with_km": {
+                "source_id": "",
+                "locator": "Figure 1 caption, A, with phloretin, malformed K_m_ clause spanning 24182–24208",
+                "quantity": "fitted K_m_",
+                "conditions": "Figure 1A; 45 μM phloretin; rapid 5-second glucose transport assay; supplied clause reads “K_m_ ± 2.99 ± 0.36” rather than an unambiguous equals sign",
+                "value": 2.99,
+                "units": "mM",
+                "uncertainty": "± 0.36; uncertainty type not specified in the supplied Figure 1 caption",
+                "kind": "fit_parameter"
+              },
+              "b_no_vmax": {
+                "source_id": "",
+                "locator": "Figure 1 caption, B, no phloretin, V_max_ clause",
+                "quantity": "fitted V_max_",
+                "conditions": "Figure 1B; no phloretin; rapid 5-second glucose transport assay; full line is a fitted Michaelis–Menten curve",
+                "value": 198,
+                "units": "nmol⋅min−1⋅mg⋅protein−1",
+                "uncertainty": "± 12; uncertainty type not specified in the supplied Figure 1 caption",
+                "kind": "fit_parameter"
+              },
+              "b_no_km": {
+                "source_id": "",
+                "locator": "Figure 1 caption, B, no phloretin, K_m_ clause",
+                "quantity": "fitted K_m_",
+                "conditions": "Figure 1B; no phloretin; rapid 5-second glucose transport assay; full line is a fitted Michaelis–Menten curve",
+                "value": 1.85,
+                "units": "mM",
+                "uncertainty": "± 0.38; uncertainty type not specified in the supplied Figure 1 caption",
+                "kind": "fit_parameter"
+              },
+              "b_with_vmax": {
+                "source_id": "",
+                "locator": "Figure 1 caption, B, with phloretin, V_max_ clause",
+                "quantity": "fitted V_max_",
+                "conditions": "Figure 1B; 91 μM phloretin; rapid 5-second glucose transport assay; full line is a fitted Michaelis–Menten curve",
+                "value": 193,
+                "units": "nmol⋅min−1⋅mg⋅protein−1",
+                "uncertainty": "± 5; uncertainty type not specified in the supplied Figure 1 caption",
+                "kind": "fit_parameter"
+              },
+              "b_with_km": {
+                "source_id": "",
+                "locator": "Figure 1 caption, B, with phloretin, K_m_ clause",
+                "quantity": "fitted K_m_",
+                "conditions": "Figure 1B; 91 μM phloretin; rapid 5-second glucose transport assay; full line is a fitted Michaelis–Menten curve",
+                "value": 6.35,
+                "units": "mM",
+                "uncertainty": "± 0.39; uncertainty type not specified in the supplied Figure 1 caption",
+                "kind": "fit_parameter"
+              }
+            },
+            "claims": {}
+          },
+          "source_anchors": {
+            "finding": [
+              {
+                "span": "chunk:8:part:800",
+                "unit": "source-unit:7d376c7023121600772b94bd4a7b9dd431f9e0e46c591adc0e22a4c54e8fa0f0",
+                "quote": "Glucose transport was measured rapidly (5 seconds) in the absence (●)"
+              },
+              {
+                "span": "chunk:8:part:800",
+                "unit": "source-unit:ab8a25cd84d72601cf1c8ffd19f44812e0b6bda901aad2718118f1cb7bf76677",
+                "quote": "and presence (■) of 45 μM ( _A_) or 91 μM ( _B_) phloretin."
+              },
+              {
+                "span": "chunk:8:part:800",
+                "unit": "source-unit:80e3062a442236d9f51bc3a437cd9cc45302a7180b1eda37e85f7ce04f1f5550",
+                "quote": "The full lines represent the fitted Michaelis–Menten curves."
+              },
+              {
+                "span": "chunk:8:part:1600",
+                "unit": "source-unit:1bb5cfb8e481a5db4cef7c69ba74b6b6fff48969caa7dcf3bde725c6436e3dad",
+                "quote": "In the absence of phloretin, ethanol was added to correct for any solvent effect."
+              },
+              {
+                "span": "chunk:8:part:1600",
+                "unit": "source-unit:d5f58fe1c2d527807407c05fdbaefd180de2526dd3807f17e923f1d451731228",
+                "quote": "The data in _A_ were obtained with one batch of cells, isolated from a single rat."
+              },
+              {
+                "span": "chunk:8:part:1600",
+                "unit": "source-unit:a9009625584810ddb56dd07b6c3b34799d96638f770f9c39bfa19037616de5b5",
+                "quote": "The data in _B_ were measured with another batch of cells, obtained from a different rat."
+              }
+            ],
+            "claims": {},
+            "observations": {
+              "a_no_vmax": {
+                "statement": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:4c52bea0401373639213e43e2dda0d39c4dbbceb6127e03c823f4b70a1c7da42",
+                  "quote": "V_max_ = 169 ± 2 nmol⋅min−1⋅mg⋅protein−1"
+                },
+                "quantity": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:4c52bea0401373639213e43e2dda0d39c4dbbceb6127e03c823f4b70a1c7da42",
+                  "quote": "V_max_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:6248b21663266342d9e8b053339b20e62233ff7abfc1c0c2900b4ec1d390665a",
+                    "quote": "_A_, no phloretin:"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:80e3062a442236d9f51bc3a437cd9cc45302a7180b1eda37e85f7ce04f1f5550",
+                    "quote": "The full lines represent the fitted Michaelis–Menten curves."
+                  }
+                ]
+              },
+              "a_no_km": {
+                "statement": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:d26330db55571cca7d53f9b2382cce3724a6f84dd1950125c80d1a0ec61afc6b",
+                  "quote": "and K_m_ = 0.73 ± 0.01 mM."
+                },
+                "quantity": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:d26330db55571cca7d53f9b2382cce3724a6f84dd1950125c80d1a0ec61afc6b",
+                  "quote": "K_m_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:6248b21663266342d9e8b053339b20e62233ff7abfc1c0c2900b4ec1d390665a",
+                    "quote": "_A_, no phloretin:"
+                  }
+                ]
+              },
+              "a_with_vmax": {
+                "statement": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:f21fab05eca50dcdae5749ed3b29ade5e395dea86bf7ee853597b31cc595c296",
+                  "quote": "V_max_ = 169 ± 9 nmol⋅min−1⋅mg⋅protein−1"
+                },
+                "quantity": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:f21fab05eca50dcdae5749ed3b29ade5e395dea86bf7ee853597b31cc595c296",
+                  "quote": "V_max_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:c4a4addd2a63da088b0be630f550c5518f48eac81f2cd9831213876f07e96795",
+                    "quote": "_A_, with phloretin:"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:ab8a25cd84d72601cf1c8ffd19f44812e0b6bda901aad2718118f1cb7bf76677",
+                    "quote": "45 μM ( _A_)"
+                  }
+                ]
+              },
+              "a_with_km": {
+                "statement": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:392004be6676978f5db55103d9610e6464370e5cd66b17e069ea26f51fb7cf3f",
+                  "quote": "and K_m_ ± 2.99 ± 0.36 m"
+                },
+                "quantity": {
+                  "span": "chunk:8:part:800",
+                  "unit": "source-unit:392004be6676978f5db55103d9610e6464370e5cd66b17e069ea26f51fb7cf3f",
+                  "quote": "K_m_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:c4a4addd2a63da088b0be630f550c5518f48eac81f2cd9831213876f07e96795",
+                    "quote": "_A_, with phloretin:"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:ab8a25cd84d72601cf1c8ffd19f44812e0b6bda901aad2718118f1cb7bf76677",
+                    "quote": "45 μM ( _A_)"
+                  }
+                ]
+              },
+              "b_no_vmax": {
+                "statement": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:a7a4fced272d7615b413f5a2a90a479541b56d56ad654704f3689737f02f9f4d",
+                  "quote": "V_max_ = 198 ± 12 nmol⋅min−1⋅mg⋅protein−1"
+                },
+                "quantity": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:a7a4fced272d7615b413f5a2a90a479541b56d56ad654704f3689737f02f9f4d",
+                  "quote": "V_max_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:1600",
+                    "unit": "source-unit:ec06b223edd5648e27016fc2f8c7f68989936521ce29114a5c450ad8569a4733",
+                    "quote": "_B_, no phloretin:"
+                  }
+                ]
+              },
+              "b_no_km": {
+                "statement": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:7d2f58aa2ca937672bb0695ec6a3d19bacf35790db56d70ee90dd3d8c15b1386",
+                  "quote": "and K_m_ = 1.85 ± 0.38 _mM_."
+                },
+                "quantity": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:7d2f58aa2ca937672bb0695ec6a3d19bacf35790db56d70ee90dd3d8c15b1386",
+                  "quote": "K_m_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:1600",
+                    "unit": "source-unit:ec06b223edd5648e27016fc2f8c7f68989936521ce29114a5c450ad8569a4733",
+                    "quote": "_B_, no phloretin:"
+                  }
+                ]
+              },
+              "b_with_vmax": {
+                "statement": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:8fd03f2a2f3d3db7d8e9d8c03fe86dae0d7b9e1ecbb5834906785833bfd20a46",
+                  "quote": "V_max_ = 193 ± 5 nmol⋅min−1⋅mg⋅protein−1"
+                },
+                "quantity": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:8fd03f2a2f3d3db7d8e9d8c03fe86dae0d7b9e1ecbb5834906785833bfd20a46",
+                  "quote": "V_max_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:1600",
+                    "unit": "source-unit:482c43f64ef5adea30af6ca5c491cc33ffbf2b5127531f0aacb75ad04c3814df",
+                    "quote": "_B_, with phloretin:"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:ab8a25cd84d72601cf1c8ffd19f44812e0b6bda901aad2718118f1cb7bf76677",
+                    "quote": "91 μM ( _B_) phloretin."
+                  }
+                ]
+              },
+              "b_with_km": {
+                "statement": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:9eb18562d378ed09eab0a734a58efd4e07732051c8da57b81ec334114131a404",
+                  "quote": "and K_m_ = 6.35 ± 0.39 mM."
+                },
+                "quantity": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:9eb18562d378ed09eab0a734a58efd4e07732051c8da57b81ec334114131a404",
+                  "quote": "K_m_"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:1600",
+                    "unit": "source-unit:482c43f64ef5adea30af6ca5c491cc33ffbf2b5127531f0aacb75ad04c3814df",
+                    "quote": "_B_, with phloretin:"
+                  },
+                  {
+                    "span": "chunk:8:part:800",
+                    "unit": "source-unit:ab8a25cd84d72601cf1c8ffd19f44812e0b6bda901aad2718118f1cb7bf76677",
+                    "quote": "91 μM ( _B_) phloretin."
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "span": "chunk:8:part:1600",
+          "study_id": "https://www.pnas.org/doi/10.1073/pnas.96.18.10098",
+          "finding": "Figure 2 reports “The inhibitor constant of phloretin is 21 μM.” Its provenance is the apparent-K_m_ versus inhibitor-concentration curve: “The apparent K_m_ of zero-trans-glucose influx depended linearly on the inhibitor concentration.” The caption then states “The inhibitor constant K_i_ was derived from this curve by using the equation K_m__app_ =”; the equation is not reconstructed here. The caption describes each plotted parameter point as obtained by “linear regression of a complete Michaelis–Menten curve,” with at least six glucose concentrations between 0.1 and 20 mM, or up to 40 mM with phloretin, measured in duplicate. Separately, it says “The standard deviation was obtained from the nonlinear regression procedure.” Both regression descriptions are retained as printed rather than harmonized. Independent experiments with different isolates were individual data points. Thus 21 μM is a curve-derived inhibitor constant, not a direct uptake measurement or a Figure 1 V_max_/K_m_ fit value. No numerical uncertainty for K_i_ itself is stated in these supplied passages; the stated regression-derived standard deviations must not be reassigned to K_i_. These passages document transport-kinetic fitting, not pathway-model fitting. Figure 5 control slopes are not supplied here and are not re-extracted or conflated with these fits.",
+          "measurements": {
+            "observations": {
+              "ki": {
+                "source_id": "",
+                "locator": "Figure 2 caption, opening inhibitor-constant statement",
+                "quantity": "inhibitor constant of phloretin, K_i_",
+                "conditions": "Derived from the curve of apparent K_m_ of zero-trans-glucose influx versus inhibitor concentration",
+                "value": 21,
+                "units": "μM",
+                "uncertainty": "not reported",
+                "kind": "fit_parameter"
+              }
+            },
+            "claims": {}
+          },
+          "source_anchors": {
+            "finding": [
+              {
+                "span": "chunk:8:part:1600",
+                "unit": "source-unit:95136499e820da078fb72a743dd7d11accc72e6fe3fe32246c2aa881ce9bfa4e",
+                "quote": "The apparent K_m_ of zero-trans-glucose influx depended linearly on the inhibitor concentration."
+              },
+              {
+                "span": "chunk:8:part:1600",
+                "unit": "source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b",
+                "quote": "The inhibitor constant K_i_ was derived from this curve by using the equation K_m__app_ ="
+              },
+              {
+                "span": "chunk:8:part:2400",
+                "unit": "source-unit:c488f994b48cda9ce3f5f9ea8a20f7dc8c72f3302ecc6e3f20ccae38bb5b3dac",
+                "quote": "Each data point was obtained by linear regression of a complete Michaelis–Menten curve, containing at least 6 points between 0.1"
+              },
+              {
+                "span": "chunk:8:part:2400",
+                "unit": "source-unit:0e0cae8fe9978c0bfc66bd13643a76e5ac8933bdb88c84da211a556f274dff24",
+                "quote": "and 20 mM glucose (or 40 mM glucose in the presence of phloretin), measured in duplicate."
+              },
+              {
+                "span": "chunk:8:part:2400",
+                "unit": "source-unit:71192e30246bf6a931a6df75b414392739bf767471295ffb8318d62942692a59",
+                "quote": "The standard deviation was obtained from the nonlinear regression procedure."
+              },
+              {
+                "span": "chunk:8:part:2400",
+                "unit": "source-unit:da96a7ebec112d9206bf86c7aa664ccca82d5bb0ee40b6d21d28acf55efca9f2",
+                "quote": "Independent experiments with different isolates were treated as individual data points."
+              }
+            ],
+            "claims": {},
+            "observations": {
+              "ki": {
+                "statement": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:5ae822d0a9fd893848bbe752ca4b15178bf7f0f48023804fee90526a5e8aca12",
+                  "quote": "The inhibitor constant of phloretin is 21 μM."
+                },
+                "quantity": {
+                  "span": "chunk:8:part:1600",
+                  "unit": "source-unit:5ae822d0a9fd893848bbe752ca4b15178bf7f0f48023804fee90526a5e8aca12",
+                  "quote": "inhibitor constant of phloretin"
+                },
+                "conditions": [
+                  {
+                    "span": "chunk:8:part:1600",
+                    "unit": "source-unit:95136499e820da078fb72a743dd7d11accc72e6fe3fe32246c2aa881ce9bfa4e",
+                    "quote": "The apparent K_m_ of zero-trans-glucose influx depended linearly on the inhibitor concentration."
+                  },
+                  {
+                    "span": "chunk:8:part:1600",
+                    "unit": "source-unit:129df5ef06117ccdef8dd6ef312d1d7a06df28ffe837b4d73f8a55ebd856919b",
+                    "quote": "The inhibitor constant K_i_ was derived from this curve"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "reading_memory": {
+        "summary": "Figure 1 caption explicitly identifies full lines as fitted Michaelis–Menten curves over measured 5-second glucose-transport data. Extracted fitted V_max_ and K_m_ with reported ± terms for panels A/B, without treating them as raw uptake observations. Figure 2 gives K_i_ = 21 μM derived from apparent K_m_ versus phloretin concentration; no numerical K_i_ uncertainty is reported. Its caption says each point came from linear regression of a complete Michaelis–Menten curve, while standard deviation came from nonlinear regression; both wordings preserved. Curves contained at least six concentrations, 0.1–20 mM glucose or up to 40 mM with phloretin, measured in duplicate; different isolates were individual points. No flattened equation reconstructed; no pathway-model fitting claimed; previously resolved Figure 5 symbol mapping and intracellular-glucose estimator not re-extracted.",
+        "unresolved_links": [
+          "Figure 5 control-slope fitting provenance cannot be verified from the supplied passages, which contain Figures 1 and 2 but not Figure 5.",
+          "The supplied Figure 2 caption uses both “linear regression” and “nonlinear regression procedure”; no additional supplied text resolves that wording difference.",
+          "Figure 1A inhibited K_m_ clause is malformed as supplied (“K_m_ ± 2.99 ± 0.36 m” followed by “M.”); the source rendering has not been independently checked."
+        ],
+        "anchors": [
+          {
+            "span": "chunk:8:part:800"
+          },
+          {
+            "span": "chunk:8:part:1600"
+          },
+          {
+            "span": "chunk:8:part:2400"
+          }
+        ],
+        "retained_evidence": []
+      }
+    }
+  }
+]

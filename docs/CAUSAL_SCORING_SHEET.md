@@ -15,6 +15,14 @@ exact equation, deterministic acyclic SCM and discrete-simulation evaluators are
 retained. The support ledger retains observation deduplication, original-G
 identity and post-break revaluation of an existing change.
 
+Root's investigation stock also exposes verified new discovery information and
+one first-examination progress unit per G. Discovery's local yield measures its
+commissioned criteria; its child scores are not summed. A source-grounded
+`examination` names exact G/theory snapshots, a public reasoning record and actual
+source-linked grounds. Its registration measures completed investigative work,
+independently of its supported, challenged or unresolved conclusion. It is not
+support or proof of truth; an episode visit or tool invocation alone earns none.
+
 Dependencies on an append-only theory reconstruction resolve the exact recorded
 fragment snapshot. Adding components advances the reconstruction version without
 invalidating earlier assessments or withdrawing their support/change credit.
@@ -107,38 +115,59 @@ The current exposed aggregation convention is one unit per admitted hypothesis
 group plus one per admitted observation. Equal relative weights are an
 implementation convention, not a user-specified scientific weighting law.
 
-## Repairs and useful changes
+## Graduated task differences and useful alterations
 
-`repair_assessment` compares a complete candidate model and declared alternatives
-against the original expectation test. It also binds the revised expectation's
-test. Original circumstances, weights, answer meaning and expected targets remain
-fixed. Shrinking the new scope reports excluded failures rather than repairing them.
-Added equations, dependencies and branches are reported as structural changes;
-those counts do not classify a repair as trivial or magical.
+The user authorized this trial on 2026-11-10 UTC. `causal_change` defines one
+task-specific comparison: exact G and original expected-generalizability-bounds
+snapshots; source-bound original, candidate and reference models; task quantity,
+units and absolute/relative accuracy tolerances; declared cases; original scope
+membership; public reasoning and limitations. The support-multiplied restored-mass
+contract has been removed, with no format adapter.
 
-The same original-G predicate and intervention are executed on source, candidate
-and alternative models. A missing dependency that improves predictions while
-preserving G is not a demonstrated change to G. Changing equation text or a G
-version number alone does not establish a reversal.
+Scientific and all its scientific children can call `compare_tasks` on selected
+declared cases. Models use explicit mathematical equations or continuous ODE
+directional-event times. The host uses a closed mathematical interpreter and
+SciPy DOP853 at the declared tolerances and one tighter precision. Retained
+uncertainty combines the observed refinement difference and requested solver
+precision. These estimates are numerical diagnostics, not rigorous integration
+bounds. Physical experiment time is separate from episode elapsed runtime.
 
-Per-case outputs distinguish restored failures, retained/lost successes,
-remaining failures, excluded failures and unresolved work. A restored case
-qualifies for scoped change credit only when original G holds, the candidate
-changes that relation, and the compared G-preserving alternatives do not restore
-that case. Empty or unfinished comparisons leave necessity unresolved. This is
-necessity within declared alternatives, not exclusion of every conceivable repair.
-Construction and declared test cases are separate. Declaring a test partition
-does not establish empirical independence or novel corroboration.
+`task_result` retains actual original/candidate/reference outputs. Admission
+reproduces the calculation; an LLM cannot submit a favorable outcome or grade.
+Success requires task error plus numerical uncertainty within the declared
+tolerance. A result overlapping that boundary remains unresolved. A reduced
+initial state beyond the directional crossing is `not_represented`; no resolved
+event within the physical experiment remains unresolved, not proof of absence.
 
-`causal_change.assessment` links the executed comparison to the same recorded
-break. The exposed scaling convention multiplies support for original G by the
-qualifying restored mass divided by original expected-scope mass. Raw importance
-and restored-target fraction remain distinct reported quantities. Later support
-for original G revalues the same change even after G and B_G have been revised.
-A subsequently demonstrated preserving repair can retract that scoped change
-contribution while leaving independent support for original G intact.
+Each distinct original-model/task/circumstance with a demonstrated failed target
+earns one `applicability_difference` unit. Its candidate earns gradual improvement
+`max(0, 1 - candidate_error_upper / original_error_lower)`. An improved prediction
+can still fail the task tolerance. If the original does not represent the event,
+a candidate that successfully represents it earns one improvement unit. Unresolved
+originals earn none; a candidate losing an event earns no improvement. Retained
+successes, restored targets, still-failing improvements, losses and missing events
+remain explicit. Case weights describe coverage masses; credit counts distinct
+demonstrated consequences, not continuous-domain volume.
 
-## Pragmatic transfer failures and current scoring limits
+Original-G support remains its separate 0.1-per-unit component. Full repair,
+relation reversal and failure of competing alternatives are not prerequisites.
+Original expected-scope membership is reported without excluding extensions.
+Empty scope means unclassified; `<<` must not acquire an invented numeric cutoff.
+
+Point identities use canonical G, original/reference model structure, task and
+used circumstance inputs. Keys, case aliases, whitespace, bounds revisions,
+solver precision and event-search horizon extensions do not mint another point.
+Alternative candidates contribute only increases over the best improvement for
+the same task/circumstance; precision-only repeats do not reprice an already
+credited candidate. This structural identity convention does not establish
+general mathematical equivalence.
+
+`repair_assessment` remains available for its separately scoped necessity
+question; it does not control this score. Information costs and conceptual
+interpretation remain scientific arguments, not coefficient-count penalties
+or model-authored merit grades.
+
+## Pragmatic transfer findings and qualifications
 
 The current scientific target is a demonstrated failure of a specified present
 representation to transfer usefully, together with evidence explaining why.
@@ -146,8 +175,8 @@ Universal irreducibility and fundamental contradiction are not required. Tasks
 may differ in question, observable, organism, scale or grain. Establish their
 connection through G and preserve each task's native meanings and success criteria.
 A numeric comparison within one task still requires a justified mapping and
-fixed operands. The repair adapter's common-case restrictions protect its test;
-they are not universal admission criteria for scientific candidates.
+fixed operands. Different tasks use separate comparisons with justified mappings;
+one task's improvement does not erase a loss on another.
 
 The existing records can describe this broader target without a new workflow:
 
@@ -164,49 +193,13 @@ The existing records can describe this broader target without a new workflow:
 - `repair` records construction versus test evidence and the costs of a concrete
   adjustment. Expected-bounds revisions retain original successes and losses.
 
-The executable `repair_assessment` is a restricted adapter, not a complete
-decision procedure for pragmatic failure. It currently has three limitations:
-
-1. Change credit requires the original executable G predicate to become false
-   while a failed prediction is restored. Useful omission or aggregation can
-   escape that predicate even when its benefit is demonstrated.
-2. Any fitting G-preserving alternative defeats its scoped necessity test.
-   Information requirements, fitting assumptions and costs on other tasks do
-   not enter that decision. `repair.costs` remains a public scientific argument,
-   not an executable usefulness measurement.
-3. An explained failure without a successful replacement earns no change credit.
-   Its absence of credit must not be reported as absence of a scientific result.
-
-The five score components and continuation rules are unchanged. This is a real
-incentive limitation: broader prompt guidance does not make the scorer reward
-every newly relevant finding. Receipt qualifications and prompts expose that
-limit; they do not fix it by treating a model's usefulness verdict as an operand.
-
-### Proposed numerical extension, not implemented
-
-Retain the existing G identities, expected generalizability bounds, evidence,
-versioned failures and repair history. Extend executable comparison to separate
-task-specific evaluations. Each task would declare its intended prediction or
-explanation, available inputs, and a justified success requirement before
-comparing representations. Where measurable, use native prediction errors or
-reported intervals, information requirements with an actual availability or
-resource constraint, and retained or lost successes. Do not equate a coefficient
-count with information cost or invent an arbitrary usefulness threshold.
-
-Evaluate carrying G unchanged, concrete proposed repairs and a revised or reduced
-representation on the tasks for which each is claimed to work. Each task keeps
-its own observable, denominator and justified mappings; a more accurate result
-on one task cannot silently erase a failure on another. Keep construction fit,
-independent predictive performance, untested alternatives and unmeasured costs
-separate. A demonstrated current failure and the warrant for its explanation
-must be distinguishable from later success in replacing the representation.
-
-The resulting claim is limited to the examined transfers or repairs under those
-requirements. A successful useful repair can defeat that scoped failure claim;
-a fit that violates a demonstrated task requirement need not do so. Unknown
-costs or unsupported diagnoses remain unknown. The criteria for crediting these
-results, including non-numeric explanations, still require design and testing;
-no new scalar score or prose validity gate has been introduced.
+Executed model consequences do not establish source transcription, scientific
+mapping or empirical adequacy. Construction data do not become independent
+corroboration by being labeled tests. Non-numeric explanations remain public
+findings and can earn existing first-G examination progress; they do not receive
+an invented numerical usefulness grade. An untested analytical timing certificate
+is not silently treated as an executed ODE result. Finite or sampled comparisons
+establish neither continuous-space coverage nor universal validity.
 
 ## Episode and message integration
 

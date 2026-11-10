@@ -19,6 +19,7 @@ def compile_sheet(sheet):
     from ..case_reports.research.importance import score_importance
     from .causal_support import compile_support
     from .causal_progress import compile_progress
+    from ..case_reports.research.discovery_goals import compile_discovery_points
     assessments = {key: score_importance(sheet, key) for key, _ in sheet.of_kind("importance")}
     inferences = {}
     for key, value in assessments.items():
@@ -26,12 +27,13 @@ def compile_sheet(sheet):
         inferences.setdefault(application["inference"], {})[key] = value
     from ..case_reports.research.grading import GRADING_FIELDS, grade_record
     subsheets = {kind: {key: grade_record(sheet, key) for key, _ in sheet.of_kind(kind)} for kind in GRADING_FIELDS}
-    return {"calculation": "causal-support-and-change-v4", "assessments": assessments, "subsheets": subsheets,
+    return {"calculation": "causal-support-and-task-alterations-v5", "assessments": assessments, "subsheets": subsheets,
             "support_credit": compile_support(sheet), "registrations": compile_progress(sheet),
+            "discovery": compile_discovery_points(sheet),
             "inferences": inferences,
             "meaning": "Each fraction measures G's influence for its recorded application, contrast, question and measure. "
                        "Executing calculations earns zero points; their findings inform support and change credit. "
-                       "Support and proportional change credit are compiled from explicit identified contributions; "
+                       "Support, applicability differences and gradual task improvements are compiled from explicit executed contributions; "
                        "importance fractions retain their measurement scopes."}
 
 

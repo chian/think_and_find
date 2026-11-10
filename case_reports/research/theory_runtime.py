@@ -133,26 +133,6 @@ def deduplicate_theory_inputs(source, inputs):
     return inputs
 
 
-def reader_theory_context(source):
-    """Pass extraction meanings to processors, not the scientific parent's evidence."""
-    request = validate_request(source.commission.theory_request, source.ledger.causal_sheet)
-    fragment = fragment_from_sheet(source.ledger.causal_sheet, request["reconstruction"])
-    def definition(component):
-        return {key: deepcopy(value) for key, value in component.items()
-                if key not in {"evidence", "supersedes"}}
-    focus = {key: definition(component) for group in ("statements", "gaps")
-             for key, component in fragment[group].items() if key in request["focus"]}
-    return {"request": request,
-            "entities": {key: definition(value) for key, value in fragment["entities"].items()},
-            "quantities": {key: definition(value) for key, value in fragment["quantities"].items()},
-            "focused_components": focus,
-            "instruction": "Extract the source's definitions, relationships, mechanisms, assumptions and "
-                "derivations relevant to this question. Use supplied meanings for already bound quantities. "
-                "Report additional source-defined quantities explicitly in findings and claim symbols. "
-                "Distinguish an unspecified relationship from a missing passage. Page constructs the typed "
-                "theory fragment from these source records; this reader returns source extraction only."}
-
-
 def integration_schema():
     from .theory_language import additions_schema
     return {"type": "object", "additionalProperties": False,

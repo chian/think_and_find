@@ -1,0 +1,197 @@
+{
+  "source": "https://pubmed.ncbi.nlm.nih.gov/1533788/",
+  "question": "Extract the Davies and Brindle article's abstract and any accessible experimental results: overexpression magnitude, matched enzyme activities and glucose or ethanol fluxes, units, uncertainty and sample sizes, aerobic versus anaerobic conditions, intervention construction, steady-state status, phosphofructokinase-2 and fructose 2,6-bisphosphate measurements. Separate measurements from feedback interpretation. Identify exact evidence locators and full-text links; explicitly flag operands and rate equations absent from this PubMed source.",
+  "passages": {
+    "chunk:2:range:3983:7893:part:0": {
+      "key": "chunk:2:range:3983:7893:part:0",
+      "start": 3983,
+      "end": 4783,
+      "text": "Send even when there aren't any new results\n\n\nOptional text in email:\n\n\nSave\n\nCancel\n\n\n## Create a file for external citation management software\n\nCreate file\n\nCancel\n\n\n## Your RSS Feed\n\nName of RSS Feed:\n\n\nNumber of items displayed:\n510152050100\n\nCreate RSS\n\nCancel\n\n\nRSS Link\nCopy\n\n\nFull text links\nCite\n\nDisplay options\n\nDisplay options\n\n\nFormat\nAbstractPubMedPMID\n\nLinked Discoveries\n\n## Abstract\n\n\nThe influence of 6-phosphofructo-1-kinase on glycolytic flux in the yeast Saccharomyces cerevisiae was assessed by measuring the effects of enzyme overexpression on glucose consumption, ethanol production, and glycolytic intermediate levels under aerobic and anaerobic conditions. Enzyme overexpression had no effect on glycolytic flux under anaerobic conditions, but under aerobic conditions, it "
+    },
+    "chunk:2:range:3983:7893:part:800": {
+      "key": "chunk:2:range:3983:7893:part:800",
+      "start": 4783,
+      "end": 5583,
+      "text": "increased glycolytic flux up to the anaerobic level. The Pasteur effect was thus abolished in these cells. The increased glycolytic flux was accompanied by a compensatory decrease in flux in oxidative phosphorylation. The concentrations of the enzyme substrates showed only small or insignificant changes. These data imply that the enzyme has a low flux control coefficient for glycolysis. However, in cells overexpressing the enzyme, there was a compensatory decrease in 6-phosphofructo-2-kinase activity which was accompanied by a corresponding decrease in fructose 2,6-bisphosphate concentration. Measurements in vitro showed that the decrease in the concentration of this positive allosteric effector of 6-phosphofructo-1-kinase could significantly lower its specific activity in the cell and tha"
+    },
+    "chunk:2:range:3983:7893:part:1600": {
+      "key": "chunk:2:range:3983:7893:part:1600",
+      "start": 5583,
+      "end": 6383,
+      "text": "t this could compensate for the increased enzyme concentration in the overproducer.\n\n\n[PubMed Disclaimer](https://pubmed.ncbi.nlm.nih.gov/disclaimer/)\n\n## Similar articles\n\n- [Effects of overexpression of the liver subunit of 6-phosphofructo-1-kinase on the metabolism of a cultured mammalian cell line.](https://pubmed.ncbi.nlm.nih.gov/11104704/)\n\nUrbano AM, Gillham H, Groner Y, Brindle KM.Urbano AM, et al.Biochem J. 2000 Dec 15;352 Pt 3(Pt 3):921-7.Biochem J. 2000.PMID: 11104704Free PMC article.\n\n- [Mutations in phosphofructokinases alter the control characteristics of glycolysis in vivo in Saccharomyces cerevisiae.](https://pubmed.ncbi.nlm.nih.gov/1387501/)\n\nLloyd D, James CJ, Maitra PK.Lloyd D, et al.Yeast. 1992 Apr;8(4):291-301. doi: 10.1002/yea.320080406.Yeast. 1992.PMID: 1387501\n\n- [M"
+    },
+    "chunk:2:range:3983:7893:part:2400": {
+      "key": "chunk:2:range:3983:7893:part:2400",
+      "start": 6383,
+      "end": 7183,
+      "text": "utant studies of phosphofructo-2-kinases do not reveal an essential role of fructose-2,6-bisphosphate in the regulation of carbon fluxes in yeast cells.](https://pubmed.ncbi.nlm.nih.gov/9308187/)\n\nMüller S, Zimmermann FK, Boles E.Müller S, et al.Microbiology (Reading). 1997 Sep;143 ( Pt 9):3055-3061. doi: 10.1099/00221287-143-9-3055.Microbiology (Reading). 1997.PMID: 9308187\n\n- [Is the phosphofructokinase-reaction obligatory for glucose fermentation by Saccharomyces cerevisiae?](https://pubmed.ncbi.nlm.nih.gov/2975901/)\n\nHeinisch J, Zimmermann FK.Heinisch J, et al.Yeast. 1985 Dec;1(2):173-5. doi: 10.1002/yea.320010205.Yeast. 1985.PMID: 2975901Review.No abstract available.\n\n- [Regulation of glucose metabolism by 6-phosphofructo-2-kinase/fructose-2,6-bisphosphatases in cancer.](https://pubme"
+    },
+    "chunk:2:range:3983:7893:part:3200": {
+      "key": "chunk:2:range:3983:7893:part:3200",
+      "start": 7183,
+      "end": 7893,
+      "text": "d.ncbi.nlm.nih.gov/19454274/)\n\nYalcin A, Telang S, Clem B, Chesney J.Yalcin A, et al.Exp Mol Pathol. 2009 Jun;86(3):174-9. doi: 10.1016/j.yexmp.2009.01.003. Epub 2009 Jan 14.Exp Mol Pathol. 2009.PMID: 19454274Review.\n\n\n[See all similar articles](https://pubmed.ncbi.nlm.nih.gov/?linkname=pubmed_pubmed&from_uid=1533788)\n\n## Cited by\n\n- [Finite change analysis of glycolytic intermediates in tuber tissue of lines of transgenic potato (Solanum tuberosum) overexpressing phosphofructokinase.](https://pubmed.ncbi.nlm.nih.gov/9078250/)\n\nThomas S, Mooney PJ, Burrell MM, Fell DA.Thomas S, et al.Biochem J. 1997 Feb 15;322 ( Pt 1)(Pt 1):111-7. doi: 10.1042/bj3220111.Biochem J. 1997.PMID: 9078250Free PMC article.\n\n"
+    }
+  },
+  "response": {
+    "findings": [
+      {
+        "span": "chunk:2:range:3983:7893:part:0",
+        "study_id": "https://pubmed.ncbi.nlm.nih.gov/1533788/",
+        "finding": "The abstract opens: “The influence of 6-phosphofructo-1-kinase on glycolytic flux in the yeast Saccharomyces cerevisiae was assessed by measuring the effects of enzyme overexpression on glucose consumption, ethanol production, and glycolytic intermediate levels under aerobic and anaerobic conditions.” This identifies the intervention and measured endpoints, but gives neither the magnitude nor the construction of overexpression.",
+        "measurements": {
+          "observations": {},
+          "claims": {}
+        }
+      },
+      {
+        "span": "chunk:2:range:3983:7893:part:800",
+        "study_id": "https://pubmed.ncbi.nlm.nih.gov/1533788/",
+        "finding": "Reported experimental outcomes, abstract sentences 2–5: “Enzyme overexpression had no effect on glycolytic flux under anaerobic conditions, but under aerobic conditions, it increased glycolytic flux up to the anaerobic level. The Pasteur effect was thus abolished in these cells. The increased glycolytic flux was accompanied by a compensatory decrease in flux in oxidative phosphorylation. The concentrations of the enzyme substrates showed only small or insignificant changes.” Sentence 2 starts in part:0 and ends in part:800. These are qualitative results, not numerical glucose-consumption or ethanol-production rates. The term “compensatory” is the authors’ interpretation of the accompanying oxidative-phosphorylation change.",
+        "measurements": {
+          "observations": {
+            "anaerobic_flux": {
+              "source_id": "https://pubmed.ncbi.nlm.nih.gov/1533788/",
+              "locator": "Abstract, sentence 2; chunk:2:range:3983:7893:part:0, continuing in part:800",
+              "quantity": "glycolytic flux response to 6-phosphofructo-1-kinase overexpression",
+              "conditions": "Saccharomyces cerevisiae; anaerobic conditions; enzyme overexpression",
+              "value": "no effect",
+              "units": "not reported",
+              "uncertainty": "not reported",
+              "kind": "measurement"
+            },
+            "aerobic_flux": {
+              "source_id": "https://pubmed.ncbi.nlm.nih.gov/1533788/",
+              "locator": "Abstract, sentence 2; chunk:2:range:3983:7893:part:0, continuing in part:800",
+              "quantity": "glycolytic flux response to 6-phosphofructo-1-kinase overexpression",
+              "conditions": "Saccharomyces cerevisiae; aerobic conditions; enzyme overexpression",
+              "value": "increased glycolytic flux up to the anaerobic level",
+              "units": "not reported",
+              "uncertainty": "not reported",
+              "kind": "measurement"
+            },
+            "oxidative_phosphorylation_flux": {
+              "source_id": "https://pubmed.ncbi.nlm.nih.gov/1533788/",
+              "locator": "Abstract, sentence 4; chunk:2:range:3983:7893:part:800",
+              "quantity": "flux in oxidative phosphorylation",
+              "conditions": "Cells with increased glycolytic flux following 6-phosphofructo-1-kinase overexpression; aerobic comparison described immediately before this sentence",
+              "value": "decrease accompanying increased glycolytic flux",
+              "units": "not reported",
+              "uncertainty": "not reported",
+              "kind": "measurement"
+            },
+            "enzyme_substrates": {
+              "source_id": "https://pubmed.ncbi.nlm.nih.gov/1533788/",
+              "locator": "Abstract, sentence 5; chunk:2:range:3983:7893:part:800",
+              "quantity": "concentrations of the enzyme substrates",
+              "conditions": "6-phosphofructo-1-kinase overexpression experiment; individual substrates and condition-specific results not specified in this sentence",
+              "value": "only small or insignificant changes",
+              "units": "not reported",
+              "uncertainty": "not reported",
+              "kind": "measurement"
+            }
+          },
+          "claims": {
+            "anaerobic_effect": {
+              "kind": "causal_relation",
+              "statement_id": "",
+              "locator": "Abstract, sentence 2; chunk:2:range:3983:7893:part:0, continuing in part:800",
+              "left": "6-phosphofructo-1-kinase overexpression",
+              "relation": "has_no_effect_on",
+              "right": "glycolytic flux",
+              "conditions": "Saccharomyces cerevisiae under anaerobic conditions",
+              "symbols": {}
+            },
+            "aerobic_effect": {
+              "kind": "causal_relation",
+              "statement_id": "",
+              "locator": "Abstract, sentence 2; chunk:2:range:3983:7893:part:0, continuing in part:800",
+              "left": "6-phosphofructo-1-kinase overexpression",
+              "relation": "increases",
+              "right": "glycolytic flux up to the anaerobic level",
+              "conditions": "Saccharomyces cerevisiae under aerobic conditions",
+              "symbols": {}
+            }
+          }
+        }
+      },
+      {
+        "span": "chunk:2:range:3983:7893:part:800",
+        "study_id": "https://pubmed.ncbi.nlm.nih.gov/1533788/",
+        "finding": "The abstract distinguishes an inference about control from accompanying measurements: “These data imply that the enzyme has a low flux control coefficient for glycolysis. However, in cells overexpressing the enzyme, there was a compensatory decrease in 6-phosphofructo-2-kinase activity which was accompanied by a corresponding decrease in fructose 2,6-bisphosphate concentration.” The low control coefficient is an interpretation, not a reported numerical coefficient. Decreased 6-phosphofructo-2-kinase activity and fructose 2,6-bisphosphate concentration are reported qualitative experimental outcomes; their characterization as compensatory is interpretive.",
+        "measurements": {
+          "observations": {
+            "phosphofructokinase_2_activity": {
+              "source_id": "https://pubmed.ncbi.nlm.nih.gov/1533788/",
+              "locator": "Abstract, sentence 7; chunk:2:range:3983:7893:part:800",
+              "quantity": "6-phosphofructo-2-kinase activity",
+              "conditions": "Saccharomyces cerevisiae cells overexpressing 6-phosphofructo-1-kinase; oxygen condition not separately specified for this result",
+              "value": "decrease",
+              "units": "not reported",
+              "uncertainty": "not reported",
+              "kind": "measurement"
+            },
+            "fructose_2_6_bisphosphate": {
+              "source_id": "https://pubmed.ncbi.nlm.nih.gov/1533788/",
+              "locator": "Abstract, sentence 7; chunk:2:range:3983:7893:part:800",
+              "quantity": "fructose 2,6-bisphosphate concentration",
+              "conditions": "Saccharomyces cerevisiae cells overexpressing 6-phosphofructo-1-kinase; accompanying decreased 6-phosphofructo-2-kinase activity",
+              "value": "corresponding decrease",
+              "units": "not reported",
+              "uncertainty": "not reported",
+              "kind": "measurement"
+            }
+          },
+          "claims": {}
+        }
+      },
+      {
+        "span": "chunk:2:range:3983:7893:part:1600",
+        "study_id": "https://pubmed.ncbi.nlm.nih.gov/1533788/",
+        "finding": "The final abstract sentence, starting in part:800 and ending in part:1600, states: “Measurements in vitro showed that the decrease in the concentration of this positive allosteric effector of 6-phosphofructo-1-kinase could significantly lower its specific activity in the cell and that this could compensate for the increased enzyme concentration in the overproducer.” In-vitro measurements are reported, but the lowering of specific activity in the cell and compensation for increased enzyme concentration are expressed as possible consequences (“could”), not direct quantitative in-vivo measurements. The abstract does not identify the mechanism producing the decrease in 6-phosphofructo-2-kinase activity.",
+        "measurements": {
+          "observations": {},
+          "claims": {
+            "effector_decrease": {
+              "kind": "causal_relation",
+              "statement_id": "",
+              "locator": "Abstract, final sentence; chunk:2:range:3983:7893:part:800 through part:1600",
+              "left": "decrease in fructose 2,6-bisphosphate concentration",
+              "relation": "decreases",
+              "right": "6-phosphofructo-1-kinase specific activity in the cell",
+              "conditions": "Proposed possible consequence supported by measurements in vitro; fructose 2,6-bisphosphate is described as a positive allosteric effector. The source says this could significantly lower specific activity and could compensate for increased enzyme concentration in the overproducer.",
+              "symbols": {}
+            }
+          }
+        }
+      },
+      {
+        "span": "chunk:2:range:3983:7893:part:0",
+        "study_id": "https://pubmed.ncbi.nlm.nih.gov/1533788/",
+        "finding": "The supplied PubMed passages expose the complete abstract across part:0, part:800 and the opening of part:1600, but no experimental tables or numerical results. Absent operands are: overexpression fold-change; matched control and overproducer 6-phosphofructo-1-kinase activities or concentrations; numerical glucose-consumption, ethanol-production, glycolytic or oxidative-phosphorylation fluxes; numerical 6-phosphofructo-2-kinase activities and fructose 2,6-bisphosphate concentrations; units; numerical uncertainties; sample sizes; and a numerical flux control coefficient. Intervention construction, assay details and steady-state status are not supplied. No isolated-enzyme rate equation, substrate/capacity dependence, kinetic parameters or defined rate-equation symbols appear. Thus no native numerical intervention-flux operand or enzyme-rate equation can be extracted. A “Full text links” heading appears before the abstract, but no target-article full-text URL is exposed. The record URL remains https://pubmed.ncbi.nlm.nih.gov/1533788/. Similar-article and cited-by links in the other spans are not full-text evidence for this study. These limitations concern the supplied PubMed text, not necessarily the complete article.",
+        "measurements": {
+          "observations": {},
+          "claims": {}
+        }
+      }
+    ],
+    "reading_memory": {
+      "summary": "PubMed record 1533788 now supplies the complete Davies and Brindle abstract across chunk:2:range:3983:7893:part:0, part:800 and the opening of part:1600. It describes 6-phosphofructo-1-kinase overexpression in Saccharomyces cerevisiae with glucose consumption, ethanol production and glycolytic intermediates assessed aerobically and anaerobically. Reported qualitative results: no anaerobic glycolytic-flux effect; aerobic flux increased to the anaerobic level, abolishing the Pasteur effect; accompanying decreased oxidative-phosphorylation flux; small or insignificant substrate-concentration changes; decreased 6-phosphofructo-2-kinase activity and fructose 2,6-bisphosphate concentration. Low flux control coefficient is an inference. In-vitro measurements support the possibility that reduced fructose 2,6-bisphosphate lowers specific activity in the cell enough to compensate for increased enzyme concentration; this is not a numerical in-vivo compensation measurement. No numerical rates, activities, concentrations, overexpression magnitude, units, uncertainties, sample sizes, construction details, steady-state declaration or rate equations are supplied. The Full text links heading has no exposed target URL. Previously supplied MeSH and bibliographic entries are metadata, not additional experimental evidence; links to other articles must not be attributed to this study.",
+      "unresolved_links": [
+        "https://pubmed.ncbi.nlm.nih.gov/1533788/"
+      ],
+      "anchors": [
+        {
+          "span": "chunk:2:range:3983:7893:part:0"
+        },
+        {
+          "span": "chunk:2:range:3983:7893:part:800"
+        },
+        {
+          "span": "chunk:2:range:3983:7893:part:1600"
+        }
+      ],
+      "retained_evidence": []
+    }
+  }
+}

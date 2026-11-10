@@ -78,10 +78,11 @@ show its consequences for the tasks concerned. Preserve useful general repairs,
 the losses or requirements of unsuccessful repairs, and uncertainty about causes.
 The asymptotic-series discussion is design guidance, not a prescribed runtime case.
 
-The prompts and existing record descriptions now reflect that target. Numerical
-change credit still measures the narrower restored-prediction/relation-change
-case. Its limitations and a proposed extension are documented in
-[the scoring specification](CAUSAL_SCORING_SHEET.md#pragmatic-transfer-failures-and-current-scoring-limits).
+The prompts, records and graduated numerical task-comparison credit reflect that
+target. Applicability differences and partial task-error improvements can earn
+credit beyond original expected generalizability bounds, independently of support
+for original G. Losses and unrepresented tasks remain explicit. See
+[the scoring specification](CAUSAL_SCORING_SHEET.md#graduated-task-differences-and-useful-alterations).
 
 The later discussion in the current conversation makes the scientific requirements
 into a scoring rubric: a global sheet records the state of a generalized causal

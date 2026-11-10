@@ -1,4 +1,4 @@
-"""Deduplicated support and support-proportional change credit.
+"""Deduplicated support and graduated task-specific alteration credit.
 
 The operational support unit is one identified hypothesis or source observation,
 conditional on its explicit scientific support argument. Counts are not posterior
@@ -15,7 +15,7 @@ from ..case_reports.research.support_observations import observation_identity
 
 
 SUPPORT_FIELDS = ("support", "applications", "facts", "reasoning_key", "checks")
-CHANGE_FIELDS = ("break", "source", "target", "importance", "argument", "assessment")
+from ..case_reports.research.task_comparisons import FIELDS as CHANGE_FIELDS
 
 
 def _id(value):
@@ -51,7 +51,8 @@ def references(kind, data):
     if kind == "support_contribution":
         return [data["support"], data["reasoning_key"], *data["applications"],
                 *(item["evidence"] for item in data["facts"]), *data["checks"]]
-    return [data["break"], data["importance"], data["argument"], *([data["assessment"]] if data["assessment"] else [])]
+    from ..case_reports.research.task_comparisons import references as task_references
+    return task_references(data)
 
 
 def context_pins(sheet, kind, data):
@@ -59,7 +60,8 @@ def context_pins(sheet, kind, data):
         support = sheet.rows[data["support"]]["data"]
         refs = [support["inference"], support["expectation"]]
     else:
-        refs = [data["source"], data["target"], claim_of(sheet, data["source"]), claim_of(sheet, data["target"])]
+        from ..case_reports.research.task_comparisons import context_pins as task_pins
+        return task_pins(sheet, data)
     pins = {}
     for ref in refs:
         pins.setdefault(ref["key"], set()).add(ref["version"])
@@ -137,46 +139,8 @@ def validate(sheet, key, kind, data):
                 raise ValueError("The public support derivation must address the formalized source statement")
         return
 
-    sheet._require_kind(data["argument"], "reasoning")
-    sheet._require_kind(data["break"], "expectation_break")
-    for name in ("source", "target"):
-        if sheet.snapshot(data[name])["kind"] != "expectation":
-            raise ValueError("Change endpoints are exact expected-generalizability-bounds snapshots")
-    if sheet.rows[data["break"]]["data"]["expectation"] != data["source"]:
-        raise ValueError("Change must start from the expectation challenged by its break")
-    source_claim, target_claim = claim_of(sheet, data["source"]), claim_of(sheet, data["target"])
-    if source_claim["key"] != target_claim["key"]:
-        raise ValueError("A change retains G's identity and explicitly distinguishes its versions")
-    cursor = data["target"]
-    while cursor != data["source"]:
-        revision = sheet.snapshot(cursor)["data"]["revision"]
-        if revision is None:
-            raise ValueError("Changed expectation must descend from the challenged expectation")
-        cursor = revision["prior"]
-    if data["source"] == data["target"]:
-        raise ValueError("A change needs a different target expectation")
-    sheet._require_kind(data["importance"], "importance")
-    protocol = sheet.rows[data["importance"]]["data"]
-    application = sheet.rows[protocol["application"]]
-    if (application["data"]["inference"] != source_claim["key"] or
-            application["dependencies"][source_claim["key"]] not in {source_claim["version"], target_claim["version"]}):
-        raise ValueError("Importance must measure the selected original/changed G in an affected application")
-    trigger_keys = {ref["key"] for ref in sheet.rows[data["break"]]["data"]["triggers"]}
-    for ref in (data["break"], data["importance"], *trigger_keys):
-        if not sheet._depends_on(data["argument"], ref):
-            raise ValueError("The necessity/usefulness argument must address the break, alteration and actual triggering grounds")
-    previous = sheet.rows.get(key)
-    if previous and any(previous["data"][name] != data[name] for name in ("break", "source")):
-        raise ValueError("A change case retains its original break and expectation")
-    if any(other != key and row["data"]["break"] == data["break"] for other, row in sheet.of_kind("causal_change")):
-        raise ValueError("Update the existing change case; alternative repairs/adapters do not create another break reward")
-    if data["assessment"]:
-        sheet._require_kind(data["assessment"], "repair_assessment")
-        repair = sheet.rows[data["assessment"]]["data"]
-        source_test = sheet.rows[repair["expectation_test"]]["data"]
-        if (repair["break"] != data["break"] or repair["target"] != data["target"] or
-                source_test["expectation"] != data["source"] or source_test["assessment"] != data["importance"]):
-            raise ValueError("Change credit must use its exact break, old/new bounds and executed repair comparison")
+    from ..case_reports.research.task_comparisons import validate as validate_task
+    validate_task(sheet, key, data)
 
 
 
@@ -191,13 +155,14 @@ SUPPORT_UNIT_CREDIT = Fraction(1, 10)
 
 
 SUPPORT_POLICY = {
-    "name": "executed-support-tenth-point-units-v3",
+    "name": "executed-support-and-graduated-task-alterations-v4",
     "hypothesis_unit": "One canonical theory/hypothesis group with executed G dependence and an aligned same-method source formalization inside its expected bounds; contexts and parameterizations do not multiply it",
     "observation_unit": "One identified source observation aligned with a computed prediction in a dependent application inside expected bounds",
     "unit_credit": float(SUPPORT_UNIT_CREDIT),
     "aggregation": "0.1 * (hypothesis_count + observation_count)",
-    "change_factor": "qualifying restored original-scope circumstance mass / original-scope mass",
-    "origin": "User-specified 0.1 points per support unit; restored-mass scaling remains the existing implementation convention",
+    "difference_unit": "One demonstrated original-representation task failure per distinct model/task/circumstance, inside or outside original expected bounds",
+    "change_unit": "For a failed original prediction, max(0, 1 - candidate_error_upper / original_error_lower); retain the best demonstrated improvement per task/circumstance",
+    "origin": "User-specified support units and user-authorized trial of graduated task differences and alterations, 2026-11-10 UTC",
     "meaning": "Counts are support for G as represented, not certainty, empirical probabilities, verified source transcription or statistical independence",
 }
 
@@ -205,8 +170,7 @@ SUPPORT_POLICY = {
 def compile_support(sheet):
     """Compile executed subscoring operands; current executable operands are required."""
     from ..case_reports.research.support_grading import grade_support
-    from ..case_reports.research.repairs import grade_repair
-    from ..case_reports.research.importance import result_key
+    from ..case_reports.research.task_comparisons import grade as grade_task
     claims, expectations, contributions, points, point_dependencies = {}, {}, {}, {}, {}
     check_cache = {}
     hypothesis_units = []
@@ -328,50 +292,19 @@ def compile_support(sheet):
             entry["support"] = float(support)
             entry["support_exact"] = str(support)
 
-    changes, resolutions = {}, [SUPPORT_UNIT_CREDIT]
+    changes, resolutions, compared = {}, [SUPPORT_UNIT_CREDIT], set()
     for key, row in sheet.of_kind("causal_change"):
         data = row["data"]
-        cid = claim_id(claim_of(sheet, data["source"]))
-        support = Fraction(claims.get(cid, {}).get("support_exact", "0"))
-        current, _ = _current_operands(sheet, key, context_pins(sheet, "causal_change", data))
-        assessment = data["assessment"]
-        repair = grade_repair(sheet, assessment) if current and assessment else None
-        factor = repair["qualifying_restored_fraction"] if repair else {"lower": "0", "upper": "1", "value": None}
-        lower = support * Fraction(factor["lower"])
-        upper = support * Fraction(factor["upper"])
-        status = ("stale_operands" if not current else "awaiting_executable_repair_comparison" if repair is None else
-                  "scoped_change_demonstrated" if Fraction(factor["lower"]) > 0 else
-                  "scoped_change_unresolved" if factor["value"] is None else "no_qualifying_change_in_declared_comparison")
-        changes[key] = {"break": data["break"], "source": data["source"], "target": data["target"],
-            "source_claim": cid, "support": float(support), "support_exact": str(support), "importance": data["importance"],
-            "assessment": assessment, "status": status, "factor": factor,
-            "lower": str(lower), "upper": str(upper),
-            "value": str(lower) if factor["value"] is not None else None,
-            "rule": "support_for_original_G * qualifying_restored_original_scope_fraction",
-            "repair_kind": sheet.snapshot(data["target"])["data"]["revision"]["repair_kind"],
-            "current_scope": repair["necessity_scope"] if repair else "No executable repair comparison yet",
-            "qualification": repair["qualification"] if repair else "Pending scientific operands are not a negative verdict",
-            "repair_summary": {name: repair[name] for name in ("masses", "g_changed", "model_changes", "domain_kind")} if repair else None}
-        point = "change:" + key
-        points[point] = str(lower)
-        dependencies = {key, data["break"], data["argument"], data["importance"]}
-        if repair:
-            dependencies.add(assessment)
-            protocols = [repair["source_protocol"], repair["candidate"], *(item["assessment"] for item in repair["alternatives"])]
-            dependencies.update(protocols)
-            dependencies.update((repair["source_test"], repair["target_test"]))
-            for case in repair["cases"]:
-                if case["qualifying_restored"] is True:
-                    dependencies.update(result_key(protocol, case["case_id"]) for protocol in protocols)
-            denominator = Fraction(repair["masses"]["original_in_scope"])
-            if denominator:
-                resolutions.append(SUPPORT_UNIT_CREDIT * min(Fraction(case["weight"]) for case in repair["cases"]) / denominator)
-        # Later support for old G revalues this same change and receives that gain.
-        for kind in ("hypotheses", "facts"):
-            for identity in claims.get(cid, {}).get(kind, {}):
-                support_point = "support:" + _id([cid, kind, identity])
-                dependencies.update(point_dependencies.get(support_point, ()))
-        point_dependencies[point] = dependencies
+        graded = grade_task(sheet, key)
+        changes[key] = graded
+        for point, value in graded["points"].items():
+            comparison = (point, graded["candidate_identity"])
+            if comparison in compared:
+                continue
+            compared.add(comparison)
+            points[point] = str(max(Fraction(value), Fraction(points.get(point, "0"))))
+            resolutions.append(Fraction(value))
+            point_dependencies.setdefault(point, set()).update({key, data["argument"]})
     total = sum((Fraction(value) for value in points.values()), Fraction())
     return {"qualification": "executed_formal_consequences_with_explicit_source_and_model_mapping_limits",
         "policy": SUPPORT_POLICY["name"], "policy_details": deepcopy(SUPPORT_POLICY),
@@ -379,8 +312,8 @@ def compile_support(sheet):
         "changes": changes, "points": points, "total": str(total), "resolution": str(min(resolutions)),
         "point_dependencies": {key: sorted(values) for key, values in point_dependencies.items()},
         "meaning": "Hypothesis support requires executed dependence and an aligned same-method source formalization; fact support requires executed dependence and computed agreement with source observations in expected generalizability bounds. "
-            "Change credit uses restored targets not rescued by compared G-preserving alternatives, within the declared comparison only. "
-            "Later support revalues original G after a break. Each support unit earns the user-specified 0.1 points; these scores are not certainty or statistical independence. "
+            "Task differences and graduated error improvements are calculated from executed comparisons, including extensions beyond original expected bounds. "
+            "Original-G support remains separate and never multiplies a useful alteration to zero. Each support unit earns the user-specified 0.1 points; these scores are not certainty or statistical independence. "
             "Unexecuted, unrepresentable, stale and text-only operands remain explicit pending entries; model verdicts never supply numerical credit."}
 
 
@@ -412,6 +345,6 @@ def record_schema(kind, snapshot_schema):
                       "reasoning_key": {**text, "description": "Exact key of an accessible admitted reasoning record, or one created earlier in this batch. Put argument prose in that record's steps and conclusion; this field contains only its key."},
                       "checks": {"type": "array", "maxItems": 16, "uniqueItems": True, "items": text}}
     else:
-        properties = {"break": text, "source": snapshot_schema, "target": snapshot_schema,
-                      "importance": text, "argument": text, "assessment": text}
+        from ..case_reports.research.task_comparisons import record_schema as task_schema
+        return task_schema(snapshot_schema)
     return {"type": "object", "additionalProperties": False, "required": list(properties), "properties": properties}

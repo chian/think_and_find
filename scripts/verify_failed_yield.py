@@ -64,19 +64,24 @@ def _fixture_run(agent, retrieve, emit):
     from episodic_workflow.case_reports.research.causal_sheet import CausalSheet
     from episodic_workflow.case_reports.research.engine import ResearchLimits, ResearchProviders, ResearchRun
     from episodic_workflow.case_reports.research.records import ResearchResult
-    from episodic_workflow.case_reports.research.theory_language import empty_fragment
 
-    key, question = "fixture:theory", "Verify delivery of failed source outcomes."
+    key, question = "fixture:discovery-goal", "Verify delivery of failed source outcomes."
     sheet = CausalSheet()
     initial = ResearchResult(causal_sheet_updates=(
-        sheet.put(key, "theory_fragment", empty_fragment(key, question)),))
+        sheet.put(key, "discovery_goal", {
+            "question": question, "inputs": [],
+            "answer_schema": {"type": "object", "additionalProperties": False,
+                              "properties": {}, "required": []},
+            "criteria": [{"id": "fixture_source_claim", "question": "Obtain a source-grounded scientific claim.",
+                "check": {"kind": "source_claim", "claim_schema": {
+                    "type": "object", "required": ["kind"], "properties": {
+                        "kind": {"enum": ["equation", "causal_relation", "boundary_condition"]}}}}}]}),))
     providers = ResearchProviders(agent=agent, retrieve=retrieve, trace_event=emit,
         search=lambda query, limit: [{"url": "https://example.invalid/source",
             "title": "Deterministic failed source", "snippet": "Fixture source lead."}])
     run = ResearchRun(providers, ResearchLimits(root_yield_threshold=None,
         root_yield_window=4), question, initial=initial)
-    request = {"reconstruction": key, "focus": [], "requested_kinds": ["equation", "gap"]}
-    return run, question, request
+    return run, question, key
 
 
 def _episode(run, grain, source, commission):
@@ -119,8 +124,7 @@ def _parent_handoff(emit):
             return {"action": "read_source", "option_id": request["candidates"][0]["option_id"],
                 "objective": "Read the fixture source.", "rationale": "Exercise failed Page return.",
                 "working_assessment": _assessment(SearchSource)}
-        return {"action": "integrate_theory", "rationale": "No source-grounded additions available.",
-            "additions": {"entities": {}, "quantities": {}, "statements": {}, "gaps": {}},
+        return {"action": "recall", "references": [],
             "working_assessment": _assessment(SearchSource)}
 
     def retrieve(candidate):
@@ -131,10 +135,10 @@ def _parent_handoff(emit):
         events.append(event)
         emit(event)
 
-    run, question, request = _fixture_run(agent, retrieve, trace)
+    run, question, goal_key = _fixture_run(agent, retrieve, trace)
     source = SearchSource(run, run.initial, query="fixture source")
     episode = _episode(run, "search", source,
-        SearchCommission(question, (), theory_request=request))
+        SearchCommission(question, (), discovery_goal=goal_key))
     record = episode.run(Context(tree=run.tree))
     child = record.unit_records[0].child
     assert child.ended_by == "yield_stop" and child.units_consumed == run.limits.yield_window
@@ -175,10 +179,10 @@ def _transient_recovery(emit):
         return {"action": "recall", "references": [],
                 "working_assessment": _assessment(PageSource)}
 
-    run, question, request = _fixture_run(agent, retrieve, emit)
+    run, question, goal_key = _fixture_run(agent, retrieve, emit)
     source = PageSource(run, run.initial, candidate={"url": "https://example.invalid/source"})
     episode = _episode(run, "page", source,
-        PageCommission(question, (), theory_request=request))
+        PageCommission(question, (), discovery_goal=goal_key))
     record = episode.run(Context(tree=run.tree))
     assert len(retrievals) == 3 and source.document is not None and not source.failure
     assert record.unit_records[0].controller_step.stop is False

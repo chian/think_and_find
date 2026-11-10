@@ -1,49 +1,49 @@
-"""Role-specific commissions and episode-owned job returns."""
+"""Closed commissions for Root's two arms and their concrete child episodes."""
 from dataclasses import dataclass, field
 from copy import deepcopy
 
 from ...method_loop.communication import ReportContract
-
 from .episode_memory import RETURN_FIELDS, job_report
+from .causal_commission import SheetCommission
+
+
+DISCOVERY_GOALS_RETURN = {
+    "discovery_goals": "Exact newly created information goals, their definitions, answer types and executable criteria."}
+
+
+def _scope(question, inputs, snapshots):
+    if not isinstance(question, str) or not question.strip():
+        raise ValueError("A commission needs its scientific question")
+    if not isinstance(inputs, (list, tuple)) or any(not isinstance(key, str) for key in inputs):
+        raise ValueError("Commission inputs are scientific record keys")
+    if not isinstance(snapshots, (list, tuple)) or any(
+            not isinstance(ref, dict) or set(ref) != {"key", "version"} for ref in snapshots):
+        raise ValueError("Commission snapshots identify exact scientific record versions")
 
 
 @dataclass(frozen=True)
-class ScientificAttemptCommission:
-    """One independent start at the shared scientific objective."""
-
+class ScientificCommission:
     question: str
     inputs: tuple[str, ...]
     snapshots: tuple[dict, ...] = ()
 
     def __post_init__(self):
-        if not isinstance(self.question, str) or not self.question.strip():
-            raise ValueError("A scientific attempt needs a starting question")
-        if not isinstance(self.inputs, (list, tuple)) or len(self.inputs) > 8 or any(
-                not isinstance(key, str) for key in self.inputs):
-            raise ValueError("Select at most eight scientific starting inputs")
-        if not isinstance(self.snapshots, (list, tuple)) or len(self.snapshots) > 8 or any(
-                not isinstance(ref, dict) or set(ref) != {"key", "version"} for ref in self.snapshots):
-            raise ValueError("Select at most eight exact historical starting records")
+        _scope(self.question, self.inputs, self.snapshots)
         object.__setattr__(self, "inputs", tuple(dict.fromkeys(self.inputs)))
-        object.__setattr__(self, "snapshots", tuple(dict(ref) for ref in self.snapshots))
+        object.__setattr__(self, "snapshots", tuple(deepcopy(self.snapshots)))
 
     def as_record(self):
-        return {"question": self.question, "inputs": list(self.inputs),
-                "snapshots": list(self.snapshots)}
+        return {"question": self.question, "inputs": list(self.inputs), "snapshots": list(self.snapshots)}
 
     def request(self, sheet):
         return {"question": self.question, "inputs": sheet.view(self.inputs),
                 "historical_inputs": sheet.snapshot_view(self.snapshots)}
 
     def report_contract(self):
-        return ReportContract(decision=self.question,
-            measurements={"scope": self.as_record()},
-            information={**RETURN_FIELDS,
-                "assessment": "Scientific answer about G in each explanatory task, expected generalizability bounds and their revisions, attempted transfers, evidence of failure and its explanation, tested repairs and their costs, qualifications and next uncertainties.",
-                "starting_question": "The starting question of this attempt, retained to avoid repeating the same unproductive start.",
-                "scientific_changes": "Kinds and keys of changed scientific records, excluding source evidence; counts remain visible.",
-                "score_change": "Numeric sum of the five score-component changes relative to this attempt's starting sheet.",
-                "score_component_changes": "Numeric changes for G registration, expected generalizability bounds registration, theory/context application registration, support for G and causal change."})
+        return ReportContract(decision=self.question, measurements={"scope": self.as_record()},
+            information={**RETURN_FIELDS, **DISCOVERY_GOALS_RETURN,
+                "assessment": "Scientific findings, formalized theories/Gs, comparisons and repairs with their evidence and qualifications.",
+                "pending_discovery": "Findings whose scientific correspondence needs further reconstruction or comparison."})
 
 
 @dataclass(frozen=True)
@@ -51,135 +51,144 @@ class LiteratureCommission:
     question: str
     inputs: tuple[str, ...]
     snapshots: tuple[dict, ...] = ()
-    theory_request: dict = field(kw_only=True)
+    discovery_goal: str = field(kw_only=True)
+    assessment_meaning = "Source-grounded information answering the commissioned discovery goal."
+    return_fields = {}
 
     def __post_init__(self):
-        from .theory_runtime import validate_request
-        object.__setattr__(self, "theory_request", validate_request(self.theory_request))
-        if not isinstance(self.question, str) or not self.question.strip():
-            raise ValueError("Literature needs a specific information question")
-        if not isinstance(self.inputs, (list, tuple)) or any(not isinstance(k, str) for k in self.inputs):
-            raise ValueError("Literature inputs must be record keys")
-        if not isinstance(self.snapshots, (list, tuple)) or any(
-            not isinstance(ref, dict) or set(ref) != {"key", "version"} for ref in self.snapshots):
-            raise ValueError("Literature snapshots require exact keys and versions")
+        _scope(self.question, self.inputs, self.snapshots)
+        if not isinstance(self.discovery_goal, str) or not self.discovery_goal.strip():
+            raise ValueError("Acquisition must identify its exact discovery goal")
         object.__setattr__(self, "inputs", tuple(dict.fromkeys(self.inputs)))
-        object.__setattr__(self, "snapshots", tuple(dict(ref) for ref in self.snapshots))
+        object.__setattr__(self, "snapshots", tuple(deepcopy(self.snapshots)))
 
     def as_record(self):
         return {"question": self.question, "inputs": list(self.inputs), "snapshots": list(self.snapshots),
-                "theory_request": deepcopy(self.theory_request)}
+                "discovery_goal": self.discovery_goal}
 
     def request(self, sheet):
-        from .theory_runtime import validate_request
-        validate_request(self.theory_request, sheet)
+        sheet._require_kind(self.discovery_goal, "discovery_goal")
         return {"question": self.question, "inputs": sheet.view(self.inputs),
                 "historical_inputs": sheet.snapshot_view(self.snapshots),
-                "theory_request": deepcopy(self.theory_request)}
+                "discovery_goal": sheet.view([self.discovery_goal])[0]}
 
     def report_contract(self):
-        information = {key: value for key, value in RETURN_FIELDS.items()
-                       if key != "score_component_changes"}
-        information.update(THEORY_RETURN_FIELDS)
         return ReportContract(decision=self.question, measurements={"scope": self.as_record()},
-                              information={**information, "assessment": self.assessment_meaning, **self.return_fields})
+            information={**{key: value for key, value in RETURN_FIELDS.items() if key != "score_component_changes"},
+                         "assessment": self.assessment_meaning, **self.return_fields})
 
 
-THEORY_RETURN_FIELDS = {
-    "theory_fragment": "Exact key/version reference to the shared typed reconstruction; full content is in the scientific sheet and available through recall.",
-    "theory_contributions": "Added component IDs grouped by entity, quantity, statement and gap within the referenced fragment, deduplicated contribution identities, and unresolved validation repair. Component definitions are not copied into the return."}
-
-
-@dataclass(frozen=True)
-class TheoryReconstructionCommission(LiteratureCommission):
-    seed: dict | None = field(kw_only=True)
-    assessment_meaning = "Connected account of the commissioned theory, its mechanisms, assumptions, derivations and substantive gaps."
-    return_fields = {}
-
-    def as_record(self):
-        return {**super().as_record(), "seed": deepcopy(self.seed)}
-
-    def request(self, sheet):
-        from .causal_sheet import CausalSheet
-        key = self.theory_request["reconstruction"]
-        if key not in sheet.rows:
-            if self.seed is None:
-                raise ValueError("A new reconstruction needs the parent's explicit declaration seed")
-            sheet = CausalSheet(sheet.history)
-            sheet.put(key, "theory_fragment", self.seed)
-        elif self.seed is not None:
-            raise ValueError("Continue an existing reconstruction with seed=null; additions use typed integration")
-        return super().request(sheet)
-
-
-class TheoryGapCommission(LiteratureCommission):
-    assessment_meaning = "What focused reading and additional literature establish about the selected reconstruction gaps; unresolved or intentionally unspecified relationships remain explicit."
-    return_fields = {}
-
-
-class TheoryFormatRepairCommission(LiteratureCommission):
-    assessment_meaning = "Corrections of rejected typed theory additions using exact validator errors and supplied evidence."
-    return_fields = {"repair_status": "Host validation outcome, unresolved errors and rejected additions; no scientific truth verdict."}
-
-
-class SearchStrategyCommission(LiteratureCommission):
-    assessment_meaning = "Commission answer across searches, coverage and gaps, qualifications and specific remaining reasoning questions, with selected references."
-    return_fields = {"searches": "Query count and latest literal query; the strategy assessment explains coverage and gaps.",
-                     "reasoning_questions": "The strategy assessment's remaining logical questions for the scientific parent."}
+class DiscoveryCommission(LiteratureCommission):
+    assessment_meaning = "Literal native matches, separately verified scientific requirements, source-grounded findings and pending scientific questions returned to Root."
+    return_fields = {"discovery_goal": "Exact commissioned information goal.",
+                     "request_credit": "Native matches and scientific fulfillment at their declared verification scopes, with repeated request slots deduplicated.",
+                     "scientific_questions": "Pointed unresolved questions for Scientific through Root.",
+                     "searches": "Literal search queries selected for the goal."}
 
 
 class SearchCommission(LiteratureCommission):
-    assessment_meaning = "Answer from this query's examined sources, their comparison and remaining information need, with selected references."
-    return_fields = {"query": "The single literal query whose results this episode selects among.",
-                     "examined_sources": "Sources selected from this query, with retrieved versions when available; a selection alone is not successful reading."}
+    assessment_meaning = "Information supplied by sources examined for one literal query, with remaining criteria."
+    return_fields = {"query": "The literal query whose sources were examined.",
+                     "examined_sources": "Source identities and retrieved versions, with access failures retained."}
 
 
 class PageCommission(LiteratureCommission):
-    assessment_meaning = "Source answer, typed reconstruction additions, source qualifications and remaining reading need."
-    return_fields = {"source": "The retrieved document identity and version.",
-                     "remaining_source": "Unexamined character count and available table count for selecting further reading."}
+    assessment_meaning = "Source information, qualifications and remaining reading relevant to the goal."
+    return_fields = {"source": "Document identity and exact version.",
+                     "remaining_source": "Unexamined document coverage and available tables."}
 
 
 class ReadingCommission(LiteratureCommission):
-    """A processing child returns extraction, without scientific score fields."""
-
     def report_contract(self):
-        information = {name: meaning for name, meaning in RETURN_FIELDS.items()
-                       if name != "score_component_changes"}
-        information.update(
-            assessment=self.assessment_meaning,
-            extracted_records="Source records extracted by this reader with exact versions and provenance.",
-            extraction_credit="Local credit for distinct returned source information; repeated information adds zero.",
-            extraction_errors="Unresolved validator or request errors for Page, including the rejected fields when available.",
-            **self.return_fields)
+        contract = super().report_contract()
         return ReportContract(decision=self.question, measurements={"scope": self.as_record()},
-                              information=information)
+            information={**contract.information,
+                "extracted_records": "Exact source records extracted by this reader.",
+                "extraction_credit": "Local credit for distinct returned source information.",
+                "extraction_errors": "Unresolved extraction errors returned to Page."})
 
 
 class ReportCommission(ReadingCommission):
-    assessment_meaning = "Extracted source information, qualifications and unresolved source links for Page."
-    return_fields = {"source_anchors": "Source identity, version and exact spans retained by this reader; findings and open questions belong to its assessment.",
-                     "document_position": "Document-order cursor and remaining windows; cross-window context stays with the reader."}
+    assessment_meaning = "Document-order source extraction, qualifications and unresolved links."
+    return_fields = {"source_anchors": "Source/version and exact retained spans.",
+                     "document_position": "Cursor and remaining document windows."}
 
 
 class LexicalCommission(ReadingCommission):
-    assessment_meaning = "Extracted passage information, qualifications and unresolved source links for Page."
-    return_fields = {"source_anchors": "Source identity, version and exact spans retained by this reader; findings and open questions belong to its assessment.",
-                     "passage_selection": "Literal source-local query, number of ranked passages considered and remaining."}
+    assessment_meaning = "Query-ranked source passages, qualifications and unresolved links."
+    return_fields = {"source_anchors": "Source/version and exact retained spans.",
+                     "passage_selection": "Literal query, selected passages and remaining coverage."}
 
 
 class TableCommission(ReadingCommission):
     assessment_meaning = "Native table rows, headers and conditions returned to Page."
-    return_fields = {"source_anchors": "Source identity, version and exact spans retained by this reader; findings and open questions belong to its assessment.",
-                     "table": "Native table identity, columns, headers and selected rows with source provenance.",
-                     "table_queries": "Last eight row queries, selected row keys and remaining row count; findings retain headers and exact row anchors."}
+    return_fields = {"source_anchors": "Source/version and exact retained spans.",
+                     "table": "Native table identity, headers, rows and provenance.",
+                     "table_queries": "Row-query outcomes and remaining rows."}
 
 
 class ExtractionRepairCommission(ReadingCommission):
-    assessment_meaning = "Corrected source extraction, retained valid findings, and remaining exact validation errors."
-    return_fields = {
-        "source_anchors": "Source identity, version and exact spans supplied for correction.",
-        "repair_status": "Host extraction validation status, corrected reading memory, rejected output and unresolved errors."}
+    assessment_meaning = "Corrected rejected extraction, valid retained findings and unresolved exact errors."
+    return_fields = {"source_anchors": "Source/version and exact spans supplied for correction.",
+                     "repair_status": "Host validation, rejected fields and remaining errors."}
+
+
+THEORY_RETURN_FIELDS = {
+    "theory_fragment": "Exact key/version reference to the shared typed reconstruction.",
+    "theory_contributions": "Added component IDs and unresolved representation requirements; definitions remain in the scientific sheet."}
+
+
+@dataclass(frozen=True)
+class TheoryReconstructionCommission(ScientificCommission):
+    theory_request: dict = field(kw_only=True)
+    seed: dict | None = field(kw_only=True)
+
+    def __post_init__(self):
+        super().__post_init__()
+        from .theory_runtime import validate_request
+        object.__setattr__(self, "theory_request", validate_request(self.theory_request))
+
+    def as_record(self):
+        return {**super().as_record(), "theory_request": deepcopy(self.theory_request), "seed": deepcopy(self.seed)}
+
+    def request(self, sheet):
+        from .causal_sheet import CausalSheet
+        from .theory_runtime import validate_request
+        key = self.theory_request["reconstruction"]
+        if key not in sheet.rows:
+            if self.seed is None:
+                raise ValueError("A new reconstruction needs its explicit declaration seed")
+            sheet = CausalSheet(sheet.history)
+            sheet.put(key, "theory_fragment", self.seed)
+        elif self.seed is not None:
+            raise ValueError("Existing reconstructions receive additions; continue with seed=null")
+        validate_request(self.theory_request, sheet)
+        return {**super().request(sheet), "theory_request": deepcopy(self.theory_request)}
+
+    def report_contract(self):
+        return ReportContract(decision=self.question, measurements={"scope": self.as_record()},
+            information={**RETURN_FIELDS, **THEORY_RETURN_FIELDS, **DISCOVERY_GOALS_RETURN,
+                         "assessment": "Connected formalized theory, its Gs, conditions, derivations and unresolved scientific premises."})
+
+
+class TheoryRepairCommission(TheoryReconstructionCommission):
+    pass
+
+
+class TheoryComparisonCommission(SheetCommission):
+    def report_contract(self):
+        contract = super().report_contract()
+        return ReportContract(decision=contract.decision, measurements=contract.measurements,
+            information={**contract.information, **DISCOVERY_GOALS_RETURN})
+
+
+@dataclass(frozen=True)
+class TheoryFormatRepairCommission(TheoryReconstructionCommission):
+    def report_contract(self):
+        return ReportContract(decision=self.question, measurements={"scope": self.as_record()},
+            information={**RETURN_FIELDS, **THEORY_RETURN_FIELDS,
+                "assessment": "Corrections of rejected typed theory additions using validator feedback and supplied evidence.",
+                "repair_status": "Host validation outcome and unresolved malformed additions."})
 
 
 def completion_fields(result, completion):
@@ -188,8 +197,4 @@ def completion_fields(result, completion):
 
 
 def literature_report(source, result, completion):
-    return job_report(source, result, completion)
-
-
-def reasoning_report(source, result, completion):
     return job_report(source, result, completion)

@@ -5,8 +5,9 @@ from copy import deepcopy
 from .documents import Span
 from .records import Ledger, ResearchResult, identity
 from .engine import selected_choice
-from .support_observations import observation_identity, observations_schema
-from .source_claims import claim_identity, claims_schema
+from .support_observations import observation_identity, observations_schema, validate_observation_fields
+from .source_claims import claim_identity, claims_schema, validate_claim_fields
+from . import source_anchors
 from ...task_executors._http import ProviderError
 from ...task_executors.evidence_extraction.argo import ModelOutputError
 
@@ -91,7 +92,7 @@ def _apply_corrections(base, response, issues):
 
 
 def read_source_window(reader, spans, question):
-    from .theory_runtime import reader_theory_context
+    from .discovery_goals import reader_extraction_context
 
     allowed = {}
     for span in spans:
@@ -101,13 +102,15 @@ def read_source_window(reader, spans, question):
             allowed[key] = Span(key, span.start + offset, span.start + offset + len(text), text)
     allowed.update({anchor["span"]: reader.seen_spans[anchor["span"]] for anchor in reader.memory["anchors"]})
     first_call = reader.run.model_calls + 1
+    anchor_context = source_anchors.context(reader, allowed)
     fields = {"span": {"enum": list(allowed)},
         "study_id": {"type": "string", "minLength": 1},
         "finding": {"type": "string", "minLength": 1},
         "measurements": {"type": "object", "additionalProperties": False,
             "required": ["observations", "claims"],
-            "properties": {"observations": observations_schema(),
-                           "claims": claims_schema(source=reader.document.source)}}}
+            "properties": {"observations": observations_schema(source=reader.document.source),
+                           "claims": claims_schema(source=reader.document.source)}},
+        "source_anchors": source_anchors.input_schema(allowed, anchor_context["units"])}
     memory_schema = {"type": "object", "additionalProperties": False,
         "required": ["summary", "unresolved_links", "anchors", "retained_evidence"], "properties": {
             "summary": {"type": "string"},
@@ -123,24 +126,48 @@ def read_source_window(reader, spans, question):
         request = {"operation": "extract_causal_evidence", "source": reader.document.source,
             "source_version": reader.document.sha256, "question": question,
             "task": reader.instructions,
-            "theory_extraction": reader_theory_context(reader),
-            "passages": {key: span.as_record() for key, span in allowed.items()},
+            "extraction_request": reader_extraction_context(reader, question),
+            "passages": source_anchors.passages(reader, allowed),
+            "source_anchor_context": anchor_context,
             "reading_memory": reader.memory,
             "retained_records": [reader.ledger.causal_sheet.snapshot(ref)
                                  for ref in reader.memory["retained_evidence"]],
             "instruction": (
                 "Extract source information answering the reading question. Return findings, native measurements, "
-                "source claims, exact span references and source-specific qualifications. Page interprets their "
-                "scientific significance. Do not formulate cross-study arguments, research scopes or grading needs. "
-                "Use theory_extraction as the parent's extraction request: preserve its entity names, quantity "
-                "meanings and vocabulary when mapping source wording, and seek the requested kinds of components. "
+                "source claims, exact span references and source-specific qualifications. Page aggregates the "
+                "source answer; Scientific owns theory reconstruction. Do not formulate cross-study arguments, "
+                "research scopes or grading needs. Use extraction_request for the acquisition information need "
+                "and native claim/observation definitions. Preserve source-native meanings and vocabulary. "
                 "This request is context, not source evidence. Return source observations and claims with exact "
-                "provenance; Page and its parents own reconstruction of the theory and identification of its gaps. "
+                "provenance; Discovery assembles its answer and Scientific reconstructs the theory. "
                 "Distinguish measured, simulated and proposed results. Do not invent values, source identifiers, "
                 "equations, units or uncertainty. Return no findings when the passage supplies no requested information. "
+                "Put bounded absence-of-information reports, uninspected-source warnings and unrelated citation or "
+                "recommendation leads in reading_memory, not findings. Return findings=[] when that is all the "
+                "passage supplies. Source-reported negative results, definitions, assumptions, limitations and "
+                "requested provenance of the retrieved work remain source information; anchor only what answers "
+                "the reading question. "
                 "study_id identifies the source study; use its URL when studies cannot be distinguished. Reuse source-native "
                 "identifiers and precise locators across repeated extractions. Preserve native table headings and units. "
-                "Observations are measurements, not metadata. Conditions may be text; structured condition maps require "
+                "Observation source_id is optional: use the source's own full observation ID, or an empty string plus "
+                "a precise locator for that quantity and condition. Never put the document URL or study ID there. "
+                "Each finding includes source_anchors maps matching its native observation/claim selectors. "
+                "Use exact quotes from the unit-labeled passage fragments. A statement quote lies inside one host "
+                "unit. Observations also require result={span,unit,quote,occurrence}: quote only the exact reported "
+                "value, without units, uncertainty or context, and select its 1-based occurrence within the selected "
+                "unit's supplied portion. Distinct equal-valued cells select their own source positions. Text values "
+                "copy the source wording; Boolean values require literal true/false source values. Anchor the precise quantity/subject and source conditions separately; avoid broad quotes "
+                "containing multiple quantities or conditions. Native fields retain the source meanings; anchor "
+                "sidecars supply source-occurrence identity when the source has no native ID. Locator prose and "
+                "paraphrasing cannot create a new occurrence. Prose-only findings need finding anchors. "
+                "Separate reported results require their own result occurrences and quantity anchors. Adding or "
+                "dropping descriptive condition clauses does not make an existing result a new observation. "
+                "Each observation declares kind: measurement, fit_parameter, simulation_input, simulation_output, "
+                "model_prediction, reported_property or unknown. A fitted saturation rate is fit_parameter, never "
+                "an observed flux at a finite substrate concentration. Use the commissioning parent's defined "
+                "quantity vocabulary and condition keys/units when the source establishes that correspondence; "
+                "retain original wording in exact source anchors. Unknown correspondence must remain unknown. "
+                "Conditions may be text; structured condition maps require "
                 "Python-identifier names and numeric or rational values. Put categorical conditions in text. "
                 "Use not reported for absent uncertainty; reported intervals use kind=interval, lower and upper. "
                 "Claims use kind=equation with relation = and defined symbols; causal_relation uses causes, increases, "
@@ -184,10 +211,12 @@ def read_source_window(reader, spans, question):
             raise ValueError("findings must be an array")
         working = Ledger(reader.ledger.result())
         updates, diagnostics = [], []
+        known = source_anchors.registry(reader)
         for index, item in enumerate(findings):
             try:
-                if not isinstance(item, dict) or set(item) != set(fields):
-                    raise ValueError("Finding requires exactly span, study_id, finding and measurements")
+                if (not isinstance(item, dict) or set(item) - set(fields)
+                        or set(fields) - set(item) - {"source_anchors"}):
+                    raise ValueError("Finding requires exactly span, study_id, finding, measurements and source_anchors")
                 span = allowed[selected_choice(item["span"], allowed, "source span")]
                 native = item["measurements"]
                 if not isinstance(native, dict) or set(native) != {"observations", "claims"}:
@@ -197,16 +226,91 @@ def read_source_window(reader, spans, question):
                     "study_id": item["study_id"], "finding": item["finding"],
                     "measurements": {"native": native, "quote": span.text,
                         "source_version": reader.document.sha256, "question": question}}
-                for name, validate in (("observations", observation_identity), ("claims", claim_identity)):
+                sidecar = {"observations": {}, "claims": {}, "finding": [], "pending": False}
+                raw_anchors = item.get("source_anchors")
+                if not isinstance(raw_anchors, dict) or set(raw_anchors) != {"observations", "claims", "finding"}:
+                    errors.append({"path": f"findings[{index}].source_anchors",
+                        "path_segments": ["findings", index, "source_anchors"],
+                        "why": "Source anchors require exactly observations, claims and finding maps/array",
+                        "rejected": deepcopy(raw_anchors)})
+                    raw_anchors = {"observations": {}, "claims": {}, "finding": []}
+                    sidecar["pending"] = True
+                trial_known = deepcopy(known)
+                for name, validate in (("observations", validate_observation_fields), ("claims", validate_claim_fields)):
                     if not isinstance(native[name], dict):
                         raise ValueError(f"{name} must be a named map")
+                    rejected = []
                     for selector in list(native[name]):
                         try:
                             validate(data, selector)
                         except (ValueError, TypeError, KeyError) as exc:
                             errors.append({"path": f"findings[{index}].measurements.{name}.{selector}",
                                 "path_segments": ["findings", index, "measurements", name, selector],
-                                "why": str(exc), "rejected": native[name].pop(selector)})
+                                "why": str(exc), "rejected": deepcopy(native[name][selector])})
+                            rejected.append(selector)
+                    for selector in rejected:
+                        del native[name][selector]
+                    pending = []
+                    for selector in list(native[name]):
+                        try:
+                            supplied = raw_anchors[name]
+                            if not isinstance(supplied, dict):
+                                raise source_anchors.SourceAnchorError([name], "Source anchors must be a selector map")
+                            entry_known = deepcopy(trial_known)
+                            entry = source_anchors.resolve_entry(reader, allowed, name, selector,
+                                supplied.get(selector), entry_known)
+                            if name == "observations":
+                                try:
+                                    source_anchors.validate_result_value(native[name][selector]["value"], entry["result"])
+                                except ValueError as exc:
+                                    errors.append({"path": f"findings[{index}].measurements.{name}.{selector}",
+                                        "path_segments": ["findings", index, "measurements", name, selector],
+                                        "why": str(exc), "rejected": deepcopy(native[name][selector])})
+                                    pending.append(selector)
+                                    continue
+                            sidecar[name][selector] = entry
+                            trial_known = entry_known
+                        except source_anchors.SourceAnchorError as exc:
+                            errors.append({"path": f"findings[{index}].source_anchors." + ".".join(map(str, exc.path)),
+                                "path_segments": ["findings", index, "source_anchors", *exc.path],
+                                "why": str(exc), "rejected": deepcopy(raw_anchors.get(name))})
+                            pending.append(selector)
+                    for selector in pending:
+                        del native[name][selector]
+                    sidecar["pending"] |= bool(pending or rejected)
+                try:
+                    sidecar["finding"] = source_anchors.resolve_finding(reader, allowed, raw_anchors["finding"], trial_known)
+                    if item["finding"].strip() and not any(native.values()) and not sidecar["finding"] and not sidecar["pending"]:
+                        raise source_anchors.SourceAnchorError(["finding"], "A prose-only finding needs an exact source unit anchor")
+                except source_anchors.SourceAnchorError as exc:
+                    errors.append({"path": f"findings[{index}].source_anchors." + ".".join(map(str, exc.path)),
+                        "path_segments": ["findings", index, "source_anchors", *exc.path],
+                        "why": str(exc), "rejected": deepcopy(raw_anchors.get("finding"))})
+                    sidecar["pending"] = True
+                data["measurements"]["source_anchors"] = source_anchors.finalize(reader, allowed, sidecar)
+                # Two differently described quantities/conditions assigned the same
+                # no-ID occurrence in this response reveal ambiguous sidecars, not
+                # permission to rewrite accepted scientific measurement fields.
+                seen, collisions = {}, set()
+                for selector, observation in native["observations"].items():
+                    if observation["source_id"].strip():
+                        continue
+                    ident = observation_identity(data, selector)[0]
+                    scope = (" ".join(observation["quantity"].split()), observation["conditions"])
+                    if ident in seen and seen[ident][1] != scope:
+                        collisions.update((selector, seen[ident][0]))
+                    else:
+                        seen[ident] = (selector, scope)
+                for selector in collisions:
+                    errors.append({"path": f"findings[{index}].source_anchors.observations.{selector}",
+                        "path_segments": ["findings", index, "source_anchors", "observations", selector],
+                        "why": "Different native quantities/conditions share one anchored result. Select the actual distinct result occurrence and quantity; descriptive condition changes cannot create another observation. Accepted native fields remain fixed.",
+                        "rejected": deepcopy(raw_anchors["observations"].get(selector))})
+                    del native["observations"][selector]
+                    del sidecar["observations"][selector]
+                    sidecar["pending"] = True
+                data["measurements"]["source_anchors"] = source_anchors.finalize(reader, allowed, sidecar)
+                source_anchors.retain_roles(known, sidecar)
                 key = "evidence:" + identity([reader.document.source, reader.document.sha256,
                     span.start, span.text, item["study_id"], item["finding"]])[:24]
                 updates.append(working.causal_sheet.put(key, "evidence", data))

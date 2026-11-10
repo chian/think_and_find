@@ -125,22 +125,20 @@ an arbitrary new measurement label is not an additional observation. Use typed n
 with source-established observation IDs or precise source locators; units and uncertainty
 are attributes, not additional facts. Keep unresolved hypothesis identities pending. These counts are support
 for G as it is, not certainty or a probability. Provisional bounds alone create no support.
-For a necessary useful change, record one causal_change for the existing expectation_break,
-exact source/target expectation snapshots, its importance protocol and an argument explaining
-necessity, useful consequences, and why the measured alteration represents this change.
-Model opinions never certify these operands; executable checks must establish their particular formal claims. Reuse the same change case as support grows.
-The host compiles executed support operands and a scoped restored-prediction fraction,
-including support added after the break. These explicit implementation conventions are
-reported in policy_details; raw changed-answer importance remains a separate quantity. Alternative descriptions, repairs and adapters do not create more breaks.
-The present causal-change calculator measures a narrower result: restored predictions that
-require the original executable G relation to change among the compared alternatives.
-It does not grade information costs, usefulness across different tasks, or an explained
-failure without a successful replacement. A fitting G-preserving alternative blocks that
-numeric result even if its practical costs remain unresolved. A zero or unavailable change
-score is therefore not a scientific refutation of a pragmatic transfer failure. Keep the
-evidence and limitations in the scientific answer; do not manufacture a sign reversal or
-Boolean proxy merely to fit the calculator. Fixed quantities, circumstances and targets
-within one numerical test protect that test; they do not constrain all discovery candidates.
+For graduated useful alterations, record a causal_change task comparison: exact inference
+and original expectation snapshots, source-bound original/candidate/reference models,
+one defined task with quantity/units/accuracy tolerances, a fixed circumstance domain,
+scope membership (empty when unquantified), a public reasoning argument and limitations.
+Use scientific_tool compare_tasks to calculate the selected declared cases. A demonstrated
+failure earns a deduplicated applicability-difference contribution; reducing its task error
+earns gradual additional credit. Original-G support stays separate and cannot zero an
+alteration. Useful extensions beyond the original expected generalizability bounds count;
+full repair, a relation reversal and failed G-preserving alternatives are not prerequisites.
+Keep losses and nonrepresented observables explicit rather than treating one successful task
+as repair of every level. Equations and ODE event calculations are executed numerical model
+consequences, not empirical validation or automatically rigorous error bounds. Public
+analytical arguments without an executed comparison remain scientific reasoning, not a
+model-issued score. Repeated cases and relabeled alternatives do not mint additional credit.
 Never enter a numerical support grade or change score. Retain repair_kind without inventing
 a multiplier for its label. Parent transcripts and recursive child traces are not inputs or deliverables.
 """
@@ -244,6 +242,9 @@ def record_schema(kind):
     if kind == "theory_fragment":
         from .theory_language import fragment_schema
         return fragment_schema()
+    if kind == "examination":
+        from .examinations import record_schema as examination_schema
+        return examination_schema()
     if kind in GRADING_FIELDS:
         return module_for(kind).record_schema(SNAPSHOT_SCHEMA)
     if kind in {"support_contribution", "causal_change"}:

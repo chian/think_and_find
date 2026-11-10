@@ -21,7 +21,8 @@ class ExtractionRepairSource(ReadingSource):
         "response only when the host declares a root target after an original parse or top-level shape failure. "
         "Do not invent source information to satisfy the schema. Preserve source-specific "
         "qualifications and report unresolved defects. The commissioning reader owns further passage selection; "
-        "Page and its parents own theory reconstruction. Credit measures newly returned source information. "
+        "Page and its acquisition parents own source coverage; Scientific owns theory reconstruction. "
+        "Credit measures newly returned source information. "
         "The numerical controller decides whether another corrective attempt is worthwhile.")
     credit_columns = ("extraction_repair_gain",)
 

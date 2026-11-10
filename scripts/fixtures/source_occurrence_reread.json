@@ -1,0 +1,515 @@
+[
+  {
+    "call": 8,
+    "request": {
+      "source": "https://www.journals.uchicago.edu/doi/full/10.1086/516655",
+      "source_version": "c9f9bbaeeb6ee994612d854cc44abea2116a78560fd1d13f765d05c509183800",
+      "question": "Extract exact passages reporting actual algae–zooplankton experiments, including light versus nutrient treatments, native population outcomes, units and uncertainty if supplied, and primary experimental citations. Distinguish these observations from numerical model results. Also retain explicit statements about whether stoichiometric model comparisons were fitted or independently tested and whether rigorous empirical tests are lacking.",
+      "passages": {
+        "chunk:21:range:67590:71151:part:0": {
+          "key": "chunk:21:range:67590:71151:part:0",
+          "start": 67590,
+          "end": 68390,
+          "text": "The analyses suggest that unusual dynamics described from other stoichiometric algae‐grazer models (multiple equilibria, sign changes of light enrichment effects on stability, the paradox of energy enrichment) are also possible in my model but should be restricted to the low end of nutrient supplies _R_ tot. The parameter space producing specific system behaviors can be characterized by the “realized” total nutrient concentration in the water column, that is, total nutrients minus nutrients in sediments (𝑅tot−𝑅s/𝑧=𝑅+𝑄⁢𝐴+𝑞⁢𝐺Rtot−Rs/z=R+Q⁢A+q⁢G). This quantity is readily measured as total phosphorus (TP) and routinely used to characterize lake nutrient status. The numerical examples ( [fig. 5](https://www.journals.uchicago.edu/doi/full/10.1086/516655#fg5); [app. C](https://www.journals.uchic"
+        },
+        "chunk:21:range:67590:71151:part:800": {
+          "key": "chunk:21:range:67590:71151:part:800",
+          "start": 68390,
+          "end": 69190,
+          "text": "ago.edu/doi/full/10.1086/516655#appendix-3)) predict that the paradox of energy enrichment should be restricted to values of <0.15 μM realized TP in the water column at equilibrium. This is at the very low end of TP concentrations of real lakes. In contrast, the stoichiometric plant‐herbivore model of Loladze et al. ( [2000](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf38)), which emulates light supply as an algal carrying capacity, produces the paradox of energy enrichment over a more than 70‐fold larger nutrient range (beyond 10 μM P). This quantitative discrepancy is unlikely to be a matter of parameter choices. Using Loladze et al.’s grazer parameters in my model does not significantly extend the parameter space of the paradox of energy enrichment toward "
+        },
+        "chunk:21:range:67590:71151:part:1600": {
+          "key": "chunk:21:range:67590:71151:part:1600",
+          "start": 69190,
+          "end": 69990,
+          "text": "higher nutrient levels. Rather, the quantitative differences in model predictions seem to be related to structural differences in how algal growth is modeled. This suggests that a mechanistic representation of light supply and light use strongly constrains the nutrient supply space in which unusual algae‐grazer dynamics are to be expected.\n\n### Empirical Patterns\n\nWhat is the empirical evidence? Traditionally, enrichment has been equated with nutrient fertilization, and there is a wealth of data relating plant and herbivore biomass to nutrient supply (Sarnelle [1992](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf58); Mazumder [1994](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf41); Leibold et al. [1997](https://www.journals.uchic"
+        },
+        "chunk:21:range:67590:71151:part:2400": {
+          "key": "chunk:21:range:67590:71151:part:2400",
+          "start": 69990,
+          "end": 70790,
+          "text": "ago.edu/doi/full/10.1086/516655#core-collateral-rf37)). Nutrient enrichment experiments with phytoplankton‐ _Daphnia_ systems have frequently supported model predictions on equilibrium biomasses but not on stability; that is, with nutrient enrichment, _Daphnia_ biomass increased and algal biomass often remained constant, but persistent oscillations have only rarely been observed (Murdoch et al. [1998](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf45); McCauley et al. [1999](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf43)). My analyses suggest that stoichiometric constraints cannot explain the lack of population cycles at high nutrient supply. An increase in the proportion of mechanically inedible algae with nutrient enrichment s"
+        },
+        "chunk:21:range:67590:71151:part:3200": {
+          "key": "chunk:21:range:67590:71151:part:3200",
+          "start": 70790,
+          "end": 71151,
+          "text": "eems to be a more likely, though not universal, explanation (Leibold [1989](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf36); Murdoch et al. [1998](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf45); Vos et al. [2004](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf69)).\n\n"
+        },
+        "chunk:22:range:71151:74817:part:0": {
+          "key": "chunk:22:range:71151:74817:part:0",
+          "start": 71151,
+          "end": 71951,
+          "text": "Although the importance of nutrient stoichiometry to plant‐herbivore interactions has been widely perceived, data relating plant and herbivore biomass to light enrichment are scarce. Three experiments have been performed with _Daphnia_‐phytoplankton systems in which irradiance was manipulated at two levels (30–60 vs. 300–400 μmol photons m−2 s−1) in shallow water columns (<1–4 m). Two studies at very low nutrient levels (<0.15 μM seston P at termination) reported negative effects of light enrichment on _Daphnia_ population growth (Sterner et al. [1998](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf62); Urabe et al. [2002 _b_](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf66)). Because of their short duration (≤32 days), these stud"
+        },
+        "chunk:22:range:71151:74817:part:800": {
+          "key": "chunk:22:range:71151:74817:part:800",
+          "start": 71951,
+          "end": 72751,
+          "text": "ies captured only transient dynamics, making them difficult to compare to asymptotic model behaviors. Long transients were indeed observed in the third experiment at a nutrient level of 0.5 μM TP, where light enrichment delayed the buildup of a high _Daphnia_ density by 30 days, compared to a low light treatment (Urabe et al. [2002 _a_](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf65)). Long transients occurred also in an experiment at 0.33 μM TP, where the time for _Daphnia pulex_ to reach a peak correlated positively with initial algal density and could last >90 days if initial algal density was high (Nelson et al. [2001](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf47)). At similar nutrient levels, the same phenomena occur in"
+        },
+        "chunk:22:range:71151:74817:part:1600": {
+          "key": "chunk:22:range:71151:74817:part:1600",
+          "start": 72751,
+          "end": 73551,
+          "text": " my model, where the time for a grazer inoculum to reach high densities increases with light enrichment and may last >200 days, if the starting condition is a high density of low‐quality algae. The dependence of transient dynamics on light and nutrient supply is, however, complex and is treated elsewhere (C. Jäger, S. Diehl, C. Matauschek, C. Klausmeier, and H. Stibor, unpublished manuscript).\n\nUrabe et al. ( [2002 _b_](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf66)) observed negative effects of light enrichment on _Daphnia_ growth only at very low nutrient levels (<0.1 μM particulate P). Fertilization with as little as 0.1 μM P turned the effect of light enrichment into a positive one. Jäger and coworkers manipulated mixing depth over a range of 1–12 m at "
+        },
+        "chunk:22:range:71151:74817:part:2400": {
+          "key": "chunk:22:range:71151:74817:part:2400",
+          "start": 73551,
+          "end": 74351,
+          "text": "a nutrient level of 0.3 μM TP. They found that (transient) biomass peaks of _Daphnia hyalina_ were highest at the shallowest mixing depths (C. Jäger, S. Diehl, C. Matauschek, C. Klausmeier, and H. Stibor, unpublished manuscript). The data thus seem to support the model expectation that the paradox of energy enrichment requires very low nutrient supply. Evidence of nutrient limitation of _Daphnia_ has, however, been reported from lakes exceeding 2.5 μM TP (DeMott and Gulati [1999](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf13)). In these lakes, planktivorous fish imposed high mortality on _Daphnia_. Grazers must counter increased mortality by increased growth, which requires increased food density and/or quality. In the simplified model, increased mortality "
+        },
+        "chunk:23:range:74817:78632:part:800": {
+          "key": "chunk:23:range:74817:78632:part:800",
+          "start": 75617,
+          "end": 76417,
+          "text": "collateral-rf31), [2005](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf32)). Together, these data suggest that phytoplankton and zooplankton biomasses increase with light enrichment across the full range of water column depths, which seems to contradict the more discriminating picture predicted by my model. Note, however, that multiple regressions across large ranges of mixing depth and nutrient supply may be insensitive to deviant patterns occurring in very limited parameter space, such as the paradox of energy enrichment at low nutrient supply. Also, producer‐grazer dynamics in stratified water columns may not be adequately captured by my model, which assumes sediments to be in contact with the mixed water column. As a first cut, one might approximate the ef"
+        },
+        "chunk:23:range:74817:78632:part:2400": {
+          "key": "chunk:23:range:74817:78632:part:2400",
+          "start": 77217,
+          "end": 78017,
+          "text": "ived from an algae‐grazer model that explicitly accounts for the physical structure of the water column.\n\nIf empirical and theoretical research are to mutually guide each other, realism and testability should be one goal of modeling. My model analyses suggest that a mechanistic treatment of light supply and light use is necessary to properly delineate the parameter space in which particular algae‐grazer dynamics should be observed. Because light and nutrient supply are expressed in readily measurable units, the model predictions lend themselves to experimental testing. A version of the model excluding grazers has already been successfully tested in a field enclosure experiment (Diehl et al. [2005](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf18)). It should b"
+        },
+        "chunk:23:range:74817:78632:part:3200": {
+          "key": "chunk:23:range:74817:78632:part:3200",
+          "start": 78017,
+          "end": 78632,
+          "text": "e pointed out, however, that the asymptotic model behaviors described in this article are sometimes approached first after a period of transient dynamics exceeding the length of a growing season in a temperate lake. In such cases, it may be neither possible nor relevant to run experiments over sufficiently long periods to approach long‐term dynamics (Hastings [2004](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf26)). Asymptotic attractors may then be of interest for their influence on transient dynamics rather than as predicted endpoints of system behavior.\n\n## Acknowledgments\n\n"
+        }
+      }
+    },
+    "response": {
+      "findings": [
+        {
+          "span": "chunk:21:range:67590:71151:part:2400",
+          "study_id": "https://www.journals.uchicago.edu/doi/full/10.1086/516655",
+          "finding": "Exact passage: “Nutrient enrichment experiments with phytoplankton‐ _Daphnia_ systems have frequently supported model predictions on equilibrium biomasses but not on stability; that is, with nutrient enrichment, _Daphnia_ biomass increased and algal biomass often remained constant, but persistent oscillations have only rarely been observed (Murdoch et al. [1998]; McCauley et al. [1999]).” The cited experimental reports are Murdoch et al. (1998), #core-collateral-rf45, and McCauley et al. (1999), #core-collateral-rf43. This is a summary of actual nutrient-enrichment experiments, not numerical model output. The passage supplies no nutrient doses, numerical biomass measurements, biomass units, oscillation amplitudes, or uncertainty. It reports agreement on equilibrium biomass and disagreement on stability; it does not specify whether the model comparisons were fitted or independently tested.",
+          "measurements": {
+            "observations": {
+              "nutrient_enrichment_daphnia_biomass": {
+                "source_id": "",
+                "locator": "chunk:21:range:67590:71151:part:2400, sentence beginning “Nutrient enrichment experiments”; clause “with nutrient enrichment, _Daphnia_ biomass increased”",
+                "quantity": "_Daphnia_ biomass",
+                "conditions": "Nutrient enrichment experiments with phytoplankton‐_Daphnia_ systems; Murdoch et al. (1998) and McCauley et al. (1999); nutrient doses not reported in this passage",
+                "value": "increased",
+                "units": "not reported; qualitative biomass outcome",
+                "uncertainty": "not reported",
+                "kind": "measurement"
+              },
+              "nutrient_enrichment_algal_biomass": {
+                "source_id": "",
+                "locator": "chunk:21:range:67590:71151:part:2400, sentence beginning “Nutrient enrichment experiments”; clause “algal biomass often remained constant”",
+                "quantity": "algal biomass",
+                "conditions": "Nutrient enrichment experiments with phytoplankton‐_Daphnia_ systems; Murdoch et al. (1998) and McCauley et al. (1999); nutrient doses not reported in this passage",
+                "value": "often remained constant",
+                "units": "not reported; qualitative biomass outcome",
+                "uncertainty": "not reported",
+                "kind": "measurement"
+              },
+              "nutrient_enrichment_persistent_oscillations": {
+                "source_id": "",
+                "locator": "chunk:21:range:67590:71151:part:2400, sentence beginning “Nutrient enrichment experiments”; clause “persistent oscillations have only rarely been observed”",
+                "quantity": "occurrence of persistent oscillations",
+                "conditions": "Nutrient enrichment experiments with phytoplankton‐_Daphnia_ systems; Murdoch et al. (1998) and McCauley et al. (1999); nutrient doses not reported in this passage",
+                "value": "only rarely observed",
+                "units": "not reported; qualitative occurrence",
+                "uncertainty": "not reported",
+                "kind": "measurement"
+              }
+            },
+            "claims": {}
+          }
+        },
+        {
+          "span": "chunk:21:range:67590:71151:part:2400",
+          "study_id": "https://www.journals.uchicago.edu/doi/full/10.1086/516655",
+          "finding": "Exact passages: “My analyses suggest that stoichiometric constraints cannot explain the lack of population cycles at high nutrient supply.” “An increase in the proportion of mechanically inedible algae with nutrient enrichment seems to be a more likely, though not universal, explanation (Leibold [1989]; Murdoch et al. [1998]; Vos et al. [2004]).” The second sentence continues into part:3200. These are the author's interpretation and a qualified proposed explanation, not additional experimental measurements. Citation links are #core-collateral-rf36, #core-collateral-rf45, and #core-collateral-rf69, respectively.",
+          "measurements": {
+            "observations": {},
+            "claims": {}
+          }
+        },
+        {
+          "span": "chunk:21:range:67590:71151:part:800",
+          "study_id": "https://www.journals.uchicago.edu/doi/full/10.1086/516655",
+          "finding": "The sentence beginning in part:0 states: “The numerical examples ([fig. 5]; [app. C]) predict that the paradox of energy enrichment should be restricted to values of <0.15 μM realized TP in the water column at equilibrium.” The comparison then states: “In contrast, the stoichiometric plant‐herbivore model of Loladze et al. ([2000]), which emulates light supply as an algal carrying capacity, produces the paradox of energy enrichment over a more than 70‐fold larger nutrient range (beyond 10 μM P).” These nutrient ranges are numerical model results, not experimentally measured thresholds. Loladze et al. (2000) is linked at #core-collateral-rf38. The source reports: “Using Loladze et al.’s grazer parameters in my model does not significantly extend the parameter space of the paradox of energy enrichment toward higher nutrient levels.” It attributes the discrepancy tentatively to structural differences in algal growth modeling rather than parameter choices. This parameter-substitution comparison is not stated to be a fitted or independent empirical test.",
+          "measurements": {
+            "observations": {},
+            "claims": {
+              "numerical_energy_enrichment_boundary": {
+                "kind": "boundary_condition",
+                "statement_id": "",
+                "locator": "chunk:21:range:67590:71151:part:0 final sentence continuing into part:800; numerical examples in fig. 5 and app. C",
+                "left": "the paradox of energy enrichment",
+                "relation": "requires",
+                "right": "<0.15 μM realized TP in the water column at equilibrium",
+                "conditions": "Prediction of the source's numerical examples (fig. 5; app. C), not an empirical threshold; realized total nutrients are total nutrients minus nutrients in sediments",
+                "symbols": {}
+              }
+            }
+          }
+        }
+      ],
+      "reading_memory": {
+        "summary": "Previously retained experimental evidence remains in the eight referenced source records: low-nutrient light effects in Sterner et al. (1998) and Urabe et al. (2002 b); a 30-day light-induced delay at 0.5 μM TP in Urabe et al. (2002 a); >90-day peak timing at high initial algae and 0.33 μM TP in Nelson et al. (2001); reversal of a negative light effect by 0.1 μM P fertilization in Urabe et al. (2002 b); and highest transient D. hyalina biomass peaks at shallowest mixing depths in Jäger and coworkers' unpublished experiment at 0.3 μM TP. Previously retained qualifications distinguish the >200-day model transient from observations, identify successful testing only of a grazer-excluding model version, and describe long-transient and stratified-water-column limitations. Newly extracted nutrient-enrichment experiments, cited to Murdoch et al. (1998) and McCauley et al. (1999), report increased Daphnia biomass, often constant algal biomass, and only rare persistent oscillations; no treatment doses, numerical biomass values, or uncertainty are supplied. The author says stoichiometric constraints cannot explain absent cycles at high nutrient supply and proposes increased mechanically inedible algae as a more likely but nonuniversal explanation. Numerical examples restrict the paradox of energy enrichment to <0.15 μM realized equilibrium TP, whereas the Loladze et al. (2000) model produces it beyond 10 μM P; these are model predictions, not measured thresholds. Substitution of Loladze et al.'s grazer parameters reportedly does not significantly extend the source model's nutrient range. No supplied passage explicitly says comparisons were fitted or independently tested, or that rigorous empirical tests are lacking. The rare-oscillation observation does not itself establish a causal nutrient-enrichment effect on oscillation amplitude or stability.",
+        "unresolved_links": [
+          "Primary experimental reports remain unavailable: Sterner et al. (1998), #core-collateral-rf62; Urabe et al. (2002 b), #core-collateral-rf66; Urabe et al. (2002 a), #core-collateral-rf65; Nelson et al. (2001), #core-collateral-rf47.",
+          "Murdoch et al. (1998), #core-collateral-rf45, and McCauley et al. (1999), #core-collateral-rf43, are cited for nutrient-enrichment population outcomes; individual experimental treatments, measurements, and attribution of each outcome to each report are not supplied.",
+          "The C. Jäger, S. Diehl, C. Matauschek, C. Klausmeier, and H. Stibor manuscript is explicitly unpublished; underlying experimental data and model analysis are not supplied.",
+          "Diehl et al. (2005), #core-collateral-rf18, is cited for successful field-enclosure testing of the grazer-excluding version; experimental details and whether fitting or independent testing was involved are not supplied.",
+          "Whether stoichiometric comparisons were fitted or independently tested, and any explicit statement that rigorous empirical tests are lacking, remain unresolved.",
+          "Fig. 5 and appendix C underlie the source's numerical nutrient boundary; Loladze et al. (2000), #core-collateral-rf38, underlies the contrasting model range."
+        ],
+        "anchors": [
+          {
+            "span": "chunk:22:range:71151:74817:part:0"
+          },
+          {
+            "span": "chunk:22:range:71151:74817:part:800"
+          },
+          {
+            "span": "chunk:22:range:71151:74817:part:1600"
+          },
+          {
+            "span": "chunk:22:range:71151:74817:part:2400"
+          },
+          {
+            "span": "chunk:23:range:74817:78632:part:800"
+          },
+          {
+            "span": "chunk:23:range:74817:78632:part:2400"
+          },
+          {
+            "span": "chunk:23:range:74817:78632:part:3200"
+          },
+          {
+            "span": "chunk:21:range:67590:71151:part:2400"
+          },
+          {
+            "span": "chunk:21:range:67590:71151:part:3200"
+          },
+          {
+            "span": "chunk:21:range:67590:71151:part:0"
+          },
+          {
+            "span": "chunk:21:range:67590:71151:part:800"
+          },
+          {
+            "span": "chunk:21:range:67590:71151:part:1600"
+          }
+        ],
+        "retained_evidence": [
+          {
+            "key": "evidence:2d36e9db901cae9fccbdfd56",
+            "version": "e1991c3419bcdebaeb14739a93623fc434d36efbdec471f1b21d190a494b4064"
+          },
+          {
+            "key": "evidence:bed3a3bd5d132dccfc5dfb56",
+            "version": "8fa17ac6bc0ae8198ed56c3daf196711f33236c5663508baa4512119e3fddcbe"
+          },
+          {
+            "key": "evidence:5f76048609a214209c36722f",
+            "version": "e688e1acfe1766a1b5b078c932e6b5d91f0fa0c123bb8764f2d9cc74c9b9da7d"
+          },
+          {
+            "key": "evidence:4f7b46a8fe5019464456629e",
+            "version": "7667417d2f3f2e7611052b05d201239f36ae4a9b2813b51fdbd396018910d9a6"
+          },
+          {
+            "key": "evidence:45a0aca22a4696a6bd976eba",
+            "version": "858f6096aa09deafe6693006f588b44c18a7a009f38a6af32c0b6420c5a057c4"
+          },
+          {
+            "key": "evidence:e03a6fc441935728c031ea8c",
+            "version": "14a9f404f1ace13a3ae72a1cab5e0baa5279479a6f0be1cd3eadbd4a5847c4fb"
+          },
+          {
+            "key": "evidence:3e902b7f68b3f813d91393be",
+            "version": "f170b58b93797cc0fd597f3e9af7bae9958e602f5fe1bb9c6b4751aa51fb4a17"
+          },
+          {
+            "key": "evidence:55333b2b1850f47ecc8f9921",
+            "version": "7c262b7e25b7d456145b96ecd55b69389a07d5fd668dd139b7971762d928322f"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "call": 27,
+    "request": {
+      "source": "https://www.journals.uchicago.edu/doi/full/10.1086/516655",
+      "source_version": "c9f9bbaeeb6ee994612d854cc44abea2116a78560fd1d13f765d05c509183800",
+      "question": "Reexamine the discussion surrounding mechanically inedible algae to resolve the concrete repair proposed for the failure to observe cycles at high nutrient supply. Extract exact surrounding prose, including any discussion of grazer demography or spatial structure, cited experimental comparisons, and whether a repair was actually modeled, fitted, or independently tested. Distinguish an author's proposed explanation from a demonstrated restoration of predictive usefulness. Earlier opening/model reading did not resolve this discussion; already retained experimental discussion establishes that actual experiments are summarized in this source, despite the last child's narrower negative finding.",
+      "passages": {
+        "chunk:21:part:0": {
+          "key": "chunk:21:part:0",
+          "start": 67590,
+          "end": 68390,
+          "text": "The analyses suggest that unusual dynamics described from other stoichiometric algae‐grazer models (multiple equilibria, sign changes of light enrichment effects on stability, the paradox of energy enrichment) are also possible in my model but should be restricted to the low end of nutrient supplies _R_ tot. The parameter space producing specific system behaviors can be characterized by the “realized” total nutrient concentration in the water column, that is, total nutrients minus nutrients in sediments (𝑅tot−𝑅s/𝑧=𝑅+𝑄⁢𝐴+𝑞⁢𝐺Rtot−Rs/z=R+Q⁢A+q⁢G). This quantity is readily measured as total phosphorus (TP) and routinely used to characterize lake nutrient status. The numerical examples ( [fig. 5](https://www.journals.uchicago.edu/doi/full/10.1086/516655#fg5); [app. C](https://www.journals.uchic"
+        },
+        "chunk:21:part:800": {
+          "key": "chunk:21:part:800",
+          "start": 68390,
+          "end": 69190,
+          "text": "ago.edu/doi/full/10.1086/516655#appendix-3)) predict that the paradox of energy enrichment should be restricted to values of <0.15 μM realized TP in the water column at equilibrium. This is at the very low end of TP concentrations of real lakes. In contrast, the stoichiometric plant‐herbivore model of Loladze et al. ( [2000](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf38)), which emulates light supply as an algal carrying capacity, produces the paradox of energy enrichment over a more than 70‐fold larger nutrient range (beyond 10 μM P). This quantitative discrepancy is unlikely to be a matter of parameter choices. Using Loladze et al.’s grazer parameters in my model does not significantly extend the parameter space of the paradox of energy enrichment toward "
+        },
+        "chunk:21:part:1600": {
+          "key": "chunk:21:part:1600",
+          "start": 69190,
+          "end": 69990,
+          "text": "higher nutrient levels. Rather, the quantitative differences in model predictions seem to be related to structural differences in how algal growth is modeled. This suggests that a mechanistic representation of light supply and light use strongly constrains the nutrient supply space in which unusual algae‐grazer dynamics are to be expected.\n\n### Empirical Patterns\n\nWhat is the empirical evidence? Traditionally, enrichment has been equated with nutrient fertilization, and there is a wealth of data relating plant and herbivore biomass to nutrient supply (Sarnelle [1992](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf58); Mazumder [1994](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf41); Leibold et al. [1997](https://www.journals.uchic"
+        },
+        "chunk:21:part:2400": {
+          "key": "chunk:21:part:2400",
+          "start": 69990,
+          "end": 70790,
+          "text": "ago.edu/doi/full/10.1086/516655#core-collateral-rf37)). Nutrient enrichment experiments with phytoplankton‐ _Daphnia_ systems have frequently supported model predictions on equilibrium biomasses but not on stability; that is, with nutrient enrichment, _Daphnia_ biomass increased and algal biomass often remained constant, but persistent oscillations have only rarely been observed (Murdoch et al. [1998](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf45); McCauley et al. [1999](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf43)). My analyses suggest that stoichiometric constraints cannot explain the lack of population cycles at high nutrient supply. An increase in the proportion of mechanically inedible algae with nutrient enrichment s"
+        },
+        "chunk:21:part:3200": {
+          "key": "chunk:21:part:3200",
+          "start": 70790,
+          "end": 71151,
+          "text": "eems to be a more likely, though not universal, explanation (Leibold [1989](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf36); Murdoch et al. [1998](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf45); Vos et al. [2004](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf69)).\n\n"
+        }
+      }
+    },
+    "response": {
+      "findings": [
+        {
+          "span": "chunk:21:part:2400",
+          "study_id": "https://www.journals.uchicago.edu/doi/full/10.1086/516655",
+          "finding": "The empirical comparison is explicitly a summary of experiments, not a simulation: “Nutrient enrichment experiments with phytoplankton‐ _Daphnia_ systems have frequently supported model predictions on equilibrium biomasses but not on stability; that is, with nutrient enrichment, _Daphnia_ biomass increased and algal biomass often remained constant, but persistent oscillations have only rarely been observed (Murdoch et al. [1998]; McCauley et al. [1999]).” The supplied passage gives no experiment-specific nutrient concentrations, biomass values, units, or uncertainty.",
+          "measurements": {
+            "observations": {
+              "daphnia_biomass": {
+                "source_id": "",
+                "locator": "Empirical Patterns, chunk:21:part:2400, sentence beginning “Nutrient enrichment experiments”, clause “with nutrient enrichment, _Daphnia_ biomass increased”",
+                "quantity": "_Daphnia_ biomass",
+                "conditions": "Nutrient enrichment experiments with phytoplankton‐Daphnia systems; summary citing Murdoch et al. (1998) and McCauley et al. (1999).",
+                "value": "increased",
+                "units": "not reported",
+                "uncertainty": "not reported",
+                "kind": "measurement"
+              },
+              "algal_biomass": {
+                "source_id": "",
+                "locator": "Empirical Patterns, chunk:21:part:2400, sentence beginning “Nutrient enrichment experiments”, clause “algal biomass often remained constant”",
+                "quantity": "algal biomass",
+                "conditions": "Nutrient enrichment experiments with phytoplankton‐Daphnia systems; summary citing Murdoch et al. (1998) and McCauley et al. (1999).",
+                "value": "often remained constant",
+                "units": "not reported",
+                "uncertainty": "not reported",
+                "kind": "measurement"
+              },
+              "persistent_oscillations": {
+                "source_id": "",
+                "locator": "Empirical Patterns, chunk:21:part:2400, sentence beginning “Nutrient enrichment experiments”, clause “persistent oscillations have only rarely been observed”",
+                "quantity": "persistent oscillations",
+                "conditions": "Nutrient enrichment experiments with phytoplankton‐Daphnia systems; summary citing Murdoch et al. (1998) and McCauley et al. (1999).",
+                "value": "only rarely been observed",
+                "units": "not reported",
+                "uncertainty": "not reported",
+                "kind": "measurement"
+              }
+            },
+            "claims": {}
+          }
+        },
+        {
+          "span": "chunk:21:part:3200",
+          "study_id": "https://www.journals.uchicago.edu/doi/full/10.1086/516655",
+          "finding": "Exact surrounding prose across chunk:21:part:2400–chunk:21:part:3200: “My analyses suggest that stoichiometric constraints cannot explain the lack of population cycles at high nutrient supply. An increase in the proportion of mechanically inedible algae with nutrient enrichment seems to be a more likely, though not universal, explanation (Leibold [1989]; Murdoch et al. [1998]; Vos et al. [2004]).” The concrete proposed explanation is an enrichment-associated increase in the proportion of mechanically inedible algae, qualified as “more likely” and “not universal.” These supplied passages do not describe implementing, fitting, or independently testing that repair, nor demonstrate restored predictive usefulness. They contain no discussion of grazer demography or spatial structure. The citations support the author's discussion but their underlying tests cannot be established from these excerpts.",
+          "measurements": {
+            "observations": {},
+            "claims": {
+              "stoichiometric_explanation_limit": {
+                "kind": "boundary_condition",
+                "statement_id": "",
+                "locator": "Empirical Patterns, chunk:21:part:2400, sentence “My analyses suggest that stoichiometric constraints cannot explain the lack of population cycles at high nutrient supply.”",
+                "left": "stoichiometric constraints as an explanation of the lack of population cycles",
+                "relation": "fails_when",
+                "right": "nutrient supply is high",
+                "conditions": "Author's interpretation of model analyses, explicitly qualified by “suggest”; concerns explanation of absent cycles, not a demonstrated impossibility for all models.",
+                "symbols": {}
+              },
+              "inedibility_proposal": {
+                "kind": "causal_relation",
+                "statement_id": "",
+                "locator": "Empirical Patterns, sentence spanning the end of chunk:21:part:2400 and chunk:21:part:3200, beginning “An increase in the proportion of mechanically inedible algae”",
+                "left": "an increase in the proportion of mechanically inedible algae with nutrient enrichment",
+                "relation": "inhibits",
+                "right": "population cycles at high nutrient supply",
+                "conditions": "Proposed explanation only: “seems to be a more likely, though not universal, explanation”; cites Leibold (1989), Murdoch et al. (1998), and Vos et al. (2004). No modeled or tested restoration is reported in the supplied passage.",
+                "symbols": {}
+              }
+            }
+          }
+        }
+      ],
+      "reading_memory": {
+        "summary": "The Empirical Patterns passage explicitly summarizes nutrient-enrichment experiments: Daphnia biomass increased, algal biomass often remained constant, and persistent oscillations were rarely observed (Murdoch et al. 1998; McCauley et al. 1999). The author says analyses suggest stoichiometric constraints cannot explain absent cycles at high nutrient supply and proposes increasing mechanically inedible algae with enrichment as a more likely, though not universal, explanation (Leibold 1989; Murdoch et al. 1998; Vos et al. 2004). This is a proposed explanation, not a demonstrated restoration of predictive usefulness in the supplied text. No grazer-demography or spatial-structure discussion, repair implementation, fitting, or independent test appears here.",
+        "unresolved_links": [
+          "Underlying evidence and experimental conditions in Leibold (1989), Murdoch et al. (1998), McCauley et al. (1999), and Vos et al. (2004) are not supplied.",
+          "Whether other source passages discuss grazer demography, spatial structure, or an implemented and independently tested inedible-algae repair remains unresolved.",
+          "The supplied passages do not explicitly state a direct causal relation from nutrient enrichment or increased carrying capacity to increased oscillation amplitude; the explicit enrichment-related explanation here concerns mechanically inedible algae and absent cycles."
+        ],
+        "anchors": [
+          {
+            "span": "chunk:21:part:2400"
+          },
+          {
+            "span": "chunk:21:part:3200"
+          }
+        ],
+        "retained_evidence": []
+      }
+    }
+  },
+  {
+    "call": 28,
+    "request": {
+      "source": "https://www.journals.uchicago.edu/doi/full/10.1086/516655",
+      "source_version": "c9f9bbaeeb6ee994612d854cc44abea2116a78560fd1d13f765d05c509183800",
+      "question": "Reexamine the discussion surrounding mechanically inedible algae to resolve the concrete repair proposed for the failure to observe cycles at high nutrient supply. Extract exact surrounding prose, including any discussion of grazer demography or spatial structure, cited experimental comparisons, and whether a repair was actually modeled, fitted, or independently tested. Distinguish an author's proposed explanation from a demonstrated restoration of predictive usefulness. Earlier opening/model reading did not resolve this discussion; already retained experimental discussion establishes that actual experiments are summarized in this source, despite the last child's narrower negative finding.",
+      "passages": {
+        "chunk:20:part:0": {
+          "key": "chunk:20:part:0",
+          "start": 64911,
+          "end": 65711,
+          "text": "Common to plant‐herbivore models in which plant quality decreases with plant density is the existence of multiple equilibria, because the grazer population may equilibrate at either low or high plant density, where grazer growth is limited by plant quantity or quality, respectively (van de Koppel et al. [1996](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf67)). Similar to other stoichiometric models (Andersen [1997](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf3); Loladze et al. [2000](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf38); Muller et al. [2001](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf44)), my model produces multiple equilibria where either a stable or a"
+        },
+        "chunk:20:part:800": {
+          "key": "chunk:20:part:800",
+          "start": 65711,
+          "end": 66511,
+          "text": " cyclic algae‐grazer system coexists with a stable algae‐only equilibrium ( [fig. 3 _C_](https://www.journals.uchicago.edu/doi/full/10.1086/516655#fg3)). In spite of high algal biomass, grazers cannot invade the latter equilibrium, because algae are too nutrient deficient. This region of alternative attractors is limited to nutrient‐poor systems (𝑅tot<0.2Rtot<0.2 μM P in [fig. 3](https://www.journals.uchicago.edu/doi/full/10.1086/516655#fg3)). The reason is that algal biomass at the algae‐only equilibrium increases less than proportionally with increasing nutrient supply (increased biomass enhances light limitation). Consequently, as nutrient supply increases, the algal nutrient quota increases and will eventually become high enough to allow invasion of the algae‐only equilibrium by grazer"
+        },
+        "chunk:20:part:1600": {
+          "key": "chunk:20:part:1600",
+          "start": 66511,
+          "end": 67311,
+          "text": "s.\n\nThe region of alternative states shrinks considerably in the full model, as compared with the simplified model ( [figs. 3 _C_](https://www.journals.uchicago.edu/doi/full/10.1086/516655#fg3), 4), largely because the parameter space allowing for the algae‐only equilibrium shrinks when algae sink. Sinking has a positive influence on algal quality, because sinking losses reduce algal density while a fraction of the sedimented nutrients is recycled back to the remaining algae. At sufficiently high sinking losses, algal quality will therefore be high enough to allow grazers to invade the algae‐only equilibrium. A similar empirical phenomenon was described by Sommer ( [1992](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf60)), who reared _Daphnia_ together with al"
+        },
+        "chunk:20:part:2400": {
+          "key": "chunk:20:part:2400",
+          "start": 67311,
+          "end": 67590,
+          "text": "gae in chemostats at different dilution rates: _Daphnia_ could establish significant populations only at relatively high dilution rates, where dilution losses prevented the buildup of a high density of nutrient‐deficient algae.\n\n### Parameter Space of “Unusual” System Behavior\n\n"
+        },
+        "chunk:21:part:2400": {
+          "key": "chunk:21:part:2400",
+          "start": 69990,
+          "end": 70790,
+          "text": "ago.edu/doi/full/10.1086/516655#core-collateral-rf37)). Nutrient enrichment experiments with phytoplankton‐ _Daphnia_ systems have frequently supported model predictions on equilibrium biomasses but not on stability; that is, with nutrient enrichment, _Daphnia_ biomass increased and algal biomass often remained constant, but persistent oscillations have only rarely been observed (Murdoch et al. [1998](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf45); McCauley et al. [1999](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf43)). My analyses suggest that stoichiometric constraints cannot explain the lack of population cycles at high nutrient supply. An increase in the proportion of mechanically inedible algae with nutrient enrichment s"
+        },
+        "chunk:21:part:3200": {
+          "key": "chunk:21:part:3200",
+          "start": 70790,
+          "end": 71151,
+          "text": "eems to be a more likely, though not universal, explanation (Leibold [1989](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf36); Murdoch et al. [1998](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf45); Vos et al. [2004](https://www.journals.uchicago.edu/doi/full/10.1086/516655#core-collateral-rf69)).\n\n"
+        }
+      }
+    },
+    "response": {
+      "findings": [
+        {
+          "span": "chunk:20:part:1600",
+          "study_id": "https://www.journals.uchicago.edu/doi/full/10.1086/516655",
+          "finding": "A separate modeled mechanism concerns sinking and algal nutrient quality, not mechanically inedible algae. Exact prose: “Sinking has a positive influence on algal quality, because sinking losses reduce algal density while a fraction of the sedimented nutrients is recycled back to the remaining algae. At sufficiently high sinking losses, algal quality will therefore be high enough to allow grazers to invade the algae‐only equilibrium.” The preceding sentence explicitly compares the full and simplified models: “The region of alternative states shrinks considerably in the full model, as compared with the simplified model”. This is a reported model result about invasion and alternative states; the passage does not present it as a demonstrated repair of the failure to observe cycles at high nutrient supply.",
+          "measurements": {
+            "observations": {},
+            "claims": {
+              "sinking_quality": {
+                "kind": "causal_relation",
+                "statement_id": "",
+                "locator": "chunk:20:part:1600, sentence beginning “Sinking has a positive influence on algal quality”",
+                "left": "sinking",
+                "relation": "increases",
+                "right": "algal quality",
+                "conditions": "Full model: sinking losses reduce algal density while a fraction of the sedimented nutrients is recycled back to the remaining algae.",
+                "symbols": {}
+              },
+              "sinking_invasion": {
+                "kind": "boundary_condition",
+                "statement_id": "",
+                "locator": "chunk:20:part:1600, sentence beginning “At sufficiently high sinking losses”",
+                "left": "algal quality high enough to allow grazers to invade the algae‐only equilibrium",
+                "relation": "applies_when",
+                "right": "sinking losses are sufficiently high",
+                "conditions": "Reported full-model consequence of reduced algal density and recycling of a fraction of sedimented nutrients; not an experimental demonstration of restored cycle predictions.",
+                "symbols": {}
+              }
+            }
+          }
+        },
+        {
+          "span": "chunk:20:part:2400",
+          "study_id": "https://www.journals.uchicago.edu/doi/full/10.1086/516655",
+          "finding": "The sinking discussion cites an actual experimental comparison, Sommer (1992), across chunk:20:part:1600–chunk:20:part:2400. The source describes Sommer as having “reared _Daphnia_ together with algae in chemostats at different dilution rates” and reports: “_Daphnia_ could establish significant populations only at relatively high dilution rates, where dilution losses prevented the buildup of a high density of nutrient‐deficient algae.” This comparison concerns grazer establishment under differing dilution rates, not an independently tested mechanically-inedible-algae repair. No nutrient concentration, numerical dilution rate, population measurement, or uncertainty is supplied.",
+          "measurements": {
+            "observations": {
+              "daphnia_establishment": {
+                "source_id": "",
+                "locator": "chunk:20:part:1600–chunk:20:part:2400, Sommer (1992) comparison, clause “_Daphnia_ could establish significant populations only at relatively high dilution rates”",
+                "quantity": "_Daphnia_ population establishment",
+                "conditions": "_Daphnia_ reared together with algae in chemostats at different dilution rates; significant populations occurred only at relatively high dilution rates, where dilution losses prevented buildup of a high density of nutrient‐deficient algae. Nutrient supply is not specified.",
+                "value": "could establish significant populations only at relatively high dilution rates",
+                "units": "not reported",
+                "uncertainty": "not reported",
+                "kind": "measurement"
+              }
+            },
+            "claims": {
+              "dilution_density": {
+                "kind": "causal_relation",
+                "statement_id": "",
+                "locator": "chunk:20:part:2400, Sommer (1992) comparison, clause “where dilution losses prevented the buildup of a high density of nutrient‐deficient algae”",
+                "left": "dilution losses",
+                "relation": "prevents",
+                "right": "the buildup of a high density of nutrient‐deficient algae",
+                "conditions": "Author's explanation of the experimental comparison at relatively high chemostat dilution rates, where Daphnia could establish significant populations.",
+                "symbols": {}
+              }
+            }
+          }
+        }
+      ],
+      "reading_memory": {
+        "summary": "Retained evidence:fdad71db6ed45815fbfbf1f6 explicitly summarizes enrichment experiments: Daphnia biomass increased, algal biomass often remained constant, and persistent oscillations were rarely observed (Murdoch et al. 1998; McCauley et al. 1999). Retained evidence:bfa8e1df86c018e11a9e1ab4 preserves the author's conclusion that stoichiometric constraints cannot explain absent cycles at high nutrient supply and the proposed, more likely but not universal explanation of increasing mechanically inedible algae with enrichment (Leibold 1989; Murdoch et al. 1998; Vos et al. 2004). Newly examined surrounding discussion reports a separate modeled sinking mechanism: reduced algal density and recycling improve algal quality and permit grazer invasion at sufficiently high sinking losses. Its cited empirical comparison is Sommer (1992): Daphnia established significant populations only at relatively high chemostat dilution rates, which prevented dense nutrient-deficient algae. That comparison is not presented as a test of the mechanically-inedible-algae proposal or restoration of cycle predictions. No grazer-demography or spatial-structure discussion, implementation, fitting, or independent test of that proposal appears in the supplied passages.",
+        "unresolved_links": [
+          "Underlying evidence and experimental conditions in Leibold (1989), Murdoch et al. (1998), McCauley et al. (1999), and Vos et al. (2004) are not supplied.",
+          "Sommer (1992) nutrient supply, numerical dilution rates, population measurements, and uncertainty are not supplied.",
+          "Whether other source passages discuss grazer demography, spatial structure, or an implemented and independently tested inedible-algae repair remains unresolved.",
+          "The supplied passages do not explicitly state a direct causal relation from nutrient enrichment or increased carrying capacity to increased oscillation amplitude."
+        ],
+        "anchors": [
+          {
+            "span": "chunk:21:part:2400"
+          },
+          {
+            "span": "chunk:21:part:3200"
+          },
+          {
+            "span": "chunk:20:part:1600"
+          },
+          {
+            "span": "chunk:20:part:2400"
+          }
+        ],
+        "retained_evidence": [
+          {
+            "key": "evidence:fdad71db6ed45815fbfbf1f6",
+            "version": "0895ede0b49e09a5cfba23074d49ffc35cf31019aa88fbd0af2156e508a9ada9"
+          },
+          {
+            "key": "evidence:bfa8e1df86c018e11a9e1ab4",
+            "version": "9c137aec5536360b12d063115c8f1c6b61194b8ff7ccc8ba6fc2ba531c2004ca"
+          }
+        ]
+      }
+    }
+  }
+]

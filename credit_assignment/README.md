@@ -10,10 +10,10 @@ The episode chooses work from its available alternatives. The configured local
 yield estimator/controller observes completed own units and governs numerical
 continuation. Its observations do not prescribe which action to choose.
 
-Discovery and Scientific use signed scientific-score value-of-computation
+Root alone uses signed investigation-outcome value-of-computation
 forecasts. The reusable statistical function is `value_of_computation.py`; the
 application binding lives in `case_reports/research/computation_yield.py`. All
-other episodes retain `joint_preferential_discovery_v1`. See
+other episodes, including Discovery and Scientific, retain `joint_preferential_discovery_v1`. See
 [VOC measurement, continuation and limitations](../docs/VALUE_OF_COMPUTATION.md).
 
 Record outcomes before projecting credit. One completed child supplies one
@@ -51,8 +51,9 @@ The operands and current limitations are documented in
 [`CAUSAL_SCORING_SHEET.md`](../docs/CAUSAL_SCORING_SHEET.md). These are sheet
 calculations for the existing Episodes, not a new binding or controller.
 
-`causal_support.py` supplies identified support units and support-proportional
-change credit linked to exact expected-generalizability-bounds versions. The
-current operational support count keeps hypothesis and observation counts visible;
-it is not certainty. Later support for original G revalues existing changes.
+`causal_support.py` supplies identified support units and graduated task-comparison
+credit linked to exact G and original expected-generalizability-bounds versions.
+Support keeps hypothesis and observation counts visible; it is not certainty.
+It stays separate from applicability differences and task-error improvements,
+including useful extensions outside original bounds.
 Scientific definitions/arguments remain separate from host arithmetic.

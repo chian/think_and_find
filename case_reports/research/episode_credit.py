@@ -4,6 +4,7 @@ from fractions import Fraction
 from .records import Credit, Ledger, identity
 from .support_observations import observation_identity
 from .source_claims import claim_identity
+from .source_anchors import finding_identities
 from ...credit_assignment.causal_progress import compile_episode_points
 from ...credit_assignment.causal_support import controller_projection
 
@@ -20,15 +21,7 @@ def page_credit(result, baseline, source_url):
 
 def _claim_extraction_identity(data, selector):
     """Deduplicate source claims independently of extraction-window boundaries."""
-    _, claim = claim_identity(data, selector)
-    study = " ".join(data["study_id"].split())
-    source = [claim["source"], claim["source_version"], study]
-    if claim["statement_id"]:
-        return identity([*source, "statement_id", claim["statement_id"]])
-    # A paragraph or row can contain several claims. Without a source-native
-    # identifier, retain the validated structure to distinguish those claims,
-    # but never let the host's window boundaries create a new identity.
-    return identity([*source, "source_locator", claim["native_locator"], claim["structure"]])
+    return claim_identity(data, selector)[0]
 
 
 def _extracted_items(result, predicate):
@@ -55,7 +48,7 @@ def _extracted_items(result, predicate):
         if not native["observations"] and not native["claims"] and data["finding"].strip():
             # A qualitative finding still supplies information. Rephrasing the
             # same source fragment cannot earn another extraction item.
-            items.add("finding:" + identity([data["source"], measurements["source_version"], data["locator"]]))
+            items.update("finding:" + key for key in finding_identities(data))
     return items
 
 
@@ -95,21 +88,8 @@ def table_credit(result, baseline, document, table):
                             lambda row: _within_scope(row, document, table.rows))
 
 
-def reasoning_credit(result, baseline, commission):
-    sheet = Ledger(result).causal_sheet
-    score = compile_episode_points(sheet)
-    before = compile_episode_points(Ledger(baseline).causal_sheet)["points"]
-    points = _positive_delta(score["points"], before)
-    projection = controller_projection(points, score["resolution"])
-    if not projection["supported"]:
-        return Credit(evaluated=False)
-    return Credit(evaluated=result.evaluated, quality_resolution=projection["resolution"],
-        qualities=tuple(("reasoning_scientific_gain", key, value)
-                        for key, value in projection["values"].items()))
-
-
-def scientific_attempt_credit(result, baseline):
-    """Project only new global scientific points earned during this attempt."""
+def scientific_credit(result, baseline):
+    """Project the Scientific commission's actual new scientific findings."""
     score = compile_episode_points(Ledger(result).causal_sheet)
     before = compile_episode_points(Ledger(baseline).causal_sheet)["points"]
     points = _positive_delta(score["points"], before)
@@ -117,5 +97,5 @@ def scientific_attempt_credit(result, baseline):
     if not projection["supported"]:
         return Credit(evaluated=False)
     return Credit(evaluated=result.evaluated, quality_resolution=projection["resolution"],
-                  qualities=tuple(("attempt_scientific_gain", key, value)
+                  qualities=tuple(("scientific_gain", key, value)
                                   for key, value in sorted(projection["values"].items())))

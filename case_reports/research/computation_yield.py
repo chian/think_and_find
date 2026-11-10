@@ -1,7 +1,7 @@
-"""Think and Find's signed scientific-score binding to reusable Bayesian VOC.
+"""Root's signed investigation-outcome binding to reusable Bayesian VOC.
 
-Only Discovery and Scientific use this controller. The reusable forecasting
-algorithm knows nothing about scientific sheets, episode ownership or stopping.
+Only Root uses this controller. Discovery and Scientific retain their regular
+request/scientific yield estimators. The forecasting algorithm owns no tasks.
 """
 from collections import Counter
 from copy import deepcopy
@@ -15,7 +15,7 @@ from ...credit_assignment.value_of_computation import Prediction, Transition, va
 from .records import Credit, Ledger, identity
 
 
-FORMULA = "scientific_score_voc_v1"
+FORMULA = "root_investigation_voc_v2"
 ASSUMPTIONS = (
     "Exact-state observations take precedence. Otherwise transitions are exchangeable "
     "within an episode responsibility, available action set, admitted record-kind/currentness "
@@ -29,14 +29,14 @@ ASSUMPTIONS = (
 
 
 @dataclass(frozen=True)
-class ScientificState:
+class InvestigationState:
     key: str
     score: float
     features: tuple[str, ...]
     actions: tuple[str, ...]
 
 
-class ScientificTransitionModel:
+class RootTransitionModel:
     """Observed-support categorical prediction, with explicit structural transfer.
 
     Hypothetical outcomes update only the current forecast's categorical counts.
@@ -77,7 +77,7 @@ class ScientificTransitionModel:
             if score < 0 or not math.isfinite(score):
                 return None
             # Preserve exact successors when possible, including checked findings.
-            target = following if exact else ScientificState(
+            target = following if exact else InvestigationState(
                 "forecast:" + identity([score, following.features, following.actions]),
                 score, following.features, following.actions)
             counts[target] += 1
@@ -89,7 +89,7 @@ class ScientificTransitionModel:
                 score = state.score + following.score - imagined.state.score
                 if score < 0 or not math.isfinite(score):
                     return None
-                target = following if exact else ScientificState(
+                target = following if exact else InvestigationState(
                     "forecast:" + identity([score, following.features, following.actions]),
                     score, following.features, following.actions)
                 counts[target] += 1
@@ -103,13 +103,9 @@ class ScientificTransitionModel:
 
 
 def available_actions(source, sheet):
-    if source.episode_grain == "discovery":
-        revisit = bool(source.starting_questions) or any(row["kind"] != "evidence" for row in sheet.rows.values())
-        return ("fresh_start", *(("revisit_existing",) if revisit else ()), "recall")
-    from .sheet_tools import _sheet_tool_contract
-    schema, _ = _sheet_tool_contract(source, source.record_kinds)
-    return ("record", "inspect", "calculate", "reconstruct_theory", "reasoning",
-            *(("evaluate",) if schema["properties"]["assessment"] is not False else ()), "recall")
+    if source.episode_grain != "root":
+        raise ValueError("The VOC controller belongs to Root only")
+    return ("create_discovery_goal", "discovery", "scientific", "recall")
 
 
 def measured_state(source, result):
@@ -136,10 +132,9 @@ def measured_state(source, result):
     if calculation is not None:
         features.add("checked_calculation:" + identity(calculation))
     commission = source.commission.as_record() if source.commission else source.run.research_request
-    starts = source.starting_questions if source.episode_grain == "discovery" else ()
     key = identity([source.episode_grain, commission, records, selected, source.scoped_snapshots(),
-                    calculation, recalled, source.working_assessment, starts])
-    state = ScientificState(key, total, tuple(sorted(features)), available_actions(source, sheet))
+                    calculation, recalled, source.working_assessment])
+    state = InvestigationState(key, total, tuple(sorted(features)), available_actions(source, sheet))
     return state, {"records": records, "selected": selected, "calculation": calculation,
                    "recalled": recalled, "components": score["components"]}
 
@@ -155,19 +150,18 @@ class VOCState:
     rarefaction: None = None
 
 
-class ScientificVOCController:
+class RootVOCController:
     """One actual completed own action per observation; VOC alone controls yield."""
-    def __init__(self, source, path, model, *, lookahead=3, epoch="scientific-voc-v1"):
+    def __init__(self, source, path, model, *, lookahead=3, epoch="root-voc-v2"):
         self.source, self.path, self.model = source, path, model
         self.lookahead, self.epoch = lookahead, epoch
         self._current, self._metadata = measured_state(source, source.ledger.result())
         self._start, self._start_metadata = self._current, self._metadata
         self._observed_total = self._current.score
-        self._origin = self._current.score if source.episode_grain == "scientific" else 0.0
+        self._origin = 0.0
         self.history, self.observations, self.failures = [self._current.score - self._origin], [], 0
-        self.standing = source.episode_grain == "discovery" and source.run.limits.root_yield_threshold == 0
-        self.threshold = ((source.run.limits.root_yield_threshold or 0.0)
-                          if source.episode_grain == "discovery" else 0.0)
+        self.standing = source.run.limits.root_yield_threshold == 0
+        self.threshold = source.run.limits.root_yield_threshold or 0.0
 
     def begin(self):
         self._current, self._metadata = measured_state(self.source, self.source.ledger.result())
@@ -186,7 +180,7 @@ class ScientificVOCController:
             "score_change": self.model.events[event]["score_change"]}))
             for event in sorted(evidence - own)]
         return {"formula_version": FORMULA, "forecast": report.as_record(),
-            "score_binding": "sum_of_five_scientific_components", "score_units": "scientific points",
+            "score_binding": "sum_of_investigation_components", "score_units": "investigation points",
             "scope": self.source.episode_grain, "standing_investigation": self.standing,
             "should_yield": should_yield, "yield_gain_threshold": self.threshold, "assumptions": ASSUMPTIONS,
             "credit_history": deepcopy(self.observations),
@@ -206,18 +200,13 @@ class ScientificVOCController:
 
     def observe(self, unit_label, value, *, is_root):
         if not isinstance(value, Credit) or self.source.pending is None:
-            raise TypeError("Scientific VOC requires a completed research unit and its pending sheet")
+            raise TypeError("Root VOC requires a completed research unit and its pending sheet")
         following, metadata = measured_state(self.source, self.source.pending)
         change = following.score - self._observed_total
         if not math.isclose(self._start.score, self._observed_total, abs_tol=1e-12):
             raise ValueError("Shared refresh must not replace the parent's pre-action observation baseline")
         proposal = self.source.last_proposal if isinstance(self.source.last_proposal, dict) else {}
         action = proposal.get("action")
-        if (self.source.episode_grain == "discovery" and action != "recall"
-                and isinstance(proposal.get("question"), str)):
-            revisited = proposal.get("inputs") or proposal.get("snapshots") or (
-                proposal["question"] in self.source.starting_questions[:-1])
-            action = "revisit_existing" if revisited else "fresh_start"
         action = action if isinstance(action, str) and action in self._start.actions else "proposal_failure"
         produced = sorted(set(metadata["records"]) - set(self._start_metadata["records"]))
         exposed = sorted(set(metadata["selected"]) - set(self._start_metadata["selected"]))
@@ -276,5 +265,5 @@ class ScientificVOCController:
         return self._current.score - before
 
     def transitioned(self, epoch):
-        return ScientificVOCController(self.source, self.path, self.model,
+        return RootVOCController(self.source, self.path, self.model,
                                        lookahead=self.lookahead, epoch=epoch)

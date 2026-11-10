@@ -1,0 +1,261 @@
+{
+  "question": "Acquire source-grounded evidence on transferring isolated-enzyme activity representations to control of steady-state metabolic pathway flux. Find research defining an isolated-enzyme rate law, research measuring how changing enzyme abundance or activity changes pathway flux, and a source-defined metabolic-control representation that could explain successes or failures of that transfer. Prefer a connected experimental system, such as microbial glycolysis, but do not assume that an intervention fails or that any enzyme is rate-limiting. Retain exact equations, assumptions, native quantities, experimental conditions, and source passages. Seek concrete comparisons of simple activity-based predictions with substrate adjustment, feedback, or distributed-control repairs, including successful predictions and information requirements. Whether these representations depend on a common generalized causal inference, and whether their differences establish pragmatic causal pluralism, remain questions for Scientific.",
+  "inputs": [],
+  "answer_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "claims": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/claim"
+        }
+      },
+      "observations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/observation"
+        }
+      },
+      "unresolved_correspondences": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "claims",
+      "observations",
+      "unresolved_correspondences"
+    ],
+    "$defs": {
+      "source": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "citation": {
+            "type": "string"
+          },
+          "locator": {
+            "type": "string"
+          },
+          "url_or_doi": {
+            "type": "string"
+          },
+          "exact_passage": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "citation",
+          "locator",
+          "url_or_doi",
+          "exact_passage"
+        ]
+      },
+      "claim": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "claim_type": {
+            "enum": [
+              "isolated_enzyme_rate_law",
+              "pathway_flux_intervention",
+              "metabolic_control_relation",
+              "repair_comparison"
+            ]
+          },
+          "native_claim": {
+            "type": "string"
+          },
+          "native_equation": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "symbol_definitions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "conditions_and_assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source": {
+            "$ref": "#/$defs/source"
+          }
+        },
+        "required": [
+          "id",
+          "claim_type",
+          "native_claim",
+          "native_equation",
+          "symbol_definitions",
+          "conditions_and_assumptions",
+          "source"
+        ]
+      },
+      "observation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "organism_and_pathway": {
+            "type": "string"
+          },
+          "intervention": {
+            "type": "string"
+          },
+          "native_quantity": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "units": {
+            "type": "string"
+          },
+          "uncertainty_as_reported": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "baseline_and_conditions": {
+            "type": "string"
+          },
+          "measurement_or_fit_status": {
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/source"
+          }
+        },
+        "required": [
+          "id",
+          "organism_and_pathway",
+          "intervention",
+          "native_quantity",
+          "value",
+          "units",
+          "uncertainty_as_reported",
+          "baseline_and_conditions",
+          "measurement_or_fit_status",
+          "source"
+        ]
+      }
+    }
+  },
+  "criteria": [
+    {
+      "id": "native_isolated_enzyme_law",
+      "question": "Does a retained source explicitly define an isolated-enzyme rate law with its symbols and applicability assumptions?",
+      "check": {
+        "kind": "source_claim",
+        "claim_schema": {
+          "type": "object",
+          "properties": {
+            "claim_type": {
+              "const": "isolated_enzyme_rate_law"
+            },
+            "native_claim": {
+              "type": "string",
+              "minLength": 1
+            },
+            "native_equation": {
+              "type": "string",
+              "minLength": 1
+            },
+            "symbol_definitions": {
+              "type": "object",
+              "minProperties": 1
+            },
+            "conditions_and_assumptions": {
+              "type": "array",
+              "minItems": 1
+            }
+          },
+          "required": [
+            "claim_type",
+            "native_claim",
+            "native_equation",
+            "symbol_definitions",
+            "conditions_and_assumptions"
+          ]
+        }
+      }
+    },
+    {
+      "id": "experimental_activity_flux_relation",
+      "question": "Does a retained experimental source report the relationship between a specified enzyme abundance or activity intervention and measured pathway flux, rather than merely assuming proportionality?",
+      "check": {
+        "kind": "source_claim",
+        "claim_schema": {
+          "type": "object",
+          "properties": {
+            "claim_type": {
+              "const": "pathway_flux_intervention"
+            },
+            "native_claim": {
+              "type": "string",
+              "minLength": 1
+            },
+            "conditions_and_assumptions": {
+              "type": "array",
+              "minItems": 1
+            }
+          },
+          "required": [
+            "claim_type",
+            "native_claim",
+            "conditions_and_assumptions"
+          ]
+        }
+      }
+    },
+    {
+      "id": "native_control_relation",
+      "question": "Does a retained source define a quantitative metabolic-control relation and its conditions, suitable for later assessment as a repair or alternative representation?",
+      "check": {
+        "kind": "source_claim",
+        "claim_schema": {
+          "type": "object",
+          "properties": {
+            "claim_type": {
+              "const": "metabolic_control_relation"
+            },
+            "native_equation": {
+              "type": "string",
+              "minLength": 1
+            },
+            "symbol_definitions": {
+              "type": "object",
+              "minProperties": 1
+            },
+            "conditions_and_assumptions": {
+              "type": "array",
+              "minItems": 1
+            }
+          },
+          "required": [
+            "claim_type",
+            "native_equation",
+            "symbol_definitions",
+            "conditions_and_assumptions"
+          ]
+        }
+      }
+    }
+  ]
+}

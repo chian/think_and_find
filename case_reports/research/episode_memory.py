@@ -16,7 +16,7 @@ RETURN_FIELDS = {
     "selected_results": "Exact scientific references and actual grading receipts selected to substantiate that answer.",
     "unreviewed_results": "Factual results received after the last assessment update, including the final unit when the controller yields. Flat results, never nested child histories.",
     "details_ref": "Recall this reference for the job's complete record/receipt index; then recall selected exact versions. Details stay out of ordinary handoffs.",
-    "score_component_changes": "Host-calculated changes in the five scientific score components since this episode began. Child scores are not added to parent credit.",
+    "score_component_changes": "Host-calculated changes in the explicit investigation components since this episode began. Child scores are not added to parent credit.",
 }
 
 ASSESSMENT_INSTRUCTION = (

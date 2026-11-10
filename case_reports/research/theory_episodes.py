@@ -1,63 +1,125 @@
-"""Reconstruct a theory, pursue a substantive gap, and repair typed output.
+"""Scientific's iterative reconstruction, repair and comparison children.
 
-Each source uses the common Episode loop. Literature acquisition and reasoning
-remain children with their own decisions and request-relative returns.
+Information needs become explicit goals returned through Scientific and Root.
+These episodes use scientific records and formal tools, never acquisition loops.
 """
 from copy import deepcopy
+from fractions import Fraction
 
-from .acquisition import LiteratureSource, SearchStrategySource, PageSource
 from .causal_sheet import CausalSheet
-from .causal_commission import SheetCommission, SNAPSHOT_SCHEMA
+from .causal_commission import SheetCommission, SNAPSHOT_SCHEMA, read_sheet_result
 from .engine import ResearchSource, selected_choice
-from .episode_contracts import (TheoryReconstructionCommission, TheoryGapCommission,
-    TheoryFormatRepairCommission, SearchStrategyCommission, PageCommission)
-from .records import ResearchResult
+from .episode_contracts import (TheoryReconstructionCommission, TheoryRepairCommission,
+    TheoryComparisonCommission, TheoryFormatRepairCommission)
+from .episode_memory import job_report
+from .records import Credit, Ledger, ResearchResult
+from .sheet_tools import SCIENTIFIC_KINDS, SHEET_TOOLS, _sheet_tool_contract, _execute_sheet_tool
 from .theory_runtime import (theory_context, theory_credit, theory_report, integration_schema,
-    integrate_theory, request_schema, validate_request)
+    integrate_theory, request_schema)
 
 
-RECONSTRUCTION_TASK = """Reconstruct the commissioned theory as a connected scientific account.
-Own the evolving theory fragment and decide what to extract, connect, check or investigate next.
-The parent has supplied an initial vocabulary and a scientific question, not an equation to fill in.
-Discover entities and defined properties, variable/parameter distinctions, relationships,
-mechanisms, assumptions, and the derivations or approximations connecting them. Use the supplied
-closed language and exact source evidence references. Retain native scope and conditions.
-Preserve the parent's existing quantity meanings. Introduce additional source-defined quantities
-explicitly; never silently rename a quantity or change its role. New IDs do not establish novelty.
-Source-grounded claims remain scientific assertions; type validation is not proof of source fidelity.
-Mathematical normalization compares represented expressions only within its reported capabilities.
-Use integrate_theory for typed additions. Existing components are immutable; a correction gets a
-new ID with an explicit supersedes link. Reference existing components to retain explanatory
-dependencies. Record a substantive gap from an actual missing, ambiguous or conflicting connection.
-A gap may be resolved by evidence that a theory intentionally leaves a relationship unspecified.
-Choose search_strategy for broad reconstruction or a concentrated literature question, read_source
-to revisit an already identified paper, repair_gap to delegate investigation of recorded gaps, and
-reasoning for an explicit derivation or check using supplied premises. Returned literature must
-extend this same fragment or report what remains unresolved. No fixed action sequence is required.
-Local yield counts new source-grounded requested contributions with duplicate identities removed;
-it is independent of global G credit. The numerical estimator owns continuation.
+SCIENTIFIC_CHILD_INSTRUCTIONS = """
+Own the commissioned scientific question through repeated decisions. Supplied
+records contain source evidence and scientific definitions. State public
+premises, derivations, conclusions and limitations. A theory can contain many
+causal assertions: register relevant Gs with defined quantities, interventions,
+outcomes and grain, retaining their connection to the theory. Assumptions can
+legitimately define conditions behind expected generalizability bounds. Do not
+force every assertion into an executable equation or manufacture a replacement.
+Record an examination after public source-grounded reasoning has addressed a
+selected G and theoretical inputs. Reference its actual reasoning and grounds;
+supported, challenged and unresolved conclusions can all record a first
+examination. A plan to reason later is not a completed scientific finding.
+
+Use scientific-object lookup for existing theories, Gs, bounds, comparisons,
+repairs and formal results. Choose Lean for a particular equivalence question
+between formal assertions under shared definitions and explicit assumptions.
+Its checked result or unresolved obligation informs your next decision; failure
+to establish equivalence does not establish inequivalence. Choose SCM/equation/
+simulation calculations for specified interventions or changed relationships
+whose consequences bear on your question. Both tools must reference the actual
+scientific objects and conditions under examination. They are available methods,
+not compulsory stages. Formal consequences do not establish empirical premises;
+calling a tool or writing a verdict supplies no numerical merit grade.
+
+Use causal_change to define an explicit task comparison and compare_tasks to execute its
+cases when a scoped alteration or applicability difference is ready to assess. Keep G and
+the original expected generalizability bounds pinned; extensions beyond those bounds can
+earn credit. Record original, candidate and reference models with scientific source bindings,
+the task quantity/units/accuracy requirements and public reasoning. The host calculates
+gradual improvement from task errors without an original-support multiplier, a reversal
+requirement or a prerequisite to exhaust competing repairs. Keep successful tasks, losses,
+nonrepresented events and unresolved outcomes separate. Numerical ODE event comparison is
+available alongside Lean and SCM; it is not a mandatory episode or empirical validation.
+
+Use create_discovery_goal for missing evidence: state the pointed question,
+scientific definitions, acceptable answer form, source requirements and
+executable typed requirements. Use native requirements for literal source-field
+matches only. Mechanistic content belongs in a scientific requirement: its
+theory_structure predicate checks the source-grounded component and its typed
+reference closure. A source candidate is retrieval information, not fulfillment
+of that scientific requirement. Equivalence and G dependence still require
+their actual Lean or SCM checks. Scientific returns that goal through Root to
+Discovery. Do not search for literature, infer missing measurements or convert
+unavailable evidence into absence. Useful partial findings and negative results
+remain findings. The numerical iterator owns continuation.
 """
 
-GAP_TASK = """Resolve the commissioned substantive gaps in an existing theory reconstruction.
-The typed request identifies the actual components and questions that generated this investigation.
-Decide whether a targeted reread, a search through other literature, or reasoning can clarify them.
-Use the shared definitions and exact source references. Integrate new relationships, assumptions,
-scope qualifications, derivations, or explicit statements of what the theory leaves unspecified.
-Return a new gap component superseding the old one when reporting sourced resolutions; its
-resolutions must reference the actual returned components. Keep remaining questions explicit.
-Missing evidence is not a negative finding. A validator error is an output-repair problem, not a
-scientific gap. Do not invent a functional form to fill an unspecified relationship. This episode
-owns repeated choices about its assigned gaps; Search Strategy owns query choices within each
-literature commission. Local credit measures request contributions, not global G points.
-"""
+RECONSTRUCTION_TASK = """Reconstruct the commissioned theory from supplied text and evidence.
+Repeatedly choose which source-defined entity, quantity, relationship, mechanism,
+assumption or derivation to formalize or check next. The commission identifies
+an explanatory account, not an equation-shaped blank. Preserve native scope and
+qualifications and the supplied meanings of shared quantities. Distinguish
+variables, parameters and literal constants. Use integrate_theory for connected
+typed declarations and record for scientific Gs, premises, theory identities and
+applications. Multiple Gs can constitute a theory; new IDs alone are not novel
+science. Existing components cannot be overwritten: corrections explicitly
+supersede earlier components while retaining their provenance. Record missing
+connections as gaps and create pointed information goals. Reconstruct usable
+accounts with their limitations; historical-source completeness is not an
+independent task unless commissioned.
+""" + SCIENTIFIC_CHILD_INSTRUCTIONS
 
-FORMAT_REPAIR_TASK = """Correct the rejected theory additions using the exact validator feedback,
-the supplied fragment, the closed language and the supplied source evidence. Correct declarations,
-references or constructor types; preserve the proposed scientific content and valid components.
-Do not invent source evidence or replace a substantive uncertainty with a made-up equation.
-Return a complete corrected additions object. Validation will run again and return its exact
-errors. The repair has its own numerical continuation estimator; unresolved errors return to its
-parent if it yields. Successful type validation does not establish scientific truth.
+REPAIR_TASK = """Develop and examine repairs to the commissioned scientific account.
+Repeatedly choose a concrete modification, retained success, affected prediction
+or additional consequence to examine. Begin with the identified failure,
+original expected generalizability bounds, source targets and premises. A repair
+may improve definitions or add a dependency while preserving G, or may omit,
+aggregate or reformulate G. Keep these outcomes distinct without forcing a sign
+reversal or denying a mechanism's existence. Use integrate_theory for explicit
+amended components and record for repair arguments and executable comparisons.
+Formal tool results should inform which candidate or premise to reconsider.
+Retain original failures, successful G-preserving alternatives, fitting
+assumptions, prediction losses and information costs. Accommodation and
+independent corroboration are different findings. Scope failed attempts to the
+actual alternatives and evidence; no result proves all future repairs impossible.
+This task repairs scientific explanations, not malformed JSON.
+""" + SCIENTIFIC_CHILD_INSTRUCTIONS
+
+COMPARISON_TASK = """Compare the supplied theories and their uses of commissioned Gs.
+Repeatedly choose which connection, transfer, condition or consequence needs
+comparison. Look up relevant accounts, Gs, definitions, assumptions, expected
+generalizability bounds, repairs and versions. Explain their correspondence
+while preserving native quantities, scale, framing and success criteria.
+Identical tasks or opposite signs on identical observables are not required.
+Define the actual equivalence or causal-consequence question before choosing
+Lean or SCM tools. Checked equivalence can establish that forms express the
+same declared relation under their assumptions; renaming or a failed proof
+attempt cannot establish an alteration of G. Separate formal predictions,
+observed outcomes and source-to-model fidelity. Record what changed, why a
+transfer succeeded or failed, and what examined repairs retain or lose. Use
+executable support/change operands where they represent the actual question;
+zero or unresolved numerical change does not refute a useful explained failure
+or successful G-preserving repair. Return missing-information goals to Scientific.
+""" + SCIENTIFIC_CHILD_INSTRUCTIONS
+
+FORMAT_REPAIR_TASK = """Correct rejected theory additions using exact validator feedback,
+the supplied fragment, closed language and evidence. Correct constructor types,
+declarations and references while retaining valid components and proposed
+scientific content. Do not invent evidence or replace uncertainty with a made-up
+equation. Return corrected additions with unresolved errors explicit. Validation
+establishes representation consistency, not scientific truth. The ordinary
+numerical iterator owns repeated correction.
 """
 
 
@@ -71,102 +133,178 @@ def reconstruction_commission_schema():
             "snapshots": {"type": "array", "items": SNAPSHOT_SCHEMA},
             "theory_request": request_schema(),
             "seed": {"anyOf": [{"type": "null"}, fragment_schema()],
-                     "description": "For a new reconstruction, declare its identity, original question and initial vocabulary; empty maps are permitted. For an existing fragment use null."}}}
+                "description": "Declare a new reconstruction's identity, original question and vocabulary. Use null for an existing fragment."}}}
 
 
-def _work_schema(source, *, gap_child):
+def repair_commission_schema():
+    schema = reconstruction_commission_schema()
+    schema["properties"]["seed"]["description"] = (
+        "Use null to amend an existing theory. A separate candidate reconstruction "
+        "may declare its own explicit seed and input references.")
+    return schema
+
+
+def comparison_commission_schema():
     text = {"type": "string", "minLength": 1}
-    common = {"question": text, "theory_request": request_schema(), "rationale": text}
-    search = {"type": "object", "additionalProperties": False,
-        "required": ["action", "question", "theory_request", "approach", "rationale"],
-        "properties": {**common, "action": {"const": "search_strategy"}, "approach": text}}
-    read = {"type": "object", "additionalProperties": False,
-        "required": ["action", "question", "theory_request", "source", "rationale"],
-        "properties": {**common, "action": {"const": "read_source"}, "source": text}}
-    reasoning = {"type": "object", "additionalProperties": False,
-        "required": ["action", "question", "inputs", "rationale"], "properties": {
-            "action": {"const": "reasoning"}, "question": text, "rationale": text,
-            "inputs": {"type": "array", "uniqueItems": True, "items": text}}}
-    branches = [integration_schema(), search, read, reasoning]
-    if gap_child:
-        branches.append({"type": "object", "additionalProperties": False,
-            "required": ["action", "question", "theory_request", "rationale"],
-            "properties": {**common, "action": {"const": "repair_gap"}}})
-    return {"oneOf": branches}
+    return {"type": "object", "additionalProperties": False,
+        "required": ["question", "inputs", "assignments", "snapshots", "calculation_context"],
+        "properties": {"question": text,
+            "inputs": {"type": "array", "uniqueItems": True, "items": text},
+            "assignments": {"type": "array", "items": {"type": "array",
+                "minItems": 2, "maxItems": 2, "items": text}},
+            "snapshots": {"type": "array", "items": SNAPSHOT_SCHEMA},
+            "calculation_context": {"type": "string"}}}
 
 
-def _commission(source, cls, proposal):
-    request = validate_request(proposal["theory_request"], source.ledger.causal_sheet)
-    if request["reconstruction"] != source.commission.theory_request["reconstruction"]:
-        raise ValueError("Child literature work must address this same theory reconstruction")
-    inputs = tuple(dict.fromkeys([*source.commission.inputs, *source.selected_keys]))
-    commission = cls(question=proposal["question"], inputs=inputs,
-        snapshots=tuple(source.scoped_snapshots()), theory_request=request)
-    commission.request(source.ledger.causal_sheet)
-    return commission
+def _branches(schema):
+    return schema.get("oneOf", [schema])
 
 
-def _propose_work(source, view, *, gap_child):
-    context = theory_context(source)
-    sheet = source.ledger.causal_sheet
-    known_sources = {data["source"] for _, row in sheet.of_kind("evidence") for data in [row["data"]]}
-    proposal = source.decide(source.inputs(view, operation=("propose_theory_reconstruction"
-        if gap_child else "propose_theory_gap_repair"), instruction=source.instructions,
-        **context, known_sources=sorted(known_sources),
-        available_reasoning_inputs=[{"key": key, "kind": row["kind"], "version": row["version"]}
-                                    for key, row in sheet.rows.items()],
-        response_contract=_work_schema(source, gap_child=gap_child)))
-    source.last_proposal = proposal
-    action = selected_choice(proposal.get("action"),
-        ["integrate_theory", "search_strategy", "read_source", "reasoning", "recall",
-         *(["repair_gap"] if gap_child else [])], "action")
-    if action == "recall":
-        return source.recall(proposal)
-    if action == "integrate_theory":
-        return source.leaf(lambda: integrate_theory(source, proposal["additions"]), "integrate_theory")
-    if action == "reasoning":
-        from .workflow import ReasoningSource
-        commission = SheetCommission(proposal["question"], tuple(proposal["inputs"]))
-        commission.request(sheet)
-        child = ReasoningSource(source.run, source.ledger.result())
-        return source.edge(source.run.child(view, child, "reasoning", commission.question,
-            contract=commission.report_contract(), proposal=proposal))
-    if action == "repair_gap":
-        commission = _commission(source, TheoryGapCommission, proposal)
-        fragment = context["theory_fragment"]
-        if not commission.theory_request["focus"] or not any(
-                key in fragment["gaps"] for key in commission.theory_request["focus"]):
-            raise ValueError("A gap repair must identify an actual recorded reconstruction gap")
-        child, grain = TheoryGapSource(source.run, source.ledger.result()), "theory_gap"
-    elif action == "read_source":
-        commission = _commission(source, PageCommission, proposal)
-        url = proposal["source"]
-        if url not in known_sources and url not in source.run.documents:
-            raise ValueError("A focused reread needs an identified source; use Search Strategy to discover sources")
-        child = PageSource(source.run, source.ledger.result(), candidate={"url": url})
-        grain = "page"
-    else:
-        commission = _commission(source, SearchStrategyCommission, proposal)
-        child = SearchStrategySource(source.run, source.ledger.result(), approach=proposal["approach"])
-        grain = "search_strategy"
-    return source.edge(source.run.child(view, child, grain, commission.question,
-        contract=commission.report_contract(), proposal=proposal))
+class _ScopedScientificSource(ResearchSource):
+    """Shared primitive operations; concrete sources own their scientific jobs."""
+    record_kinds = list(SCIENTIFIC_KINDS)
+
+    def _commission_inputs(self):
+        keys = [*self.commission.inputs, *self.selected_keys]
+        request = getattr(self.commission, "theory_request", None)
+        if request and request["reconstruction"] in self.ledger.causal_sheet.rows:
+            keys.append(request["reconstruction"])
+        return tuple(dict.fromkeys(keys))
+
+    def _sheet_commission(self):
+        return SheetCommission(self.commission.question, self._commission_inputs(),
+            assignments=tuple(getattr(self.commission, "assignments", ())),
+            snapshots=tuple(self.scoped_snapshots()),
+            calculation_context=getattr(self.commission, "calculation_context", ""))
+
+    def record_results(self, records):
+        from dataclasses import replace
+        initial = {row["key"] for row in self.initial.causal_sheet_updates}
+        result = read_sheet_result(self.ledger.causal_sheet, self._sheet_commission(), records,
+            actor=self.actor, owned_subjects=self.ledger.causal_sheet.rows.keys() - initial)
+        return replace(result, diagnostics=tuple(self.run.identify_diagnostic({**diagnostic,
+            "model_call": self.run.model_calls}) for diagnostic in result.diagnostics))
+
+    def catalog_rows(self):
+        sheet = self.ledger.causal_sheet
+        initial = {row["key"] for row in self.initial.causal_sheet_updates}
+        keys = set(self._commission_inputs()) | (sheet.rows.keys() - initial)
+        keys.update(subject for subject, _ in getattr(self.commission, "assignments", ()))
+        context = getattr(self.commission, "calculation_context", "")
+        if context:
+            keys.add(context)
+        todo = list(keys)
+        while todo:
+            for dependency in sheet.rows[todo.pop()]["dependencies"]:
+                if dependency not in keys:
+                    keys.add(dependency)
+                    todo.append(dependency)
+        return [(key, row) for key, row in sheet.rows.items() if key in keys]
+
+    def authorize_inspection(self, keys):
+        if not set(keys) <= {key for key, _ in self.catalog_rows()}:
+            raise ValueError("Inspect commissioned or explicitly looked-up scientific objects")
+
+    def authorize_snapshots(self, snapshots):
+        allowed = {(ref["key"], ref["version"]) for ref in self.scoped_snapshots()}
+        allowed.update((key, row["version"]) for key, row in self.catalog_rows())
+        if any((ref["key"], ref["version"]) not in allowed for ref in snapshots):
+            raise ValueError("Select commissioned or explicitly looked-up historical scientific objects")
+
+    def authorize_evaluation(self, assessment):
+        if assessment not in {key for key, _ in self.catalog_rows()}:
+            raise ValueError("Evaluate a commissioned, created or explicitly looked-up protocol")
+
+    def _schema(self):
+        from .scientific_tools import tool_schema
+        from .discovery_goals import discovery_goal_action_schema
+        schema, visible = _sheet_tool_contract(self, self.record_kinds)
+        actions = ["record", "inspect", "calculate"]
+        if schema["properties"]["assessment"] is not False:
+            actions.append("evaluate")
+        schema["properties"]["action"] = {"enum": actions}
+        branches = [schema, *_branches(tool_schema()), *_branches(discovery_goal_action_schema())]
+        return {"oneOf": branches}, visible, [*actions, "scientific_tool", "create_discovery_goal"]
+
+    def _work(self, view, operation, **context):
+        from .scientific_tools import TOOL_INSTRUCTIONS, execute_tool
+        from .discovery_goals import create_discovery_goal, DISCOVERY_GOAL_INSTRUCTION
+        schema, visible, actions = self._schema()
+        proposal = self.decide(self.inputs(view, operation=operation,
+            instruction=self.instructions + SHEET_TOOLS + TOOL_INSTRUCTIONS + DISCOVERY_GOAL_INSTRUCTION,
+            allowed_actions=actions, response_contract=schema, **context))
+        self.last_proposal = proposal
+        action = selected_choice(proposal.get("action"), [*actions, "recall"], "action")
+        if action == "recall":
+            return self.recall(proposal)
+        if action == "scientific_tool":
+            return self.leaf(lambda: execute_tool(self, proposal), "scientific_tool:" + proposal["name"])
+        if action == "create_discovery_goal":
+            return self.leaf(lambda: create_discovery_goal(self, proposal), "create_discovery_goal")
+        if action == "integrate_theory":
+            return self.leaf(lambda: integrate_theory(self, proposal["additions"]), "integrate_theory")
+        return _execute_sheet_tool(self, proposal, visible)
+
+    def _scientific_credit(self, result):
+        from ...credit_assignment.causal_progress import compile_episode_points
+        from ...credit_assignment.causal_support import controller_projection
+        after = compile_episode_points(Ledger(result).causal_sheet)
+        before = compile_episode_points(Ledger(self.initial).causal_sheet)["points"]
+        points = {key: Fraction(value) - Fraction(before.get(key, "0"))
+                  for key, value in after["points"].items()
+                  if Fraction(value) > Fraction(before.get(key, "0"))}
+        projection = controller_projection(points, after["resolution"])
+        if not projection["supported"]:
+            return Credit(evaluated=False)
+        return Credit(evaluated=result.evaluated, quality_resolution=projection["resolution"],
+            qualities=tuple((self.credit_columns[0], key, value)
+                           for key, value in sorted(projection["values"].items())))
+
+    def parent_report(self, result, completion=None, request=None):
+        report = job_report(self, result, completion)
+        initial = {row["key"] for row in self.initial.causal_sheet_updates}
+        report["discovery_goals"] = [{"key": key, "version": row["version"]}
+            for key, row in Ledger(result).causal_sheet.of_kind("discovery_goal") if key not in initial]
+        return report
 
 
-class TheoryReconstructionSource(LiteratureSource):
-    commission_type = TheoryReconstructionCommission
-    instructions = RECONSTRUCTION_TASK
-    assessment_fields = {
-        "theory_account": "How the extracted entities, mechanisms and relationships explain the commissioned phenomenon.",
-        "assumptions_and_approximations": "Which source-grounded assumptions and approximations connect levels of description.",
-        "qualifications": "Disagreements, scope qualifications and limits of the reconstruction.",
-        "remaining_gaps": "Specific unresolved dependencies and which investigation could resolve them."}
-    credit_columns = ("reconstruction_contribution",)
+class _TypedTheorySource(_ScopedScientificSource):
+    """Typed integration and corrective transport shared by two scientific jobs."""
 
-    def credit(self, result):
-        return theory_credit(result, self.initial, self.commission.theory_request, self.credit_columns[0])
+    def _schema(self):
+        schema, visible, actions = super()._schema()
+        schema["oneOf"].append(integration_schema())
+        return schema, visible, [*actions, "integrate_theory"]
 
-    def propose(self, view):
+    def bounded_inputs(self, view, declared):
+        declared = deepcopy(declared)
+        fragment = self.ledger.causal_sheet.rows.get(self.commission.theory_request["reconstruction"])
+        shown = ({(fragment["key"], fragment["version"]): "theory_fragment"}
+                 if fragment is not None and "theory_fragment" in declared else {})
+        for field in ("source_evidence", "selected_sheet_inputs", "historical_sheet_inputs",
+                      "scientific_inputs", "historical_inputs"):
+            if field not in declared:
+                continue
+            projected = []
+            for row in declared[field]:
+                ref = (row["key"], row["version"])
+                if ref in shown:
+                    projected.append({**{name: value for name, value in row.items() if name != "data"},
+                                      "content_in": shown[ref]})
+                else:
+                    projected.append(row)
+                    shown[ref] = field
+            declared[field] = projected
+        return super().bounded_inputs(view, declared)
+
+    def after_verdict(self, unit, contribution, view):
+        super().after_verdict(unit, contribution, view)
+        if contribution.episode_update is not None:
+            returned = contribution.episode_update.report.as_record()
+            if returned["job"]["responsibility"] == "TheoryFormatRepairSource":
+                self.theory_repair = returned["repair_status"]["repair"]
+
+    def _typed_work(self, view, operation):
         key = self.commission.theory_request["reconstruction"]
         if key not in self.ledger.causal_sheet.rows:
             def initialize():
@@ -174,7 +312,9 @@ class TheoryReconstructionSource(LiteratureSource):
                 sheet = CausalSheet(self.ledger.causal_sheet.history)
                 return ResearchResult(causal_sheet_updates=(sheet.put(key, "theory_fragment", self.commission.seed),))
             return self.leaf(initialize, "declare_theory_vocabulary")
-        return _propose_work(self, view, gap_child=True)
+        if getattr(self, "theory_repair", None) is not None:
+            return repair_theory_unit(self, view)
+        return self._work(view, operation, **theory_context(self))
 
     def parent_report(self, result, completion=None, request=None):
         report = super().parent_report(result, completion, request)
@@ -182,31 +322,64 @@ class TheoryReconstructionSource(LiteratureSource):
         return report
 
 
-class TheoryGapSource(LiteratureSource):
-    commission_type = TheoryGapCommission
-    instructions = GAP_TASK
+class TheoryReconstructionSource(_TypedTheorySource):
+    commission_type = TheoryReconstructionCommission
+    instructions = RECONSTRUCTION_TASK
     assessment_fields = {
-        "gap_answer": "What returned literature and reasoning establish about the commissioned missing connection.",
-        "qualifications": "Scope, conflicts and assumptions of the proposed resolution.",
-        "remaining_gaps": "Unresolved questions, including relationships intentionally left unspecified."}
-    credit_columns = ("gap_contribution",)
+        "theory_account": "The connected source-grounded account, its entities, quantities, causal assertions and Gs.",
+        "assumptions_and_approximations": "Definitions and conditions behind expected generalizability bounds, with source qualifications.",
+        "formal_checks": "What chosen equivalence/intervention checks established, with exact tool and scientific references.",
+        "qualifications": "What remains conditional, disputed or unverified.",
+        "information_needs": "Pointed missing-information goals returned to Scientific and Root for Discovery."}
+    credit_columns = ("reconstruction_contribution",)
 
     def credit(self, result):
         return theory_credit(result, self.initial, self.commission.theory_request, self.credit_columns[0])
 
     def propose(self, view):
-        return _propose_work(self, view, gap_child=False)
+        return self._typed_work(view, "propose_theory_reconstruction")
 
-    def parent_report(self, result, completion=None, request=None):
-        report = super().parent_report(result, completion, request)
-        report.update(theory_report(self, result))
-        return report
+
+class TheoryRepairSource(_TypedTheorySource):
+    commission_type = TheoryRepairCommission
+    instructions = REPAIR_TASK
+    assessment_fields = {
+        "repair_account": "Concrete proposed and examined changes and their relation to the failure and affected Gs.",
+        "tested_consequences": "Actual checks, restored predictions, retained successes, losses and additional consequences.",
+        "G_preservation_or_alteration": "What establishes preservation, alteration or unresolved status of each examined G.",
+        "qualifications": "Fitting assumptions, information costs, scope and limits of corroboration and numerical comparison.",
+        "information_needs": "Specific missing evidence or premises for Scientific and Root to request from Discovery."}
+    credit_columns = ("repair_scientific_gain",)
+
+    def credit(self, result):
+        return self._scientific_credit(result)
+
+    def propose(self, view):
+        return self._typed_work(view, "propose_theory_repair")
+
+
+class TheoryComparisonSource(_ScopedScientificSource):
+    commission_type = TheoryComparisonCommission
+    instructions = COMPARISON_TASK
+    assessment_fields = {
+        "comparison_account": "The theories, tasks and Gs and their correspondence through native definitions and conditions.",
+        "established_results": "Source-grounded outcomes, executed checks, failures and useful G alterations.",
+        "repair_consequences": "Examined preserving/altering repairs, retained successes, prediction losses and information costs.",
+        "qualifications": "Scope and unresolved source-to-formalism correspondence; zero score does not refute broader findings.",
+        "information_needs": "Pointed information goals for Scientific and Root to send to Discovery."}
+    credit_columns = ("comparison_scientific_gain",)
+
+    def credit(self, result):
+        return self._scientific_credit(result)
+
+    def propose(self, view):
+        return self._work(view, "propose_theory_comparison")
 
 
 class TheoryFormatRepairSource(ResearchSource):
     commission_type = TheoryFormatRepairCommission
     instructions = FORMAT_REPAIR_TASK
-    assessment_fields = {"repair_answer": "Which exact output errors have been corrected and what remains unresolved."}
+    assessment_fields = {"repair_answer": "Which representation errors were corrected and which validator errors remain unresolved."}
     credit_columns = ("format_repair_contribution",)
 
     def __init__(self, run, inherited, *, rejected):
@@ -251,12 +424,11 @@ class TheoryFormatRepairSource(ResearchSource):
 
 
 def repair_theory_unit(source, view):
-    source_records = theory_context(source)["source_evidence"]
+    records = theory_context(source)["source_evidence"]
     commission = TheoryFormatRepairCommission(question=source.commission.question,
         inputs=tuple(dict.fromkeys([*source.commission.inputs, *source.selected_keys,
-                                   *(row["key"] for row in source_records)])),
-        snapshots=tuple(source.scoped_snapshots()),
-        theory_request=source.commission.theory_request)
+                                   *(row["key"] for row in records)])),
+        snapshots=tuple(source.scoped_snapshots()), theory_request=source.commission.theory_request, seed=None)
     child = TheoryFormatRepairSource(source.run, source.ledger.result(), rejected=source.theory_repair)
     return source.edge(source.run.child(view, child, "theory_format_repair", commission.question,
         contract=commission.report_contract(), proposal={"operation": "repair_theory_output"}))

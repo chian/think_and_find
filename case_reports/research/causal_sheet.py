@@ -16,6 +16,9 @@ from .importance import (PROTOCOL_FIELDS, RESULT_FIELDS, validate_protocol, vali
 from . import source_formalization
 from . import source_claims
 from .support_observations import observation_identity
+from . import discovery_goals
+from . import scientific_tools
+from . import examinations
 
 
 # Deliberately closed records. References below are scientific object identities,
@@ -39,6 +42,12 @@ FIELDS = {
     "causal_change": causal_support.CHANGE_FIELDS,
     "importance": PROTOCOL_FIELDS,
     "importance_result": RESULT_FIELDS,
+    "discovery_goal": discovery_goals.GOAL_FIELDS,
+    "discovery_finding": discovery_goals.FINDING_FIELDS,
+    "discovery_check": discovery_goals.CHECK_FIELDS,
+    "tool_receipt": scientific_tools.RECEIPT_FIELDS,
+    "task_result": ("assessment", "case_id", "original", "candidate", "reference", "error"),
+    "examination": examinations.FIELDS,
 }
 FIELDS.update(GRADING_FIELDS)
 
@@ -56,7 +65,7 @@ REPAIR_KINDS = {"not_a_repair", "better_definition", "missing_dependency", "gene
 REVISION_FIELDS = {"prior", "triggers", "changes", "change", "repair_kind", "proposed_rule",
                    "general_rules", "rule_reasoning", "retained", "lost", "new_predictions", "limitations"}
 TRIGGER_KINDS = {"evidence", "source_formalization", "premise", "theory", "theory_fragment", "application", "reasoning",
-                 "comparison", "repair", "expectation_break", "importance_result", *GRADING_FIELDS}
+                 "comparison", "repair", "expectation_break", "importance_result", "task_result", *GRADING_FIELDS}
 
 
 def _object(value, fields, name):
@@ -161,7 +170,13 @@ class CausalSheet:
         if kind not in FIELDS or not isinstance(data, dict) or set(data) != expected:
             raise ValueError(f"{kind!r} requires exactly its declared sheet fields")
         refs = []
-        if kind in GRADING_FIELDS:
+        if kind in {"discovery_goal", "discovery_finding", "discovery_check"}:
+            refs = discovery_goals.references(kind, data)
+        elif kind == "tool_receipt":
+            refs = scientific_tools.receipt_references(data)
+        elif kind == "examination":
+            refs = examinations.references(data)
+        elif kind in GRADING_FIELDS:
             refs = list(module_for(kind).references(data))
         elif kind == "theory_fragment":
             from .theory_language import evidence_references
@@ -183,6 +198,8 @@ class CausalSheet:
         elif kind == "source_formalization":
             refs = source_formalization.references(data)
         elif kind == "importance_result":
+            refs = [data["assessment"]]
+        elif kind == "task_result":
             refs = [data["assessment"]]
         elif kind in {"support_contribution", "causal_change"}:
             refs = causal_support.references(kind, data)
@@ -209,6 +226,12 @@ class CausalSheet:
 
     def snapshot_references(self, kind, data):
         """Direct audit references only; no recursive expansion of public arguments."""
+        if kind in {"discovery_goal", "discovery_finding", "discovery_check"}:
+            return discovery_goals.snapshot_references(kind, data)
+        if kind == "tool_receipt":
+            return scientific_tools.receipt_snapshot_references(data)
+        if kind == "examination":
+            return examinations.snapshot_references(data)
         if kind == "theory_fragment":
             from .theory_language import evidence_references
             return evidence_references(data)
@@ -218,7 +241,8 @@ class CausalSheet:
         if kind == "application" and data.get("inference_version"):
             return [{"key": data["inference"], "version": data["inference_version"]}]
         if kind == "causal_change":
-            return [data["source"], data["target"]]
+            from .task_comparisons import snapshot_references
+            return snapshot_references(data)
         if kind == "expectation_break":
             return [data["expectation"], *data["triggers"]]
         if kind == "expectation_support":
@@ -324,7 +348,13 @@ class CausalSheet:
         if len(key) > 160:
             raise ValueError("Scientific keys are identifiers, not prose; maximum 160 characters")
         refs = self._references(kind, data)
-        if kind in GRADING_FIELDS:
+        if kind in {"discovery_goal", "discovery_finding", "discovery_check"}:
+            discovery_goals.validate_record(self, key, kind, data)
+        elif kind == "tool_receipt":
+            scientific_tools.validate_receipt(self, data)
+        elif kind == "examination":
+            examinations.validate(self, key, data)
+        elif kind in GRADING_FIELDS:
             module_for(kind).validate(self, key, data)
         elif kind == "theory_fragment":
             from .theory_language import validate_fragment
@@ -351,6 +381,9 @@ class CausalSheet:
         elif kind == "importance_result":
             self._require_kind(data["assessment"], "importance")
             validate_result(data, self.rows[data["assessment"]]["data"])
+        elif kind == "task_result":
+            from .task_comparisons import validate_result as validate_task_result
+            validate_task_result(self, data)
         elif kind in {"expectation", "expectation_break", "expectation_support"}:
             self._validate_bounds(key, kind, data)
         elif kind in {"support_contribution", "causal_change"}:
@@ -487,7 +520,13 @@ class CausalSheet:
 
     def _claim_pins(self, row, pins):
         additional = {}
-        if row["kind"] in GRADING_FIELDS:
+        if row["kind"] in {"discovery_goal", "discovery_finding", "discovery_check"}:
+            additional = discovery_goals.context_pins(row["kind"], row["data"])
+        elif row["kind"] == "tool_receipt":
+            additional = scientific_tools.receipt_context_pins(row["data"])
+        elif row["kind"] == "examination":
+            additional = examinations.context_pins(row["data"])
+        elif row["kind"] in GRADING_FIELDS:
             additional = module_for(row["kind"]).context_pins(self, row["data"])
         elif row["kind"] == "expectation_support":
             for name in ("inference", "expectation"):

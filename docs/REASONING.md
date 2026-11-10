@@ -1,114 +1,69 @@
-# Reasoning within Episodes
+# Scientific reasoning inside the episode responsibilities
 
-Each scientific attempt repeatedly asks what its evidence supports, what remains
-uncertain and which available work could change the answer. The discovery root
-selects a new starting question after an attempt yields or ends in failure.
-Reasoning can identify an information need; returned evidence can revise that reasoning.
-These choices belong to the ongoing investigation.
+Scientific coordinates three concrete iterative children: Theory Reconstruction,
+Theory Repair and Theory Comparison. Each performs its own public scientific
+reasoning and can use the same primitive sheet and formal tools. There is no
+separate generic Reasoning episode or switch that grants literature acquisition.
 
-The scientific question is where a specified causal representation fails to
-transfer usefully and why it fails under the circumstances examined. Formalize
-the original and destination tasks, the connection through G, the attempted
-transfer, observed consequences and evidence for the proposed explanation.
-Do not require identical questions or observables as a discovery condition.
-Each numerical comparison still preserves compatible meanings and a fixed test.
-Omission, aggregation or reformulation can change G's explanatory role without
-denying an underlying mechanism. Mere omission is not proof of failure.
+Reconstruction defines the supplied theory and its causal claims from actual
+source excerpts. A theory can contain many Gs; relevant claims are registered
+with quantities, interventions, outcomes, grain and expected generalizability
+bounds. Assumptions can appropriately supply conditions behind those bounds.
+Prose is permitted where executable representation would invent information.
 
-Compare actual repairs and report what they retain, lose or require. A successful
-general repair is informative; an explained current failure is reportable even
-without a successful replacement. No search or finite model comparison proves
-all future reduction impossible. Keep source findings, conditional deductions,
-demonstrated reasons and proposed explanations distinct. The current change
-score measures only a narrower restored-prediction/relation-change case, so a
-zero score must not erase the broader scientific result. See
-[the calculator's limits and proposed extension](CAUSAL_SCORING_SHEET.md#pragmatic-transfer-failures-and-current-scoring-limits).
+Repair develops specific modifications and follows their consequences. A repair
+may preserve G by improving definitions or adding a dependency, or may alter G.
+Retain successful repairs, failed attempts, scope losses, fitting assumptions and
+information requirements. Comparison establishes the connection between accounts
+and evaluates the actual transfer question without requiring identical tasks,
+observables or opposite signs. Scope negative conclusions to examined alternatives.
 
-Each decision needs the episode's complete task instructions: its actual job,
-objects, scope, constraints, available kinds of decisions and requested result
-meanings. Instructions should explain the substantive reasoning problem and
-relevant alternatives. A role name or tool list is insufficient.
+## Formal tools in the scientific work
 
-Iteration steering contains only recorded information that affects the next
-choice: pertinent prior attempts, returned findings, current interpretations,
-qualifications, failures and relevant progress measurements. Select this from
-state rather than serializing the ledger or transcript. Keep detailed task
-instructions separate from concise steering; shortening history must not erase
-the assignment.
-Each completed own choice records its selected operands, information newly
-exposed, admitted records, diagnostic outcome and local credit change. The next
-decision receives the current owned assessment, newly completed factual outcomes
-and current full selected records. Its normal response updates that assessment;
-a successful update incorporates the results so they are not replayed on later
-turns. Full action records remain retrievable. The final result is returned even
-when the controller yields before another assessment update. Repeating an inspection remains an available
-choice; the episode can see whether the earlier inspection supplied anything.
+A tool call must answer a concrete question arising in reconstruction, repair or
+comparison. Scientific and all three children can invoke:
 
-Recording results preserves the episode's selected working inputs. Changed
-records are returned separately and do not replace that selection. Exposure
-feedback compares exact key/version pairs against records already presented to
-the episode: presenting an unchanged record again is distinct from exposing a
-new version. A reader may retain exact supplied context references with their
-original kinds and source provenance; context is not recast as a finding from
-the source being read. A rejected retained reference does not discard a valid
-reading summary or its unresolved questions.
+1. Scientific-object lookup for theories, Gs, bounds, comparisons, repairs and
+   recorded results. Select exact versions and definitions for the current task.
+2. Lean equivalence checking. State the two assertions and the assumptions under
+   which equivalence is claimed. Parameters and assumptions bind to selected
+   scientific fields. Actual checked proof output returns to the invoking episode;
+   an unsuccessful proof remains unresolved. It does not refute either statement.
+3. SCM/equation/simulation calculation. Supply an admitted model, its intervention,
+   outcome query and declared circumstances. Results return as reproducible
+   receipts and inform the next scientific choice. Formal model consequences do
+   not establish source fidelity or empirical premises.
+4. Task comparison. Define source-bound original/candidate/reference models for
+   one observable, units and fixed circumstances, then execute `compare_tasks`.
+   Numerical event-time comparisons can earn partial improvement credit even
+   when the task tolerance is still missed. A loss on another descriptive level
+   remains a separate finding. A full repair or necessity argument is not an
+   entry requirement, and support for original G is not a multiplier.
 
-Diagnostics belong to the action that produced them and retain their originating
-responsibility and repair owner across returns. A later successful inspection
-does not inherit those diagnostics as its own failure or grant new premise
-permissions. Prior problems remain available in recorded outcomes and the
-episode's chosen assessment. These communication fields do not assign credit
-or determine continuation.
+For example, Comparison might ask whether a proposed repair merely rewrites G
+under the same assumptions. Its Lean receipt can settle that particular formal
+correspondence. It might instead need interventional consequences of changing a
+focal relation; SCM receipts expose those consequences. No proof or calculation
+is manufactured solely because a tool is available.
 
-A parent constructs the child's task from its scoped commission. Initial facts
-are supplied explicitly. The child does not inherit the parent's whole context.
-The returned typed fields become relevant steering for the parent's own task.
-The parent can select `recall` to inspect an exact record version, grader receipt
-or job detail index instead of inheriting the child's full working history.
-Collect required interpretations in the actual work responses; project recorded
-facts directly, without a separate model composing a report.
+## Communication and evidence
 
-Keep source text, reported findings, supplied premises, inferred relationships,
-hypotheses and conclusions distinct. Interpretations retain their evidence,
-premises, alternatives and unresolved questions. New information can change an
-interpretation without changing the source text. A failed attempt preserves
-valid partial work and explains what needs repair.
+Missing source information becomes a typed discovery goal. Scientific passes it
+through Root to Discovery with its definitions, answer type and fulfillment
+criteria. Discovery returns source-grounded answers and verification receipts.
+Scientific interprets unresolved scientific correspondence by reconstructing or
+comparing the candidate; linked executed results can resolve the original goal.
+No model's assertion that a candidate passed substitutes for that work.
 
-For a theoretical source claim about G, Reasoning or a scientific episode may
-record a source-linked formalization using the same method and circumstance
-inputs as G's importance protocol. It states the derivation and limitations.
-The host executes the source and G formalisms and exposes aligned, conflicting
-and unresolved comparisons. A model's assertion that two claims agree is not
-the comparison. A source measurement remains a measured target, including a
-Boolean target when the reported result supports one, rather than an invented
-SCM or simulation rule.
+Public arguments retain premises, steps, conclusions and limitations. A first
+source-grounded examination of G earns a deduplicated progress registration,
+independently of its conclusion. Support and useful-change credit use separate
+explicit operands. A model verdict, adjective or arbitrary merit grade supplies
+no numerical score. Repeated descriptions of one result do not create new credit.
 
-Scoring needs explicit meanings and operands for the contribution being measured.
-Investigation progress and support for a favored conclusion are different
-quantities: a useful refutation can improve the investigation. The numerical
-controller observes actual contributions under the bound policy. It does not
-supply an action itinerary or decide scientific truth.
-
-For an episode trace, show the recurring question, information available before
-a choice, selected work, actual returned information, changed interpretation,
-measured contribution and controller outcome. A later choice should be
-understandable from those records. This trace is how episode behavior and scoring
-are examined together with the user.
-
-The scientific attempt directly commissions Theory Reconstruction and Reasoning.
-Reconstruction owns the connected explanatory account and can commission Search
-Strategy, a source reread, Reasoning or a substantive-gap investigation. Its
-literature children return additions to the same typed fragment, provenance and
-explicit open questions. Reconstruction and the scientific parent can turn these
-into scoped Reasoning assignments, selecting the needed evidence, G, expected
-generalizability bounds, premises and historical versions. Reasoning cannot
-enable acquisition; it reports missing premises to its parent.
-
-Page translates extracted evidence into the fragment while retaining local
-extraction credit. Search and Search Strategy use request-relative typed
-contributions. Scientific and Reasoning episodes own G grading and scientific
-score operands. A Theory Gap child investigates a missing substantive connection;
-Theory Format Repair corrects rejected typed additions, and Extraction Repair
-corrects malformed Report or Lexical output. These repairs retain valid work and
-return unresolved errors without converting validator acceptance into a
-scientific verdict. See [Theory reconstruction](THEORY_RECONSTRUCTION.md).
+Versioned inputs identify what a finding examined. Append-only reconstruction
+additions retain earlier snapshots and their findings. A later theory or counter-
+example is additional scientific work, not automatic invalidation by a new hash.
+Each episode receives selected information and factual returns, not parent private
+histories or recursively copied report bodies. Its numerical iterator controls
+continuation; scientific uncertainty is never replaced by a usage cutoff.

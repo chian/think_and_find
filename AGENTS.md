@@ -37,9 +37,12 @@ proof that every reduction must fail. Tasks can differ in question, observable,
 organism, scale or grain; justify their connection through G. Distinguish an
 observed failure, an explanation of it and the consequences of examined repairs.
 A useful omission or reformulation need not reverse a sign. Preserve successful
-repairs and explained failures even without a replacement. The current numerical
-change calculator covers a narrower relation-change/restored-prediction result;
-its zero score is not a refutation of other pragmatic failures. See the current
+repairs and explained failures even without a replacement. The numerical
+task-comparison calculator credits demonstrated applicability differences and
+gradual task-error improvement, including useful extensions beyond original
+expected generalizability bounds. Original-G support stays separate; full repair,
+a relation reversal and failed competing alternatives are not prerequisites.
+Results remain conditional on declared models and mappings. See the current
 user clarification in docs/CURRENT_GOAL.md and limits in docs/CAUSAL_SCORING_SHEET.md.
 
 Use the user's term "expected generalizability bounds" exactly. Distinguish those
@@ -72,15 +75,19 @@ a predetermined single case for the entire application.
 
 Every episode owns a specific set of iterative decisions, with its own complete
 instructions, numerical credit projection, input scope and return contract.
-Never switch one generic episode between scientific parent, search and reasoning
-roles. The scientific parent commissions Theory Reconstruction or Reasoning.
-Theory Reconstruction owns a typed connected theory fragment and can commission
-Search Strategy, a focused source reread, Reasoning, or investigation of a
-recorded substantive gap. Search Strategy translates acquired source information
-into that same vocabulary. Typed-output repair and substantive-gap investigation
-have separate child episodes; the latter can acquire additional literature.
-There is no generic Investigation wrapper and no search-enabled switch. Sharing the
-Episode loop and primitive sheet/calculation tools does not share decision ownership.
+Never switch one generic episode between different scientific or acquisition
+roles. Root is Root and alone uses VOC. It commissions sibling Discovery and
+Scientific episodes. Discovery chooses targeted queries for explicit scientific
+goals and uses the existing Search/Page/Table/Report/Lexical acquisition subtree.
+Scientific commissions Theory Reconstruction, Theory Repair and Theory Comparison.
+Those children do not search: missing information becomes typed discovery goals
+returned through Scientific and Root. Scientific and all three children can
+invoke scientific-object lookup, actual Lean equivalence checking and existing
+SCM/equation/simulation tools. Tools are selected for scientific questions, not
+mandatory stages or extra episodes. Ordinary yield applies below Root. Shared
+scientific records carry results, criteria and feedback between the sibling arms.
+There is no generic Reasoning/Investigation execution wrapper or search-enabled
+scientific mode. Sharing tools does not share decision ownership.
 
 Every Episode is a decision point that iterates. Identify its recurring
 question, available choices, received information and how outcomes can change

@@ -18,15 +18,15 @@ from .causal_commission import SheetCommission
 from .grading import GRADING_FIELDS
 
 TREE = {
-    "discovery": ("scientific",),
-    "scientific": ("theory_reconstruction", "reasoning"),
-    "theory_reconstruction": ("search_strategy", "page", "reasoning", "theory_gap", "theory_format_repair"),
-    "theory_gap": ("search_strategy", "page", "reasoning", "theory_format_repair"),
+    "root": ("discovery", "scientific"),
+    "discovery": ("search",),
+    "scientific": ("theory_reconstruction", "theory_repair", "theory_comparison"),
+    "theory_reconstruction": ("theory_format_repair",),
+    "theory_repair": ("theory_format_repair",),
+    "theory_comparison": (),
     "theory_format_repair": (),
-    "reasoning": (),
-    "search_strategy": ("search", "theory_format_repair"),
-    "search": ("page", "theory_format_repair"),
-    "page": ("source_table", "report", "lexical_probe", "theory_format_repair"),
+    "search": ("page",),
+    "page": ("source_table", "report", "lexical_probe"),
     "source_table": (), "report": ("extraction_repair",), "lexical_probe": ("extraction_repair",),
     "extraction_repair": (),
 }
@@ -116,13 +116,13 @@ class ResearchRun:
                                for path in sorted(paths)}
         self.context = {"research_request": research_request}
         units = {
-            "discovery": "one completed scientific attempt from a selected starting question",
-            "scientific": "a completed theory reconstruction, reasoning commission, or scientific sheet action",
-            "theory_reconstruction": "a completed literature commission, substantive gap investigation, typed integration or reasoning check",
-            "theory_gap": "a completed focused literature commission, source reread, typed integration or reasoning check",
+            "root": "one completed Discovery or Scientific commission, or an explicit new information goal",
+            "discovery": "one completed targeted search or source-grounded finding against explicit scientific criteria",
+            "scientific": "one completed reconstruction, repair, comparison or scientific tool/sheet action",
+            "theory_reconstruction": "one formalization, derivation, scientific check or representation repair",
+            "theory_repair": "one proposed amendment, consequence check or scientific repair assessment",
+            "theory_comparison": "one mapped theoretical comparison, formal check or source-grounded examination of G",
             "theory_format_repair": "a corrected typed theory addition and its validator feedback",
-            "reasoning": "a completed derivation, check, comparison or calculation for the assigned logical question",
-            "search_strategy": "a completed search for one proposed query",
             "search": "a completed source investigation from this query's results",
             "page": "a completed selected reading episode",
             "source_table": "one table query and source-grounded extraction",
@@ -132,7 +132,7 @@ class ResearchRun:
         }
         self.grains = {name: Grain(name, unit, "scoped findings and causal-sheet state", self.controller)
                        for name, unit in units.items()}
-        self.tree = EpisodeTree(self.grains["discovery"], {
+        self.tree = EpisodeTree(self.grains["root"], {
             self.grains[parent]: tuple(self.grains[name] for name in children)
             for parent, children in TREE.items() if children})
         self.emit_trace("run_started", research_request=research_request,
@@ -140,10 +140,10 @@ class ResearchRun:
 
     def controller(self, path):
         source = self.controller_specs[path[-1][1]]
-        if source.episode_grain in {"discovery", "scientific"}:
-            from .computation_yield import ScientificTransitionModel, ScientificVOCController
-            model = self.computation_models.setdefault(source.episode_grain, ScientificTransitionModel())
-            controller = ScientificVOCController(source, path, model)
+        if source.episode_grain == "root":
+            from .computation_yield import RootTransitionModel, RootVOCController
+            model = self.computation_models.setdefault(source.episode_grain, RootTransitionModel())
+            controller = RootVOCController(source, path, model)
         else:
             controller = ResearchController(source.credit_columns, window=self.limits.yield_window,
                 root_window=self.limits.root_yield_window, initial=source.credit(source.ledger.result()), point_scores=True,
@@ -153,7 +153,7 @@ class ResearchRun:
         return controller
 
     def computation_controller(self, source):
-        if source.episode_grain in {"discovery", "scientific"}:
+        if source.episode_grain == "root":
             return next((controller for path, controller in self.live_controllers.items()
                          if path[-1][1] == source.controller_key), None)
         return None
@@ -186,7 +186,7 @@ class ResearchRun:
             source.selected_keys = list(source.commission.inputs)
         self.sources[goal.goal_id] = source
         self.controller_specs[key] = source
-        if grain == "discovery":
+        if grain == "root":
             self.root_source, self.root_key = source, key
         episode = Episode(self.grains[grain], key, source, EpisodeRequest(
             goal, ResearchMessage(str(goal.objective), (), diagnostic_value(proposal or {})), contract),
@@ -409,6 +409,10 @@ class ResearchSource:
         committed = self.run.global_goal.ledger.result()
         working = Ledger(committed)
         working.merge(changed_records(result, self.ledger.result()))
+        from .discovery_goals import recheck_findings
+        checks = recheck_findings(working.causal_sheet)
+        if checks:
+            working.merge(ResearchResult(causal_sheet_updates=tuple(checks)))
         self.pending = working.result(evaluated=result.evaluated, stop_reason=result.stop_reason)
         self.pending_global = changed_records(self.pending, committed)
         return self.credit(self.pending)

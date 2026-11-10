@@ -1,82 +1,81 @@
-# Search and reading Episodes
+# Discovery and source acquisition
 
-Theory Reconstruction delegates increasingly focused literature questions.
-Reconstruction, Gap, Strategy, Search, Page and each reader retain their own
-iteration and local continuation. A literal provider query is separate from the information question
-that gives the search its purpose. Commissions share a typed theory fragment,
-requested component kinds and a focus; see [Theory reconstruction](THEORY_RECONSTRUCTION.md).
+Discovery owns targeted query planning against the exact scientific information
+goal forwarded by Root. A goal supplies scientific definitions and snapshots,
+a custom answer schema and individually identified typed requirements.
+Discovery returns source-grounded information to Scientific through Root.
 
-The scientific objective follows a candidate G between explanatory tasks to
-discover useful applications, attempted transfers, demonstrated failures and
-their explanations. Literature commissions reconstruct the relevant definitions,
-relationships, mechanisms, assumptions and derivations; the scientific parent
-and Reasoning assess their bearing on G.
-The source and destination questions, quantities, organisms and scales can differ.
-Their correspondence must be established through G; a shared label alone is
-insufficient. Requiring identical settings or opposite signs on one observable
-would prematurely exclude some relevant failures.
+```text
+Discovery → Search → Page → Table / Report / Lexical Probe
+                                  Report/Lexical → Extraction Repair
+```
 
-Queries use the natural phenomenon's terminology. Depending on the commissioned
-uncertainty, evidence may be described as prediction failure, model reduction,
-coarse-graining, closure, parameter identifiability or failed refinement. These
-are possible query concepts, not required searches or a methodological reading
-list. Sources need not say "pluralism" or "contradiction". Search includes useful
-refinements that challenge the current failure hypothesis.
-The mismatch need not be explicitly identified in one paper. Return sourced
-premises and a precise reasoning question when the parent must compare or derive
-the transfer across literature; distinguish that work from published outcomes.
+Search selects sources for one literal query. Page chooses reading using source
+structure and recorded coverage. Table returns native rows/headers; Report reads
+ordered windows; Lexical Probe selects query-ranked passages. Their scientific
+extraction is not a theory-reconstruction or global-G grading job.
 
-Readers preserve the actual representation or repair attempted, the task and
-its native quantities and assumptions, reported outcomes, and the evidence for
-any proposed cause of failure. Report losses on other tasks, fitting assumptions
-and information requirements when supported; do not invent costs or collapse
-them into a subjective grade. Missing information or an unsuccessful search is
-not a demonstrated scientific failure. Page and upstream assessments keep
-observed failure, its proposed or demonstrated explanation, tested repairs and
-untested possibilities distinct. No conclusion must exclude all future repairs.
+Source claims and measured observations retain exact evidence versions, literal
+quotations and character/table anchors. Discovery and Search can submit a typed
+finding with native claim/observation selectors. The host verifies the actual
+commissioned requirements and saves check receipts. Each criterion is
+`{id, requirement}`. A native requirement contains only its literal
+`source_claim` or `source_value` predicate. Its result is `native_match` or
+`native_no_match`, explicitly scoped to `native_fields_only`; IDs and surrounding
+prose do not add a scientific meaning to that check.
 
-| Episode | Recurring choice and relevant feedback |
-| --- | --- |
-| Reconstruction | Connect returned components, commission literature or reasoning, or investigate a recorded gap. |
-| Gap | Choose focused search, source rereading, reasoning or integration to address a substantive missing connection. |
-| Strategy | Propose a useful query or integrate returned evidence, using the theory request and earlier outcomes. |
-| Search | Select another returned source or integrate its evidence into the commissioned fragment. |
-| Page | Select table investigation, ordered reading, targeted passage work or typed integration using source structure, coverage and returned findings. |
-| Table | Choose exact rows or a literal query over remaining rows, using prior query outcomes. |
-| Ordered reading | Examine further document windows with retained context, unresolved links and exact anchors. |
-| Targeted passage investigation | Examine source-local passages relevant to its question, retaining scope and coverage. |
-| Theory Format Repair | Correct rejected typed additions using exact validator errors and supplied evidence. |
-| Extraction Repair | Correct Report or Lexical extraction using source text, rejected output and validator feedback. |
+A scientific requirement contains its question, an optional native candidate
+filter and a scientific predicate. The candidate can earn preliminary Search
+information credit, but cannot fulfill the scientific requirement. A
+`theory_structure` predicate checks a selected component and its transitive typed
+reference closure in a linked theory fragment, grounded in the finding's exact
+source evidence. Unrelated components elsewhere in a fragment cannot supply
+that grounding. Equivalence, causal dependence and distinct-theory requirements
+retain their separate formal checks. Missing matching scientific operands stay
+pending for Scientific; receipts retain the requirement, verification scope,
+component and exact source versions. A useful negative source finding
+can match a literal predicate asking about failure or conditions. Missing evidence
+or a retrieval failure is not a negative scientific result.
 
-Reconstruction, Gap, Strategy and Search count new source-grounded typed
-contributions to the request. Page counts only distinct extracted source
-information across its readers; readers and Extraction Repair count their local
-extraction. No literature episode uses global G credit or calls G graders.
-Valid partial findings and unresolved errors return through ordinary child
-contracts. Theory Format Repair and Extraction Repair iterate until their
-requested output is repaired or the estimator yields.
+Unlabeled source operands use host-defined document units and exact source
+occurrences for identity. The reader selects unit-labeled text and quantity,
+result, condition or statement anchors; the host validates their quotes and coordinates.
+An observation's required result anchor selects its exact source value and its
+1-based occurrence within the selected unit portion. The host checks that literal
+against the native value. Equal-valued cells at different source positions remain
+distinct. Descriptive condition anchors remain provenance and never mint another
+observation or claim when added, dropped or reworded.
+Quote uniqueness is checked within the selected unit and supplied source span,
+so repeated text elsewhere in the passage does not invalidate an explicit unit.
+Changing an extraction key, descriptive locator or scientific wording does not
+create a new occurrence. Overlapping mentions of the same role reuse a recorded
+identity; an anchor spanning several recorded mentions is ambiguous and returns
+to ordinary Extraction Repair. Distinct quantities and actual result occurrences remain separate.
+Native equation/observation IDs and table-cell identities retain their own roles.
+These checks identify source occurrences, not semantic equivalence across
+different passages or documents. Scientific must assess those correspondences.
 
-The bindings are in `case_reports/research/acquisition.py`, `theory_episodes.py`
-and `extraction_repair.py`; document
-addresses and tables are in `documents.py`, lexical ranking in `lexical.py`, and
-coverage projections in `communication.py`. `SearchPageProposer` supplies page
-assessment and selection. Firecrawl adapters provide search and retrieval.
+Source-level and Discovery local credit saturates when its commissioned criteria
+are answered at their declared verification scope. Global discovery information credit uses stable source operands,
+not duplicated findings or arbitrary tool/check aliases. Additional scientific
+interpretation is explicitly pending for Scientific; linked executed results can
+resolve that requirement later through a retained receipt. Native-information
+and scientific-fulfillment totals are reported separately. Children do not receive
+or sum global scientific merit credit.
 
-A table preview does not restrict queries to those rows. The table episode can
-query remaining rows repeatedly, including matches outside the preview. Each
-selected reading window retains header context and exact source addresses.
+Table previews do not limit which remaining rows may be queried. Document windows
+bound one processing input, not the whole source. Record actual examined coverage,
+remaining material, failed retrievals and qualifications. Numerical yield does not
+establish whole-document coverage or absence from the literature.
 
-Ordered reading advances through document windows. A window limit bounds one
-input, not the whole document. Targeted passage work can examine material later
-in the source or deliberately reexamine a passage for a changed question. Report
-actual examined ranges and remaining material. Numerical yielding does not
-establish whole-document coverage or absence of evidence.
+Extraction Repair corrects host-identified rejected fields using exact validator
+feedback. It retains valid work and returns unresolved errors normally. Its
+source-anchor corrections cannot rewrite accepted measurement or claim fields.
+Pending anchors supply no extraction identity until validated. Its
+continuation uses the same ordinary estimator; no episode timeout or fixed retry
+allowance is introduced.
 
-Preserve source versions, exact quotations, addresses, retrieval provenance and
-failed reading attempts. Reading memory supplies working context; it is not an
-independent source. Retrieval success does not establish that the provider
-returned every supplement, figure or table.
-
-These responsibilities are reflected in the role-specific instructions and
-source-window extraction contract. Behavior on a fresh research run still needs
-evaluation; prompt coverage alone does not establish improved discovery.
+Scientific's children reconstruct, repair and compare theories from the supplied
+excerpts and records. They return pointed additional information goals when
+needed. There is no Search Strategy wrapper, search-enabled scientific episode,
+or independent source-level scientific assessment loop.

@@ -1,0 +1,113 @@
+{
+  "call": 34,
+  "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3865114/",
+  "source_version": "94d30b2053b342e6161f25ebfa8fc069e26ea6417eb8d8edd80b93e6e047d52c",
+  "passage": {
+    "key": "chunk:11:range:36890:40890:part:0",
+    "start": 36890,
+    "end": 37690,
+    "source_units": [
+      {
+        "unit": "source-unit:7109997850c51ab6daea7f94cc96712212bc8331c1f41826948131d95b6023dd",
+        "start": 36890,
+        "end": 37019,
+        "text": "Metacommunities have two patches ( _M_ = 2), one poor patch (left column), where prey carrying capacity ( _K1_) is kept constant,"
+      },
+      {
+        "unit": "source-unit:b0d8c35fb44cb8a1cede8c03b8b9869698292d95dafa2c1993f97ad8ba499103",
+        "start": 37020,
+        "end": 37123,
+        "text": "and one enriched patch (right column), where prey carrying capacity ( _K2_ =  _K1_ + _E_) is increased."
+      },
+      {
+        "unit": "source-unit:0c4b3e6efafb79b4243f7fd2cca278fbf307417a0e17634f8bd222987d74f0ce",
+        "start": 37124,
+        "end": 37126,
+        "text": "A."
+      },
+      {
+        "unit": "source-unit:8cf1ea78ae67862571143eb1b13192dd36b157dd1d6cdc5086721cd0eecdd632",
+        "start": 37127,
+        "end": 37156,
+        "text": "Low dispersal ( _dN_ = 0.001)"
+      },
+      {
+        "unit": "source-unit:a2f4cca7ea599205550174b3f7c4526a4e9bc06aeb39d95144d9849047cd8372",
+        "start": 37157,
+        "end": 37189,
+        "text": "and low enrichment ( _K2_ = 30)."
+      },
+      {
+        "unit": "source-unit:73533ce26e74146eacacb382e1a238c42b4506341a1da20f19ccf32522576cef",
+        "start": 37190,
+        "end": 37192,
+        "text": "B."
+      },
+      {
+        "unit": "source-unit:ed1543d63e9a72333aee71742a02790ebebe8dee194d541ee8c23addc0a96365",
+        "start": 37193,
+        "end": 37222,
+        "text": "High dispersal ( _dN_ = 1000)"
+      },
+      {
+        "unit": "source-unit:6f5a396a1f9c6e9e742c56ace0c1b70887347cbc7649efb159d34a932306e2d7",
+        "start": 37223,
+        "end": 37255,
+        "text": "and low enrichment ( _K2_ = 30)."
+      },
+      {
+        "unit": "source-unit:c0d0679f5dab0cb018401a4dca767ba8aa0282448bd77a78d8428328c7e7fc13",
+        "start": 37256,
+        "end": 37258,
+        "text": "C."
+      },
+      {
+        "unit": "source-unit:47f4c820738ba3fa46caddefb218f67c7868cf8f7b152c76e735e985887c63f5",
+        "start": 37259,
+        "end": 37288,
+        "text": "High dispersal ( _dN_ = 1000)"
+      },
+      {
+        "unit": "source-unit:d7f30bc5f8c478c0df94760680336b166416b1003bf252c15a5d1dbb2d53dfbc",
+        "start": 37289,
+        "end": 37322,
+        "text": "and high enrichment ( _K2_ = 40)."
+      },
+      {
+        "unit": "source-unit:75aa80f48343f8be5595e547a6f7e2fb91e002ca9877d15dc159749e6a7fd88c",
+        "start": 37323,
+        "end": 37397,
+        "text": "These three cases correspond to the three points labeled respectively A, B"
+      },
+      {
+        "unit": "source-unit:823ddffc952b3df38bc92235f4b885bd162fba7e5f275d3f9fc2da188e6ff953",
+        "start": 37398,
+        "end": 37505,
+        "text": "and C on the panels of the [Figure 3](https://pmc.ncbi.nlm.nih.gov/articles/PMC3865114/#pone-0082969-g003)."
+      },
+      {
+        "unit": "source-unit:3634a5835d7c8bbcee88c049d58391fedf2e24fed85323540206af3674408c4f",
+        "start": 37506,
+        "end": 37530,
+        "text": "Other parameters values:"
+      },
+      {
+        "unit": "source-unit:8cb1b93dda6f0c4b05cf0b731e64d72048a14a13e9447c645e9befad8685993a",
+        "start": 37531,
+        "end": 37609,
+        "text": "_r_ = 10, _K1_ = 18.3, _e_ = 0.1, _a_ = 5, _th_ = 0.01, _m_ = 1, _dP_ =  _dN_."
+      },
+      {
+        "unit": "source-unit:39063ef7ddf20172953aea3720f894ebe46e86d6dfe431ba2269bdd9e644c1b6",
+        "start": 37611,
+        "end": 37690,
+        "text": "Thus, as long as dispersal is sufficiently high, enrichment distribution is het"
+      }
+    ]
+  },
+  "anchor": {
+    "span": "chunk:11:range:36890:40890:part:0",
+    "unit": "source-unit:a2f4cca7ea599205550174b3f7c4526a4e9bc06aeb39d95144d9849047cd8372",
+    "quote": "and low enrichment ( _K2_ = 30)."
+  }
+}

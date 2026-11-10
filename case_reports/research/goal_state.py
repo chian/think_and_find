@@ -1,4 +1,4 @@
-"""Five explicit scientific credit components shared by existing Episodes."""
+"""Scientific and verified discovery progress shared through Root."""
 from fractions import Fraction
 
 from ...credit_assignment.causal_progress import combine_episode_points, compile_episode_points
@@ -29,11 +29,11 @@ class ScientificGoalState:
 
     def preview(self):
         calculation = self.ledger.causal_sheet.calculate()
-        score = combine_episode_points(calculation["support_credit"], calculation["registrations"])
+        score = combine_episode_points(calculation["support_credit"], calculation["registrations"], calculation["discovery"])
         projection = controller_projection(score["points"], score["resolution"])
         return {"scientific_calculations": calculation,
                 "total_score": float(Fraction(score["total"])),
                 "score_components": {name: float(Fraction(value)) for name, value in score["components"].items()},
-                "score_binding": "sum_of_five_scientific_components" if projection["supported"] else "unsupported_controller_precision",
+                "score_binding": "sum_of_investigation_components" if projection["supported"] else "unsupported_controller_precision",
                 "controller_limitation": None if projection["supported"] else projection["reason"],
                 "meaning": score["registrations"]["meaning"] + " " + score["support"]["meaning"]}

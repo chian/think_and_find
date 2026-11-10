@@ -1,7 +1,8 @@
-"""Source-anchored scientific statement operands; extraction earns zero credit.
+"""Source-anchored statements; registration supplies no scientific merit credit.
 
 These are registrations of what a source appears to state. Structural checks do
 not establish source fidelity, causal truth, or support for a candidate G.
+Readers measure distinct returned source operands with their local extraction credit.
 """
 
 from hashlib import sha256
@@ -70,8 +71,8 @@ def source_anchor(evidence_data):
     return quote, version
 
 
-def claim_identity(evidence_data, claim_id):
-    """Identify a recorded source claim for inspection, without assigning credit."""
+def validate_claim_fields(evidence_data, claim_id):
+    """Validate native fields independently of the host occurrence sidecar."""
     _text(claim_id, "selector")
     if not isinstance(evidence_data, dict):
         raise ValueError("Source claim needs an evidence record")
@@ -111,12 +112,21 @@ def claim_identity(evidence_data, claim_id):
             raise ValueError("Equation claim needs equality and defined symbols")
     elif symbols:
         raise ValueError("Symbol definitions belong to equation claims")
-    provenance = {"source": evidence_data["source"], "source_version": version,
-                  "evidence_locator": evidence_data["locator"], "structure": structural}
-    canonical = json.dumps(provenance, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    ident = sha256(canonical.encode()).hexdigest()[:32]
     detail = {"claim": claim_id, "statement_id": statement_id, "native_locator": locator,
               "source": evidence_data["source"], "source_version": version,
               "evidence_locator": evidence_data["locator"], "study_id": evidence_data["study_id"],
               "quote": quote, "structure": structural}
+    return detail
+
+
+def claim_identity(evidence_data, claim_id):
+    """Identify a native statement label or a host-anchored source occurrence."""
+    detail = validate_claim_fields(evidence_data, claim_id)
+    if detail["statement_id"]:
+        canonical = [detail["source"], detail["source_version"],
+                     " ".join(detail["study_id"].split()), "statement_id", detail["statement_id"]]
+        ident = sha256(json.dumps(canonical, ensure_ascii=False).encode()).hexdigest()[:32]
+    else:
+        from .source_anchors import entry_identity
+        ident = entry_identity(evidence_data, "claims", claim_id)
     return ident, detail

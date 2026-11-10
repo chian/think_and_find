@@ -1,68 +1,73 @@
-# Theory reconstruction
+# Scientific theory reconstruction
 
-The scientific parent commissions reconstruction of a theory's connected
-explanatory structure. The initial request supplies scientific scope and any
-known entities, property definitions and quantity roles. Empty component maps
-allow the theory's vocabulary to be discovered from sources. Focused questions
-come from dependencies found during reconstruction.
+Theory Reconstruction is an iterative child of Scientific. It converts supplied
+source excerpts into a connected formal account. Discovery owns literature
+acquisition; missing source premises become explicit discovery goals returned
+through Scientific and Root, not a search-enabled reconstruction child.
 
-`theory_language.py` defines one closed vocabulary for entities, quantities,
-equations, causal relations, mechanisms, assumptions, derivations, approximations
-and gaps. Quantities distinguish coordinates, states, parameters and literal
-constants; field/function applications bind their declared arguments. Source
-references resolve exact evidence record versions. Every component uses that
-same vocabulary across Page, Search, Search Strategy and Theory Reconstruction.
+`theory_language.py` defines entities, quantities, equations, causal relations,
+mechanisms, assumptions, derivations, approximations and gaps. Quantities separate
+coordinates, states, parameters and constants; functions bind declared arguments.
+All component evidence resolves exact source records and versions. Assumptions
+can legitimately state conditions behind expected generalizability bounds.
+Prose remains valid when a numerical expression would invent source content.
 
-A mechanism names at least one declared entity, quantity or statement as its
-output: what the process produces or explains. Research gaps remain references,
-not mechanism outputs. Qualitative outputs can be represented explicitly; that
-structural condition does not establish source fidelity or verify equations.
+A theory can contain many causal assertions and relevant Gs. Reconstruction
+registers their definitions and scientific relationships as appropriate, retaining
+provenance, native conditions and unresolved information. Its role is not limited
+to filling a prescribed equation-shaped blank. Scientific and Comparison can use
+the result to choose which G relationships to investigate across accounts.
 
-The shared `theory_fragment` is a versioned scientific-sheet record. Additions
-cannot replace an existing component. An explicit new component may supersede
-an older one while retaining its definition and provenance. The fragment can be
-supplied as a scientific premise to the parent or Reasoning.
+## Iteration and formal tools
 
-Reconstruction repeatedly chooses integration, literature search, source reread,
-Reasoning or a substantive-gap child. A substantive-gap child investigates an
-actual recorded question and can commission further searches or rereads. A
-separate theory-format repair child corrects rejected typed additions using
-validator errors and the same evidence. Report and Lexical readers have an
-extraction-repair child for malformed source extraction. All use the common
-Episode loop and numerical yield estimator.
+Reconstruction repeatedly chooses typed integration, public reasoning/sheet
+operations, scientific-object lookup, an equivalence or causal calculation, or a
+pointed new discovery goal. Lean checks an explicitly formulated equality or
+logical equivalence under source-bound assumptions; a failed proof stays
+unresolved. SCM/equation/simulation tools evaluate declared models and
+interventions. Their exact receipts return to Reconstruction's next decision.
+Tool use is selected for a scientific question and is not a mandatory stage.
 
-Extraction repair changes only host-identified rejected targets; accepted fields
-remain fixed. A whole response can be replaced only after its original parsing
-or top-level shape failed. Failed corrective calls retain the current response
-and outstanding targets, while valid partial corrections become fixed.
+A mechanism names a declared entity, quantity or statement as its output.
+Research gaps are references, not mechanism outputs. Qualitative outputs can be
+represented without claiming scientific truth from structural acceptance.
+Scientific source-to-model fidelity remains explicit.
 
-Search Strategy and Search translate evidence into the fragment and return an
-exact key/version reference, added component IDs and unresolved requirements.
-The current typed fragment is supplied once in the parent's decision context;
-child returns do not copy its component definitions. Full versions remain in
-the scientific sheet and can be retrieved through ordinary `recall` decisions.
-Raw source content is supplied for commissioned or selected records and evidence
-cited by rejected additions during format repair. Other acquired evidence is
-listed by exact key/version, source and locator, so the episode can select what
-to recall. It is not automatically copied into every subsequent prompt.
-Normalization reports give form identities, matching statement groups and
-unresolved operations; they do not serialize recursively expanded dependencies.
-These projections use no character, item or token quota. Final unreviewed
-outcomes remain part of the ordinary episode return. Request-relative credit is
-new source-grounded component identities within the commissioned reconstruction,
-requested component kinds and focus. Page and processing readers retain local
-extraction credit. Child scores are not summed; each parent recomputes its own
-request projection. Global G credit does not drive literature continuation.
+## Versioned state and communication
 
-Exact rational normalization deduplicates supported algebraic forms on the same
-declared quantities and retained domains. Re-citing a relationship does not
-create another law. Unknown symbols, invalid signatures, silent overwrites and
-identically zero denominators produce validator errors. Unsupported analytic
-equivalence and prose equivalence remain unresolved. Structural acceptance does
-not verify a source interpretation or establish a causal claim.
+The shared `theory_fragment` is append-only. Existing components cannot be
+replaced; an explicit new component may supersede an older one while retaining
+its definition and provenance. Earlier findings resolve the recorded fragment
+snapshot and keep their credit when later additions advance its version.
 
-`scripts/run_theory_reconstruction.py` is a focused live experiment of this
-production subtree. It uses configured providers and the ordinary controller;
-only its question and output directory are supplied. Run it through the
-per-window machine-resource launcher. Trace, parent return, theory graph,
-controller state and complete audit remain under the launch's run directory.
+Scientific commissions a question, selected records, exact historical inputs,
+a reconstruction ID, requested component kinds and focus. An explicit seed can
+declare a new reconstruction's original question and initial vocabulary.
+Returned source material includes exact excerpts and source anchors, not merely
+paper titles or another episode's assessment. Parent private histories and
+recursive reports are not input.
+
+The return identifies the exact shared fragment version, added component IDs,
+scientific results, new discovery goals and unresolved requirements. Full graph
+bodies are supplied once in selected decision context; returns use references.
+Unselected source records have an index and are retrievable through normal
+record recall. Final unreviewed outcomes remain in factual returns.
+
+Theory Format Repair corrects rejected declarations, references or constructor
+shapes using exact validator feedback. It cannot invent source evidence or turn
+scientific uncertainty into a made-up equation. Valid partial work is retained.
+The regular numerical iterator governs its repeated corrections.
+
+## Scientific credit and limitations
+
+Reconstruction's local yield measures source-grounded requested contributions,
+deduplicated by their scientific identity. Scientific G registrations, first
+source-grounded examinations, support and useful changes retain their separate
+shared credit rules. Child internal turns and scores are not added as parent
+observations. Typed admission or a prose validity judgment alone never establishes
+support, equivalence or a useful G alteration.
+
+Rational normalization supports conservative expression matching on the same
+declared quantities and domains. Failure to match is not inequivalence. Actual
+Lean receipts provide checked equivalence for their stated propositions and
+assumptions; they do not prove empirical premises or every conceptual mapping.

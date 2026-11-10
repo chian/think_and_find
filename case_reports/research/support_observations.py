@@ -1,9 +1,9 @@
 """Typed source observations used as support operands, separate from metadata.
 
 An extraction map key is only a selector. It is never the observation's identity.
-The source-established identifier (or precise source locator when none exists)
-must be reused across extractions. This validates structure and deduplicates those
-identities; it does not prove source fidelity or detect every semantic alias.
+Source-established observation IDs retain their meaning. Without one, host-validated
+source occurrence anchors supply identity; prose locator wording cannot mint it.
+This does not prove scientific equivalence across separate source occurrences.
 """
 from copy import deepcopy
 from hashlib import sha256
@@ -11,7 +11,9 @@ import json
 import math
 
 
-OBSERVATION_FIELDS = {"source_id", "locator", "quantity", "conditions", "value", "units", "uncertainty"}
+OBSERVATION_KINDS = {"measurement", "fit_parameter", "simulation_input", "simulation_output",
+                     "model_prediction", "reported_property", "unknown"}
+OBSERVATION_FIELDS = {"source_id", "locator", "kind", "quantity", "conditions", "value", "units", "uncertainty"}
 
 
 def _text(value, name, *, empty=False):
@@ -34,14 +36,18 @@ def _value(value):
     _text(value, "value")
 
 
-def observation_identity(evidence_data, observation_id):
-    """Return (stable identity, source-provenance detail) for one selected observation.
+def _conditions(value):
+    if isinstance(value, dict):
+        from .importance import rational
+        if len(value) > 32 or any(not isinstance(name, str) or not name.isidentifier() for name in value):
+            raise ValueError("Structured source conditions must be named numeric inputs")
+        return {name: str(rational(str(item) if type(item) is float else item))
+                for name, item in value.items()}
+    return _text(value, "conditions")
 
-    Two actual observations from the same study require different source IDs or
-    precise locators. Rewording a finding or renaming its extraction field does
-    not create an observation. Units, uncertainty and sample-size metadata are
-    attributes of a measurement, never separately counted top-level operands.
-    """
+
+def validate_observation_fields(evidence_data, observation_id):
+    """Validate native fields without granting a prose locator identity."""
     if not isinstance(observation_id, str) or not observation_id.strip():
         raise ValueError("Select a nonempty observation key")
     if not isinstance(evidence_data, dict):
@@ -56,20 +62,19 @@ def observation_identity(evidence_data, observation_id):
         raise ValueError("Select an actual typed native.observations entry; metadata and raw field names are not observations")
     observation = observations[observation_id]
     if not isinstance(observation, dict) or set(observation) != OBSERVATION_FIELDS:
-        raise ValueError("Source observation needs exactly source_id, locator, quantity, conditions, value, units and uncertainty")
+        raise ValueError("Source observation needs exactly source_id, locator, kind, quantity, conditions, value, units and uncertainty")
+    if not isinstance(observation["kind"], str) or observation["kind"] not in OBSERVATION_KINDS:
+        raise ValueError("Observation kind must identify measurement, fit_parameter, simulation_input, "
+                         "simulation_output, model_prediction, reported_property or unknown")
     source_id = _text(observation["source_id"], "source_id", empty=True)
     locator = _text(observation["locator"], "locator")
+    if source_id and source_id in {source, study}:
+        raise ValueError("Observation source_id must be the source-given OBSERVATION identifier, "
+            "not the document URL or study ID. Use an empty source_id when the source gives no observation ID, "
+            "and supply a precise locator identifying this quantity and condition within the source.")
     for name in ("quantity", "units"):
         _text(observation[name], name)
-    conditions = observation["conditions"]
-    if isinstance(conditions, dict):
-        from .importance import rational
-        if len(conditions) > 32 or any(not isinstance(name, str) or not name.isidentifier() for name in conditions):
-            raise ValueError("Structured source conditions must be named numeric inputs")
-        for value in conditions.values():
-            rational(str(value) if type(value) is float else value)
-    else:
-        _text(conditions, "conditions")
+    conditions = _conditions(observation["conditions"])
     _value(observation["value"])
     uncertainty = observation["uncertainty"]
     if isinstance(uncertainty, dict):
@@ -81,22 +86,65 @@ def observation_identity(evidence_data, observation_id):
         _text(uncertainty, "uncertainty")
     # Whitespace normalization is conservative: case and punctuation can identify
     # genuinely different samples, rows or columns, so neither is discarded.
-    canonical = {"study": study, "identity_kind": "source_id" if source_id else "source_locator",
-                 "identity": source_id or locator}
-    identity = sha256(json.dumps(canonical, sort_keys=True, separators=(",", ":")).encode()).hexdigest()[:32]
+    canonical = {"study": study, "identity_kind": "source_id", "identity": source_id}
+    scope = (_text(observation["quantity"], "quantity"), conditions)
+    for selector, other in observations.items():
+        if selector == observation_id or not isinstance(other, dict) or set(other) != OBSERVATION_FIELDS:
+            continue
+        try:
+            other_id = _text(other["source_id"], "source_id", empty=True)
+            other_scope = (_text(other["quantity"], "quantity"), _conditions(other["conditions"]))
+        except (ValueError, TypeError, KeyError):
+            # That entry receives its own field validation; it cannot make an
+            # otherwise well-formed observation invalid merely by being malformed.
+            continue
+        if source_id and other_id == source_id and other_scope != scope:
+            raise ValueError(f"Observation identity is shared with native.observations[{selector!r}] "
+                "for a different quantity or condition. Reuse the source's full observation ID, "
+                "or leave source_id empty and anchor each actual quantity and condition precisely. "
+                "Do not use a document/study identifier or invent identity from value, units or uncertainty.")
     detail = {"study_id": evidence_data["study_id"], "canonical_observation": canonical,
               "source": evidence_data["source"], "evidence_locator": evidence_data["locator"],
               "observation": observation_id, "measurement": deepcopy(observation)}
     for name in ("quote", "source_version"):
         if name in measurements:
             detail[name] = deepcopy(measurements[name])
-    return identity, detail
+    return detail
 
 
-def observations_schema():
+def observation_identity(evidence_data, observation_id):
+    """Native IDs or host source occurrences, never extraction wording or values."""
+    detail = validate_observation_fields(evidence_data, observation_id)
+    canonical = detail["canonical_observation"]
+    if canonical["identity"]:
+        ident = sha256(json.dumps(canonical, sort_keys=True, separators=(",", ":")).encode()).hexdigest()[:32]
+    else:
+        from .source_anchors import entry_identity
+        ident = entry_identity(evidence_data, "observations", observation_id)
+        detail["canonical_observation"] = {"identity_kind": "source_occurrence", "identity": ident}
+    return ident, detail
+
+
+def observations_schema(*, source=None):
     """An empty map is appropriate when a source establishes no identifiable measurement."""
     text = {"type": "string", "minLength": 1, "maxLength": 2000}
-    properties = {"source_id": {"type": "string", "maxLength": 2000}, "locator": text,
+    source_id = {"type": "string", "maxLength": 2000,
+        "description": "Optional source-given OBSERVATION identifier, such as a complete result/table-row ID. "
+            "Use an empty string if none exists; host source_anchors identify its quantity and condition. "
+            "Never use the document URL, study ID or an invented label. Different quantities/conditions "
+            "need distinct complete native IDs or exact source result occurrences; descriptive condition changes, "
+            "values/units/uncertainty do not define identity."}
+    if source is not None:
+        source_id["not"] = {"const": source}
+    properties = {"source_id": source_id,
+                  "kind": {"enum": sorted(OBSERVATION_KINDS), "description":
+                      "Provenance of this value. measurement is an empirical observation or sample statistic; "
+                      "a fitted saturation/asymptotic/kinetic parameter is fit_parameter, not a measured finite-condition "
+                      "endpoint. Distinguish simulation inputs/outputs, model predictions and reported background properties. "
+                      "Use unknown when the supplied source cannot establish the kind."},
+                  "locator": {**text,
+        "description": "Precise source locator for this actual observation, including the relevant row, clause "
+            "or condition when one passage reports several observations. Locator prose is provenance, not identity."},
                   "quantity": text, "conditions": {"oneOf": [text, {"type": "object", "maxProperties": 32,
                       "additionalProperties": {"oneOf": [{"type": "number"}, text]}}]},
                   "value": {"oneOf": [{"type": "number"}, {"type": "boolean"}, text]},

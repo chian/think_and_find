@@ -1,4 +1,4 @@
-"""Credit for registered G, expected generalizability bounds and applications."""
+"""Explicit scientific registrations, first examinations and discovery fulfillment."""
 
 from fractions import Fraction
 from hashlib import sha256
@@ -40,30 +40,39 @@ def compile_progress(sheet):
         ident = _identity([_referenced_inference_identity(sheet, data["inference"], data["inference_version"]),
                            sheet.canonical_theory(data["theory"]), data["context_key"]])
         register("progress:application:" + ident, record)
+    for record, row in sheet.of_kind("examination"):
+        ref = row["data"]["inference"]
+        ident = _referenced_inference_identity(sheet, ref["key"], ref["version"])
+        register("progress:first_examination:" + ident, record)
     return {"points": {key: str(value) for key, value in sorted(registrations.items())},
             "point_dependencies": dependencies,
             "total": str(sum(registrations.values(), Fraction())),
             "resolution": "1",
             "meaning": "One point for registering G, one for its expected generalizability bounds, "
-                       "and one per registered theory/context application. Extraction, writing a support argument "
-                       "and completing calculations earn zero points. Repeated scored identities earn zero new points."}
+                       "one per registered theory/context application and one for its first source-grounded "
+                       "examination. Tool calls and calculation receipts alone earn no examination point. "
+                       "The examination point measures progress, "
+                       "not support or truth. Repeated scored identities earn zero new points."}
 
 
-def combine_episode_points(support, registrations):
+def combine_episode_points(support, registrations, discovery):
     """Expose every scored component and the exact points summed by controllers."""
-    points = {**registrations["points"], **support["points"]}
+    points = {**registrations["points"], **support["points"], **discovery["points"]}
     prefixes = {"G_registration": "progress:inference:",
                 "expected_generalizability_bounds_registration": "progress:expected_bounds:",
                 "theory_context_application_registration": "progress:application:",
-                "support_for_G": "support:", "causal_change": "change:"}
+                "first_G_examination": "progress:first_examination:",
+                "discovery_progress": "discovery:",
+                "support_for_G": "support:", "applicability_difference": "difference:", "causal_change": "change:"}
     components = {name: str(sum((Fraction(value) for key, value in points.items()
                                 if key.startswith(prefix)), Fraction()))
                   for name, prefix in prefixes.items()}
-    return {"support": support, "registrations": registrations, "points": points,
+    return {"support": support, "registrations": registrations, "discovery": discovery, "points": points,
             "components": components, "total": str(sum(map(Fraction, components.values()), Fraction())),
             "resolution": str(min(Fraction(support["resolution"]), Fraction(registrations["resolution"])))}
 
 
 def compile_episode_points(sheet):
     from .causal_support import compile_support
-    return combine_episode_points(compile_support(sheet), compile_progress(sheet))
+    from ..case_reports.research.discovery_goals import compile_discovery_points
+    return combine_episode_points(compile_support(sheet), compile_progress(sheet), compile_discovery_points(sheet))

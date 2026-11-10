@@ -18,14 +18,14 @@ class ModelTier(str, Enum):
 
 
 CALL_SITE_TIERS = MappingProxyType({
-    "propose_discovery_attempt": ModelTier.REASONING,
+    "propose_root_action": ModelTier.REASONING,
+    "propose_discovery_query": ModelTier.REASONING,
     "propose_scientific_action": ModelTier.REASONING,
     "propose_theory_reconstruction": ModelTier.REASONING,
-    "propose_theory_gap_repair": ModelTier.REASONING,
+    "propose_theory_repair": ModelTier.REASONING,
+    "propose_theory_comparison": ModelTier.REASONING,
     "repair_theory_output": ModelTier.REASONING,
     "propose_guideline_action": ModelTier.REASONING,
-    "propose_reasoning_action": ModelTier.REASONING,
-    "propose_strategy_query": ModelTier.REASONING,
     # Search owns source comparison and its query answer as well as selection.
     "choose_research_source": ModelTier.REASONING,
     "propose_page_child": ModelTier.REASONING,
